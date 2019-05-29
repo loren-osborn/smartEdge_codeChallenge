@@ -1,0 +1,10 @@
+# Run tests in throwaway environment
+FROM golang_base_image AS tester
+
+# installs the ginkgo CLI and matcher library
+RUN sh -xc 'for modules in github.com/onsi/ginkgo/ginkgo github.com/onsi/gomega/... ; do go get -v -u $modules ; done' 2>&1
+
+# We manually bind mount the source directory ourselves on use externally.
+
+# Configure the container entrypoint so that it runs the compiled program.
+ENTRYPOINT sh -c "go test  -coverprofile=coverage.out && go tool cover -html=coverage.out -o coverage.html"
