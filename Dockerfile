@@ -35,5 +35,12 @@ FROM scratch AS prod_image
 # Copy binary to production container image
 COPY --from=builder /output/codechallenge /codechallenge
 
+# Create directory to mount and store private and public keys
+WORKDIR /mnt/home
+VOLUME /mnt/home/
+
+# Direct application to store keys in mounted volume.
+ENV HOME=/mnt/home
+
 # Configure the container entrypoint so that it runs the compiled program.
 ENTRYPOINT [ "/codechallenge" ]

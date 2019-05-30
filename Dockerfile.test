@@ -1,10 +1,25 @@
+# I don't like these extra long lines, but don't know a clean
+# way to insert line breaks within a string.
+
 # Run tests in throwaway environment
-FROM golang_base_image AS tester
+FROM golang_base_image:latest AS tester
 
 # installs the ginkgo CLI and matcher library
-RUN sh -xc 'for modules in github.com/onsi/ginkgo/ginkgo github.com/onsi/gomega/... ; do go get -v -u $modules ; done' 2>&1
+RUN sh -xc                              \
+	'for modules in                     \
+		github.com/onsi/ginkgo/ginkgo   \
+		github.com/onsi/gomega/...      \
+		github.com/xeipuuv/gojsonschema \
+		github.com/mgechev/revive       \
+	; do                                \
+		go get -v -u $modules ;         \
+	done' 2>&1
 
 # We manually bind mount the source directory ourselves on use externally.
 
 # Configure the container entrypoint so that it runs the compiled program.
-ENTRYPOINT sh -c "go test  -coverprofile=coverage.out && go tool cover -html=coverage.out -o coverage.html"
+ENTRYPOINT sh -xc \
+	"go vet                                  && \
+	$GOPATH/bin/revive ./...                 && \
+	go test -coverprofile=coverage.out ./... && \
+	go tool cover -html=coverage.out -o coverage.html"
