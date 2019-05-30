@@ -22,7 +22,7 @@ COPY . ${PROJECT_DIR}
 ENV CGO_ENABLED=0
 
 # Compile and install code
-RUN go install ${PROJECT_URI}/...
+RUN go install ${PROJECT_URI}/codechallenge
 
 # Move binary to predictable location:
 #     (Utilize the shell to enable variable substitution for the

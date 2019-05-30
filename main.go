@@ -1,9 +1,9 @@
 // codechallenge is a dummy program used to demonstrate proper docker usage
-package main
+package codechallenge
 
 import "fmt"
 
-func main() {
+func DoStuff() {
 	fmt.Println(`{ 
     "message":"theAnswerIs42",
     "signature":"MGUCMCDwlFyVdD620p0hRLtABoJTR7UNgwj8g2r0ipNbWPi4Us57YfxtSQJ3dAkHslyBbwIxAKorQmpWl9QdlBUtACcZm4kEXfL37lJ+gZ/hANcTyuiTgmwcEC0FvEXY35u2bKFwhA==",
