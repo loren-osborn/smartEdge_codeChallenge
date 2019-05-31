@@ -8,38 +8,15 @@ import (
 	"testing"
 )
 
-// TestErrorSpec tests *ErrorSpec type
+// TestErrorSpec tests *ErrorSpec type's properties and String() and
+// EnsureMatches() methods
 func TestErrorSpec(t *testing.T) {
-	errorValSpecs := []struct {
-		errVal error
-		spec   *testtools.ErrorSpec
-	}{
-		{
-			errVal: nil,
-			spec:   nil,
-		},
-		{
-			errVal: errors.New("This is a generic error"),
-			spec: &testtools.ErrorSpec{
-				Type:    "*errors.errorString",
-				Message: "This is a generic error",
-			},
-		},
-		{
-			errVal: errors.New("Bar"),
-			spec: &testtools.ErrorSpec{
-				Type:    "*errors.errorString",
-				Message: "Bar",
-			},
-		},
-		{
-			errVal: &fooError{},
-			spec: &testtools.ErrorSpec{
-				Type:    "*testtools_test.fooError",
-				Message: "Bar",
-			},
-		},
-	}
+	// getSpecString(), generateStringSubtest() and
+	// generateEnsureMatchesSubtest() are functions internal to this test.
+
+	// getSpecString returns a string representation of a *ErrorSpec.
+	// This is practically identical to the code in *ErrorSpec.String() that
+	// generateStringSubtest() tests, so that may be slightly dubious
 	getSpecString := func(spec *testtools.ErrorSpec) string {
 		result := "No error expected"
 		if spec != nil {
@@ -51,6 +28,10 @@ func TestErrorSpec(t *testing.T) {
 		}
 		return result
 	}
+
+	// generateStringSubtest returns a subtest 2-tuple (name, subtest function)
+	// verifying the correct result from *ErrorSpec.String(). Verifies it
+	// matches output from getSpecString()
 	generateStringSubtest := func(spec *testtools.ErrorSpec) (string, func(*testing.T)) {
 		expectedStr := getSpecString(spec)
 		subtestName := fmt.Sprintf("Testing String() method of %s", expectedStr)
@@ -62,7 +43,11 @@ func TestErrorSpec(t *testing.T) {
 		}
 		return subtestName, subtestFunc
 	}
+
+	// generateStringSubtest returns a subtest 2-tuple (name, subtest function)
+	// verifying the correct result from *ErrorSpec.EnsureMatches()
 	generateEnsureMatchesSubtest := func(shouldMatch bool, compareSpec *testtools.ErrorSpec, actualErr error) (string, func(*testing.T)) {
+		// Here we create the subtest name:
 		whatWeAreComparing := "two nils"
 		if (compareSpec != nil) || (actualErr != nil) {
 			if (compareSpec != nil) != (actualErr != nil) {
@@ -94,9 +79,11 @@ func TestErrorSpec(t *testing.T) {
 			}
 		}
 		subtestName := fmt.Sprintf("Testing comparison of %s", whatWeAreComparing)
+		// create the subtest function:
 		subtestFunc := func(tt *testing.T) {
 			matchErr := compareSpec.EnsureMatches(actualErr)
 			if (matchErr == nil) != shouldMatch {
+				// This is a logic error, producing a false positive or negative
 				whatHappened := "reported match"
 				result := "no mismatch"
 				if matchErr != nil {
@@ -112,6 +99,7 @@ func TestErrorSpec(t *testing.T) {
 					result,
 				)
 			} else if !shouldMatch {
+				// This is only validating the message is what we expect
 				expectedErrVal := "didn't see any error"
 				if actualErr != nil {
 					expectedErrVal = fmt.Sprintf("saw a %T with message %#v instead", actualErr, actualErr.Error())
@@ -129,10 +117,46 @@ func TestErrorSpec(t *testing.T) {
 		}
 		return subtestName, subtestFunc
 	}
+	// 4 usefull error types: nested, so 16 test cases
+	errorValSpecs := []struct {
+		errVal error
+		spec   *testtools.ErrorSpec
+	}{
+		// No error
+		{
+			errVal: nil,
+			spec:   nil,
+		},
+		// Generic error
+		{
+			errVal: errors.New("This is a generic error"),
+			spec: &testtools.ErrorSpec{
+				Type:    "*errors.errorString",
+				Message: "This is a generic error",
+			},
+		},
+		// A custom error type, with a constant output
+		{
+			errVal: &fooError{},
+			spec: &testtools.ErrorSpec{
+				Type:    "*testtools_test.fooError",
+				Message: "Bar",
+			},
+		},
+		// A different error type, with the same output
+		{
+			errVal: errors.New("Bar"),
+			spec: &testtools.ErrorSpec{
+				Type:    "*errors.errorString",
+				Message: "Bar",
+			},
+		},
+	}
 	for specIdx, specVal := range errorValSpecs {
 		t.Run(generateStringSubtest(specVal.spec))
 		for compErrIdx, compErrVal := range errorValSpecs {
-			// Ensure that ErrorSpec's that don't assert a type match correctly:
+			// Ensure that ErrorSpec's that don't assert a type match correctly
+			// (ony perform subtest when indexs match *OR* Messages DO NOT match)
 			if (specVal.errVal != nil) &&
 				((specIdx == compErrIdx) ||
 					(compErrVal.errVal == nil) ||
@@ -143,7 +167,7 @@ func TestErrorSpec(t *testing.T) {
 				}
 				t.Run(generateEnsureMatchesSubtest(specIdx == compErrIdx, typelessSpec, compErrVal.errVal))
 			}
-			// Ensure that ErrorSpec's that do assert a type match correctly:
+			// Ensure that ErrorSpec's that do assert a type, match correctly:
 			t.Run(generateEnsureMatchesSubtest(specIdx == compErrIdx, specVal.spec, compErrVal.errVal))
 		}
 	}

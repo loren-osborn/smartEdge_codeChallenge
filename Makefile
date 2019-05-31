@@ -9,6 +9,7 @@ ALL_SOURCE_FILES       := $(shell \
 		-name "*.go"         -or  \
 		-name "*.iml"        -or  \
 		-name "*.toml"       -or  \
+		-path "*/utils/*"    -or  \
 		-path "*/testdata/*"      \
 	")" | sed -e 's,^\.\/,,')
 PROD_SOURCE_FILES       = $(filter-out %_test.go,$(filter %.go, $(ALL_SOURCE_FILES)))
@@ -31,7 +32,8 @@ default: event_timestamps/production_container_image
 
 .PHONY: clean purge
 
-event_timestamps/production_container_image: test event_timestamps Makefile Dockerfile $(PROD_SOURCE_FILES)
+event_timestamps/production_container_image: test event_timestamps Makefile \
+	Dockerfile $(PROD_SOURCE_FILES)
 	docker build -t production_container_image .
 	touch $@
 
@@ -39,23 +41,32 @@ event_timestamps/golang_base_image: Makefile Dockerfile event_timestamps
 	docker build --target golang_base -t golang_base_image .
 	touch $@
 
-# source files are pulled in as a volume, so the tester_image isn't dependant on them
-event_timestamps/tester_image: event_timestamps/golang_base_image Makefile Dockerfile.test event_timestamps
+# Source files are pulled in as a volume, so the tester_image isn't dependant
+# on them
+event_timestamps/tester_image: event_timestamps/golang_base_image Makefile \
+	Dockerfile.test event_timestamps
 	docker build -f Dockerfile.test -t tester_image .
 	touch $@
 
-test coverage.out coverage.html godoc: event_timestamps/tester_image Makefile $(ALL_SOURCE_FILES)
-	docker run --rm --tty -v "$$(pwd):$(CONTAINER_PROJECT_DIR)" --env TERM="$$TERM" --env EXT_UID_GID="$$(id -u):$$(id -g)" tester_image:latest
+test coverage.out coverage.html godoc: event_timestamps/tester_image \
+	Makefile $(ALL_SOURCE_FILES)
+	$(strip docker run                          \
+		--rm                                    \
+		--tty                                   \
+		-v "$$(pwd):$(CONTAINER_PROJECT_DIR)"   \
+		--env TERM="$$TERM"                     \
+		--env EXT_UID_GID="$$(id -u):$$(id -g)" \
+		tester_image:latest)
 
 event_timestamps: Makefile
-	@bash -c \
-		'if [ -d event_timestamps ] ; then \
-			>&2 echo touch event_timestamps ; \
-			         touch event_timestamps ; \
-		else \
+	@$(strip bash -c \
+		'if [ -d event_timestamps ] ; then       \
+			>&2 echo touch event_timestamps ;    \
+			         touch event_timestamps ;    \
+		else                                     \
 			>&2 echo mkdir -p event_timestamps ; \
 			         mkdir -p event_timestamps ; \
-		fi'
+		fi')
 
 clean:
 	rm -rf $(GENERATED_FILES)

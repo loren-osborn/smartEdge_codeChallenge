@@ -21,6 +21,7 @@ do
         break
     fi
     echo -n .
+    sleep 1
 done
 echo
 
