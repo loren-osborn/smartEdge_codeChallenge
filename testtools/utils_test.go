@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/smartedge/codechallenge/testtools"
+	"strings"
 	// "reflect"
 	"testing"
 )
@@ -181,15 +182,182 @@ func (fe *fooError) Error() string {
 
 // TestAreFuncsEqual tests AreFuncsEqual()
 func TestAreFuncsEqual(t *testing.T) {
-	eq, err := testtools.AreFuncsEqual(TestAreFuncsEqual, TestErrorSpec)
-	if eq {
-		t.Error("AreFuncsEqual() reports TestAreFuncsEqual() and TestErrorSpec() are the same function")
+	// genErrSpecGetter returns a closure that injects substitute values for
+	// error message substrings `{{funcA}}` and `{{funcB}}` in the given order
+	// into the provided ErrorSpec
+	genErrSpecGetter := func(spec *testtools.ErrorSpec) func(string, string, string, string) *testtools.ErrorSpec {
+		return func(aLabel, aName, bLabel, bName string) *testtools.ErrorSpec {
+			if spec == nil {
+				return nil
+			}
+			r := strings.NewReplacer(
+				"{{funcA}}", aName,
+				"{{funcB}}", bName,
+				fmt.Sprintf("{{func%sOrdinal}}", aLabel), "first",
+				fmt.Sprintf("{{Func%sOrdinal}}", aLabel), "First",
+				fmt.Sprintf("{{func%sOrdinal}}", bLabel), "second",
+				fmt.Sprintf("{{Func%sOrdinal}}", bLabel), "Second")
+			return &testtools.ErrorSpec{
+				Type:    spec.Type,
+				Message: r.Replace(spec.Message),
+			}
+		}
 	}
-	if err != nil {
-		t.Errorf("AreFuncsEqual() should only return an error if passed a non-func: TestAreFuncsEqual() and TestErrorSpec() were passed, and we got error: %T: %#v", err, err.Error())
+
+	type testCaseSpec struct {
+		funcA         interface{}
+		funcAName     string
+		funcB         interface{}
+		funcBName     string
+		ExpectedMatch bool
+		ExpectedErr   *testtools.ErrorSpec
 	}
-	// total := Sum(5, 5)
-	// if total != 10 {
-	// 	t.Errorf("Sum was incorrect, got: %d, want: %d.", total, 10)
-	// }
+	var nilFunc func()
+	var otherNilFunc func(int) string
+	var nilInt *int
+	for _, symetricalTc := range []testCaseSpec{
+		// Different functions
+		{
+			funcA:         TestAreFuncsEqual,
+			funcAName:     "TestAreFuncsEqual",
+			funcB:         TestErrorSpec,
+			funcBName:     "TestErrorSpec",
+			ExpectedMatch: false,
+			ExpectedErr:   nil,
+		},
+		// untyped nils
+		{
+			funcA:         nil,
+			funcAName:     "(untyped) nil",
+			funcB:         nil,
+			funcBName:     "(untyped) nil",
+			ExpectedMatch: true,
+			ExpectedErr: &testtools.ErrorSpec{
+				Type:    "*errors.errorString",
+				Message: "Both values nil when funcs expected",
+			},
+		},
+		// Nil function and untyped nil
+		{
+			funcA:         nilFunc,
+			funcAName:     "(func()) nil",
+			funcB:         nil,
+			funcBName:     "(untyped) nil",
+			ExpectedMatch: false,
+			ExpectedErr: &testtools.ErrorSpec{
+				Type:    "*errors.errorString",
+				Message: "Both values nil when funcs expected",
+			},
+		},
+		// One untyped nil and one valid func
+		{
+			funcA:         nil,
+			funcAName:     "(untyped) nil",
+			funcB:         TestErrorSpec,
+			funcBName:     "TestErrorSpec",
+			ExpectedMatch: false,
+			ExpectedErr: &testtools.ErrorSpec{
+				Type:    "*errors.errorString",
+				Message: "{{FuncAOrdinal}} value nil when two funcs expected",
+			},
+		},
+		// two func() typed nils
+		{
+			funcA:         nilFunc,
+			funcAName:     "(func()) nil",
+			funcB:         nilFunc,
+			funcBName:     "(func()) nil",
+			ExpectedMatch: true,
+			ExpectedErr: &testtools.ErrorSpec{
+				Type:    "*errors.errorString",
+				Message: "Both values nil when funcs expected",
+			},
+		},
+		// two mismatched func typed nils
+		{
+			funcA:         nilFunc,
+			funcAName:     "(func()) nil",
+			funcB:         otherNilFunc,
+			funcBName:     "(func(int) string) nil",
+			ExpectedMatch: false,
+			ExpectedErr: &testtools.ErrorSpec{
+				Type:    "*errors.errorString",
+				Message: "Both values nil when funcs expected",
+			},
+		},
+		// One pointer typed nil
+		{
+			funcA:         nilInt,
+			funcAName:     "(*int) nil",
+			funcB:         nilFunc,
+			funcBName:     "(func()) nil",
+			ExpectedMatch: false,
+			ExpectedErr: &testtools.ErrorSpec{
+				Type:    "*errors.errorString",
+				Message: "Both values nil when funcs expected",
+			},
+		},
+		// One array slice and one valid func
+		{
+			funcA:         []int{1, 2, 3},
+			funcAName:     "[]int{1,2,3}",
+			funcB:         TestErrorSpec,
+			funcBName:     "TestErrorSpec",
+			ExpectedMatch: false,
+			ExpectedErr: &testtools.ErrorSpec{
+				Type:    "*errors.errorString",
+				Message: "{{FuncAOrdinal}} value not a func when two funcs expected",
+			},
+		},
+		// Happy Path
+		{
+			funcA:         TestErrorSpec,
+			funcAName:     "TestErrorSpec",
+			funcB:         TestErrorSpec,
+			funcBName:     "TestErrorSpec",
+			ExpectedMatch: true,
+			ExpectedErr:   nil,
+		},
+	} {
+		getErrSpec := genErrSpecGetter(symetricalTc.ExpectedErr)
+		for _, testCase := range []testCaseSpec{
+			// Forwards
+			{
+				funcA:         symetricalTc.funcA,
+				funcAName:     symetricalTc.funcAName,
+				funcB:         symetricalTc.funcB,
+				funcBName:     symetricalTc.funcBName,
+				ExpectedMatch: symetricalTc.ExpectedMatch,
+				ExpectedErr:   getErrSpec("A", symetricalTc.funcAName, "B", symetricalTc.funcBName),
+			},
+			// Backwards
+			{
+				funcA:         symetricalTc.funcB,
+				funcAName:     symetricalTc.funcBName,
+				funcB:         symetricalTc.funcA,
+				funcBName:     symetricalTc.funcAName,
+				ExpectedMatch: symetricalTc.ExpectedMatch,
+				ExpectedErr:   getErrSpec("B", symetricalTc.funcBName, "A", symetricalTc.funcAName),
+			},
+		} {
+			eq, actualErr := testtools.AreFuncsEqual(testCase.funcA, testCase.funcB)
+			if eq != testCase.ExpectedMatch {
+				actualEquality := "are not"
+				expectedEquality := "should"
+				if eq {
+					actualEquality = "are"
+					expectedEquality = "should not"
+				}
+				t.Errorf(
+					"AreFuncsEqual() reports %s() and %s() %s the same function when they %s be",
+					testCase.funcAName,
+					testCase.funcBName,
+					actualEquality,
+					expectedEquality)
+			}
+			if err := testCase.ExpectedErr.EnsureMatches(actualErr); err != nil {
+				t.Error(err.Error())
+			}
+		}
+	}
 }
