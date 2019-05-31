@@ -1,10 +1,14 @@
 # I don't like these extra long lines, but don't know a clean
 # way to insert line breaks within a string.
 
-# Run tests in throwaway environment
+# Run tests in throwaway environment based on our clean build environment.
 FROM golang_base_image:latest AS tester
 
-# installs the ginkgo CLI and matcher library
+# installs curl and wget so we can scrape the GoDoc output.
+RUN sh -xc 'apt-get update && apt-get install -y curl wget' 2>&1
+
+# installs the ginkgo CLI and matcher library, and a few others only
+# used for testing.
 RUN sh -xc                              \
 	'for modules in                     \
 		github.com/onsi/ginkgo/ginkgo   \
@@ -17,9 +21,16 @@ RUN sh -xc                              \
 
 # We manually bind mount the source directory ourselves on use externally.
 
-# Configure the container entrypoint so that it runs the compiled program.
+# Configure the container entrypoint so that it automatically runs all
+# the tests, quality metrics and docs generation:
 ENTRYPOINT sh -xc \
-	"go vet                                  && \
-	$GOPATH/bin/revive ./...                 && \
-	go test -coverprofile=coverage.out ./... && \
-	go tool cover -html=coverage.out -o coverage.html"
+	"go vet                                                        && \
+	\"$GOPATH/bin/revive\" -config revive.toml ./...               && \
+	./utils/gendoc.sh                                              && \
+	go test -coverprofile=coverage.out ./...                       && \
+	go tool cover -html=coverage.out -o coverage.html              && \
+	cp utils/redirect.html godoc/index.html                        ;  \
+	exit_status=\$?                                                ;  \
+	[ -z \"$EXT_UID_GID\" ] ||                                        \
+		chown -R \"$EXT_UID_GID\" godoc coverage.out coverage.html ;  \
+	exit \$exit_status"

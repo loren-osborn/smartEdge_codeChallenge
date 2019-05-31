@@ -1,0 +1,21 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "title": "Signed Identifier",
+  "description": "Schema for a signed identifier",
+  "type": "object",
+  "required": [ "message", "signature", "pubkey" ],
+  "properties": {
+    "message": {
+      "type": "string",
+      "description": "original string provided as the input to your app"
+    },
+    "signature": {
+      "type": "string",
+      "description": "RFC 4648 compliant Base64 encoded cryptographic signature of the input, calculated using the private key and the SHA256 digest of the input"
+    },
+    "pubkey": {
+      "type": "string",
+      "description": "Base64 encoded string (PEM format) of the public key generated from the private key used to create the digital signature"
+    }
+  }
+}

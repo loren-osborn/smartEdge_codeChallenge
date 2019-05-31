@@ -2,8 +2,6 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="e0a42a95-6124-4ef5-96a5-6f2f0defb5b8" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Dockerfile.test" beforeDir="false" afterPath="$PROJECT_DIR$/Dockerfile.test" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/codechallenge_suite_test.go" beforeDir="false" afterPath="$PROJECT_DIR$/codechallenge_suite_test.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/main.go" beforeDir="false" afterPath="$PROJECT_DIR$/main.go" afterDir="false" />
     </list>
@@ -45,8 +43,8 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/main.go">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="195">
-              <caret line="13" lean-forward="true" selection-start-line="13" selection-end-line="13" />
+            <state relative-caret-position="225">
+              <caret line="15" lean-forward="true" selection-start-line="15" selection-end-line="15" />
             </state>
           </provider>
         </entry>
@@ -184,12 +182,12 @@
       <workItem from="1559174702879" duration="640000" />
       <workItem from="1559188933745" duration="1062000" />
       <workItem from="1559190078605" duration="4919000" />
-      <workItem from="1559257284473" duration="1394000" />
+      <workItem from="1559257284473" duration="3807000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="29885000" />
+    <option name="totallyTimeSpent" value="32298000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="-3" y="0" width="1366" height="698" extended-state="6" />
@@ -281,8 +279,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/main.go">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="195">
-          <caret line="13" lean-forward="true" selection-start-line="13" selection-end-line="13" />
+        <state relative-caret-position="225">
+          <caret line="15" lean-forward="true" selection-start-line="15" selection-end-line="15" />
         </state>
       </provider>
     </entry>

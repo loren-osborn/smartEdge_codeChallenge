@@ -1,2 +1,3 @@
 coverage.*
 event_timestamps/
+godoc/
