@@ -45,7 +45,7 @@ event_timestamps/tester_image: event_timestamps/golang_base_image Makefile Docke
 	touch $@
 
 test coverage.out coverage.html godoc: event_timestamps/tester_image Makefile $(ALL_SOURCE_FILES)
-	docker run --rm --tty -v "$$(pwd):$(CONTAINER_PROJECT_DIR)" --env EXT_UID_GID="$$(id -u):$$(id -g)" tester_image:latest
+	docker run --rm --tty -v "$$(pwd):$(CONTAINER_PROJECT_DIR)" --env TERM="$$TERM" --env EXT_UID_GID="$$(id -u):$$(id -g)" tester_image:latest
 
 event_timestamps: Makefile
 	@bash -c \

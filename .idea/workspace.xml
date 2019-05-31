@@ -1,10 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="e0a42a95-6124-4ef5-96a5-6f2f0defb5b8" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/codechallenge_suite_test.go" beforeDir="false" afterPath="$PROJECT_DIR$/codechallenge_suite_test.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/main.go" beforeDir="false" afterPath="$PROJECT_DIR$/main.go" afterDir="false" />
-    </list>
+    <list default="true" id="e0a42a95-6124-4ef5-96a5-6f2f0defb5b8" name="Default Changelist" comment="" />
     <ignored path="$PROJECT_DIR$/out/" />
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -182,12 +179,12 @@
       <workItem from="1559174702879" duration="640000" />
       <workItem from="1559188933745" duration="1062000" />
       <workItem from="1559190078605" duration="4919000" />
-      <workItem from="1559257284473" duration="3807000" />
+      <workItem from="1559257284473" duration="3810000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="32298000" />
+    <option name="totallyTimeSpent" value="32301000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="-3" y="0" width="1366" height="698" extended-state="6" />
