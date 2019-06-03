@@ -9,43 +9,56 @@ import (
 	"testing"
 )
 
-// TestErrorSpec tests *ErrorSpec type's properties and String() and
-// EnsureMatches() methods
-func TestErrorSpec(t *testing.T) {
-	// getSpecString(), generateStringSubtest() and
-	// generateEnsureMatchesSubtest() are functions internal to this test.
-
-	// getSpecString returns a string representation of a *ErrorSpec.
-	// This is practically identical to the code in *ErrorSpec.String() that
-	// generateStringSubtest() tests, so that may be slightly dubious
-	getSpecString := func(spec *testtools.ErrorSpec) string {
-		result := "No error expected"
-		if spec != nil {
-			expType := "an error"
-			if spec.Type != "" {
-				expType = fmt.Sprintf("a %s error", spec.Type)
-			}
-			result = fmt.Sprintf("Expected %s with message %#v", expType, spec.Message)
-		}
-		return result
+// TestErrorSpecString tests *ErrorSpec's String() method
+func TestErrorSpecString(t *testing.T) {
+	for _, specVal := range []struct {
+		spec *testtools.ErrorSpec
+		desc string
+	}{
+		// No error
+		{
+			spec: nil,
+			desc: "No error expected",
+		},
+		// Specific error type 1
+		{
+			spec: &testtools.ErrorSpec{
+				Type:    "*myPkg.myErrType",
+				Message: "foo",
+			},
+			desc: "Expected a *myPkg.myErrType error with message \"foo\"",
+		},
+		// Specific error type 2
+		{
+			spec: &testtools.ErrorSpec{
+				Type:    "[]yourPkg.yourErrorSliceType",
+				Message: "bar",
+			},
+			desc: "Expected a []yourPkg.yourErrorSliceType error with message \"bar\"",
+		},
+		// untyped error
+		{
+			spec: &testtools.ErrorSpec{
+				Type:    "",
+				Message: "fizzbuzz",
+			},
+			desc: "Expected an error with message \"fizzbuzz\"",
+		},
+	} {
+		t.Run(
+			fmt.Sprintf("ErrorSpec for %#v", specVal.desc),
+			func(tt *testing.T) {
+				result := specVal.spec.String()
+				if result != specVal.desc {
+					tt.Errorf("*ErrorSpec\n\t%#v reported itself as\n\t%#v", specVal.desc, result)
+				}
+			})
 	}
+}
 
-	// generateStringSubtest returns a subtest 2-tuple (name, subtest function)
-	// verifying the correct result from *ErrorSpec.String(). Verifies it
-	// matches output from getSpecString()
-	generateStringSubtest := func(spec *testtools.ErrorSpec) (string, func(*testing.T)) {
-		expectedStr := getSpecString(spec)
-		subtestName := fmt.Sprintf("Testing String() method of %s", expectedStr)
-		subtestFunc := func(tt *testing.T) {
-			result := spec.String()
-			if result != expectedStr {
-				tt.Errorf("*ErrorSpec\n\t%#v reported itself as\n\t%#v", expectedStr, result)
-			}
-		}
-		return subtestName, subtestFunc
-	}
-
-	// generateStringSubtest returns a subtest 2-tuple (name, subtest function)
+// TestErrorSpecEnsureMatches tests *ErrorSpec's EnsureMatches() method
+func TestErrorSpecEnsureMatches(t *testing.T) {
+	// generateEnsureMatchesSubtest returns a subtest 2-tuple (name, subtest function)
 	// verifying the correct result from *ErrorSpec.EnsureMatches()
 	generateEnsureMatchesSubtest := func(shouldMatch bool, compareSpec *testtools.ErrorSpec, actualErr error) (string, func(*testing.T)) {
 		// Here we create the subtest name:
@@ -105,7 +118,7 @@ func TestErrorSpec(t *testing.T) {
 				if actualErr != nil {
 					expectedErrVal = fmt.Sprintf("saw a %T with message %#v instead", actualErr, actualErr.Error())
 				}
-				expectedSpec := getSpecString(compareSpec)
+				expectedSpec := compareSpec.String()
 				expectedMessage := fmt.Sprintf("%s, but %s", expectedSpec, expectedErrVal)
 				if matchErr.Error() != expectedMessage {
 					tt.Errorf(
@@ -154,7 +167,6 @@ func TestErrorSpec(t *testing.T) {
 		},
 	}
 	for specIdx, specVal := range errorValSpecs {
-		t.Run(generateStringSubtest(specVal.spec))
 		for compErrIdx, compErrVal := range errorValSpecs {
 			// Ensure that ErrorSpec's that don't assert a type match correctly
 			// (ony perform subtest when indexs match *OR* Messages DO NOT match)
@@ -220,8 +232,8 @@ func TestAreFuncsEqual(t *testing.T) {
 		{
 			funcA:         TestAreFuncsEqual,
 			funcAName:     "TestAreFuncsEqual",
-			funcB:         TestErrorSpec,
-			funcBName:     "TestErrorSpec",
+			funcB:         TestErrorSpecString,
+			funcBName:     "TestErrorSpecString",
 			ExpectedMatch: false,
 			ExpectedErr:   nil,
 		},
@@ -253,8 +265,8 @@ func TestAreFuncsEqual(t *testing.T) {
 		{
 			funcA:         nil,
 			funcAName:     "(untyped) nil",
-			funcB:         TestErrorSpec,
-			funcBName:     "TestErrorSpec",
+			funcB:         TestErrorSpecString,
+			funcBName:     "TestErrorSpecString",
 			ExpectedMatch: false,
 			ExpectedErr: &testtools.ErrorSpec{
 				Type:    "*errors.errorString",
@@ -301,8 +313,8 @@ func TestAreFuncsEqual(t *testing.T) {
 		{
 			funcA:         []int{1, 2, 3},
 			funcAName:     "[]int{1,2,3}",
-			funcB:         TestErrorSpec,
-			funcBName:     "TestErrorSpec",
+			funcB:         TestErrorSpecString,
+			funcBName:     "TestErrorSpecString",
 			ExpectedMatch: false,
 			ExpectedErr: &testtools.ErrorSpec{
 				Type:    "*errors.errorString",
@@ -311,10 +323,10 @@ func TestAreFuncsEqual(t *testing.T) {
 		},
 		// Happy Path
 		{
-			funcA:         TestErrorSpec,
-			funcAName:     "TestErrorSpec",
-			funcB:         TestErrorSpec,
-			funcBName:     "TestErrorSpec",
+			funcA:         TestErrorSpecString,
+			funcAName:     "TestErrorSpecString",
+			funcB:         TestErrorSpecString,
+			funcBName:     "TestErrorSpecString",
 			ExpectedMatch: true,
 			ExpectedErr:   nil,
 		},
