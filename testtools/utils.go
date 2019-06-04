@@ -1,7 +1,6 @@
 package testtools
 
 import (
-	// "github.com/smartedge/codechallenge"
 	"errors"
 	"fmt"
 	"reflect"

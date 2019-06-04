@@ -1,22 +1,43 @@
 package main
 
 import (
-	// "github.com/smartedge/codechallenge"
-	// "errors"
-	// "reflect"
+	"github.com/smartedge/codechallenge"
+	"github.com/smartedge/codechallenge/testtools"
 	"testing"
 )
 
-// TestProperlyCallMainCode verifies that the injected dependancies are
-// properly passed to main code.
-func TestProperlyCallMainCode(_ *testing.T) {
-	realEntryPoint = getMockMainEntryPoint()
-	// total := Sum(5, 5)
-	// if total != 10 {
-	// 	t.Errorf("Sum was incorrect, got: %d, want: %d.", total, 10)
-	// }
-}
-
-func getMockMainEntryPoint() func() {
-	return func() {}
+// TestEntryPoint verifies that the injected dependencies are properly bound
+// to the main code.
+func TestEntryPoint(t *testing.T) {
+	t.Run(
+		"RealEntryPoint properly intialized to codechallenge.RealMain()",
+		func(tt *testing.T) {
+			if matches, err := testtools.AreFuncsEqual(
+				RealEntryPoint, codechallenge.RealMain); err != nil {
+				tt.Error(err.Error())
+			} else if !matches {
+				tt.Error("RealEntryPoint should default to codechallenge.RealMain()")
+			}
+		})
+	t.Run(
+		"main() calls RealEntryPoint",
+		func(tt *testing.T) {
+			origRealEntryPoint := RealEntryPoint
+			depObjs := make([]*codechallenge.Dependencies, 0, 1)
+			RealEntryPoint = func(d *codechallenge.Dependencies) int {
+				// each call makes depObjs 1 item longer
+				depObjs = append(depObjs, d)
+				return 0
+			}
+			if len(depObjs) != 0 {
+				tt.Errorf("depObjs (%#v) was supposed to be empty, and wasn't", depObjs)
+			}
+			main()
+			if len(depObjs) != 1 {
+				tt.Errorf(
+					"depObjs (%#v) was supposed to contain 1 item, but instead contained %d",
+					depObjs, len(depObjs))
+			}
+			RealEntryPoint = origRealEntryPoint
+		})
 }

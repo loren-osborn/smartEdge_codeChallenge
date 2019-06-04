@@ -37,7 +37,7 @@ ENTRYPOINT sh -xc \
 	\"$GOPATH/bin/revive\" -formatter stylish -config revive.toml ./... && \
 	gotest -coverprofile=coverage.out ./...                             && \
 	go tool cover -html=coverage.out -o coverage.html                   && \
-	./utils/gendoc.sh                                                   && \
+	./utils/gendoc.sh \"github.com/smartedge/codechallenge\"            && \
 	cp utils/redirect.html godoc/index.html                             ;  \
 	exit_status=\$?                                                     ;  \
 	[ -z \"$EXT_UID_GID\" ] ||                                             \

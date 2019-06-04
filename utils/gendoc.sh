@@ -5,7 +5,7 @@
 set -u
 
 DOC_DIR=godoc
-PKG=github.com/smartedge/codechallenge
+PKG="$1"
 
 # Run a godoc server which we will scrape.
 godoc -http=localhost:6060 &

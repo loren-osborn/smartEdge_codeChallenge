@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"github.com/smartedge/codechallenge/testtools"
 	"strings"
-	// "reflect"
 	"testing"
 )
 
@@ -192,7 +191,7 @@ func (fe *fooError) Error() string {
 	return "Bar"
 }
 
-// TestAreFuncsEqual tests AreFuncsEqual()
+// TestAreFuncsEqual tests AreFuncsEqual() can compare function pointers
 func TestAreFuncsEqual(t *testing.T) {
 	// genErrSpecGetter returns a closure that injects substitute values for
 	// error message substrings `{{funcA}}` and `{{funcB}}` in the given order
@@ -340,7 +339,8 @@ func TestAreFuncsEqual(t *testing.T) {
 				funcB:         symetricalTc.funcB,
 				funcBName:     symetricalTc.funcBName,
 				ExpectedMatch: symetricalTc.ExpectedMatch,
-				ExpectedErr:   getErrSpec("A", symetricalTc.funcAName, "B", symetricalTc.funcBName),
+				ExpectedErr: getErrSpec(
+					"A", symetricalTc.funcAName, "B", symetricalTc.funcBName),
 			},
 			// Backwards
 			{
@@ -349,7 +349,8 @@ func TestAreFuncsEqual(t *testing.T) {
 				funcB:         symetricalTc.funcA,
 				funcBName:     symetricalTc.funcAName,
 				ExpectedMatch: symetricalTc.ExpectedMatch,
-				ExpectedErr:   getErrSpec("B", symetricalTc.funcBName, "A", symetricalTc.funcAName),
+				ExpectedErr: getErrSpec(
+					"B", symetricalTc.funcBName, "A", symetricalTc.funcAName),
 			},
 		} {
 			eq, actualErr := testtools.AreFuncsEqual(testCase.funcA, testCase.funcB)
