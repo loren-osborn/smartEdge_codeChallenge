@@ -10,7 +10,7 @@ import (
 )
 
 // RealEntryPoint is how main() is loosely bound to codechallenge.RealMain()
-var RealEntryPoint func(*codechallenge.Dependencies) int = codechallenge.RealMain
+var RealEntryPoint func(*codechallenge.Dependencies) = codechallenge.RealMain
 
 // main() calls RealEntryPoint (which defaults to codechallenge.RealMain())
 // which is RealMain() is called in production, but at testing time, the
@@ -18,12 +18,12 @@ var RealEntryPoint func(*codechallenge.Dependencies) int = codechallenge.RealMai
 // Dependencies structure, and production RealMain() can be validated
 // independantly
 func main() {
-	exitCode := RealEntryPoint(&codechallenge.Dependencies{
+	RealEntryPoint(&codechallenge.Dependencies{
 		Os: codechallenge.OsDependencies{
 			Stdin:  os.Stdin,
 			Stdout: os.Stdout,
 			Stderr: os.Stderr,
+			Exit:   os.Exit,
 		},
 	})
-	os.Exit(exitCode)
 }

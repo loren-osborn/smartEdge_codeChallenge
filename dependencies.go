@@ -9,6 +9,7 @@ type OsDependencies struct {
 	Stdin  io.Reader
 	Stdout io.Writer
 	Stderr io.Writer
+	Exit   func(int)
 }
 
 // Dependencies contains all external dependencies injected by main()

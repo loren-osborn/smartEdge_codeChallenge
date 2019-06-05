@@ -24,10 +24,9 @@ func TestEntryPoint(t *testing.T) {
 		func(tt *testing.T) {
 			origRealEntryPoint := RealEntryPoint
 			depObjs := make([]*codechallenge.Dependencies, 0, 1)
-			RealEntryPoint = func(d *codechallenge.Dependencies) int {
+			RealEntryPoint = func(d *codechallenge.Dependencies) {
 				// each call makes depObjs 1 item longer
 				depObjs = append(depObjs, d)
-				return 0
 			}
 			if len(depObjs) != 0 {
 				tt.Errorf("depObjs (%#v) was supposed to be empty, and wasn't", depObjs)

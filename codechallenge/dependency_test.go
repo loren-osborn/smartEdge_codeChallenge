@@ -1,7 +1,10 @@
 package main
 
 import (
+	"bytes"
 	"github.com/smartedge/codechallenge"
+	"github.com/smartedge/codechallenge/testtools"
+	"github.com/smartedge/codechallenge/testtools/mocks"
 	"os"
 	"testing"
 )
@@ -11,10 +14,9 @@ import (
 func TestDependencies(t *testing.T) {
 	origRealEntryPoint := RealEntryPoint
 	depObjs := make([]*codechallenge.Dependencies, 0, 1)
-	RealEntryPoint = func(d *codechallenge.Dependencies) int {
+	RealEntryPoint = func(d *codechallenge.Dependencies) {
 		// each call makes depObjs 1 item longer
 		depObjs = append(depObjs, d)
-		return 0
 	}
 	main()
 	RealEntryPoint = origRealEntryPoint
@@ -33,5 +35,27 @@ func TestDependencies(t *testing.T) {
 			if os.Stderr != depObjs[0].Os.Stderr {
 				tt.Error("d.Os.Stderr should resolve to os.Stderr")
 			}
+			if eq, actualErr := testtools.AreFuncsEqual(os.Exit, depObjs[0].Os.Exit); actualErr != nil {
+				tt.Error(actualErr.Error())
+			} else if !eq {
+				tt.Error("d.Os.Exit should evaluate to os.Exit")
+			}
 		})
+}
+
+// TestCallingMainWithMocks verifies that calling RealMain with mocked
+// dependencies works as intended.
+func TestCallingMainWithMocks(t *testing.T) {
+	osExitHarness := mocks.NewOsExitMockHarness()
+	codechallenge.RealMain(&codechallenge.Dependencies{
+		Os: codechallenge.OsDependencies{
+			Stdin:  &bytes.Buffer{},
+			Stdout: &bytes.Buffer{},
+			Stderr: &bytes.Buffer{},
+			Exit:   osExitHarness.GetMock(),
+		},
+	})
+	if exitStatus := osExitHarness.GetExitStatus(); exitStatus != 0 {
+		t.Errorf("RealMain() should have a normal exit status of 0. Got %#v instead.", exitStatus)
+	}
 }
