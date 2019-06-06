@@ -4,6 +4,8 @@ import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
+	// "github.com/xeipuuv/gojsonschema"
+
 	"testing"
 )
 
@@ -11,6 +13,8 @@ func TestSmartEdgeCodingChallenge(t *testing.T) {
 	RegisterFailHandler(Fail)
 	RunSpecs(t, "SmartEdge: CodingChallenge Suite")
 }
+
+var JsonValidationSchemaPath string = "testdata/valid_output_schema.json"
 
 // var _ = Describe("Code Challenge Program", func() {
 

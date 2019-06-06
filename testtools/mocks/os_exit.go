@@ -1,19 +1,17 @@
 package mocks
 
 // OsExitHarness provides an easy mechanism for simulating an os.Exit in a mock.
-type OsExitHarness interface {
-	GetMock() func(int)
-	InvokeCallThatMightExit(func())
-	GetExitStatus() int
-}
-
-// osExitHarnessStruct is the implementation of OsExitHarness
-type osExitHarnessStruct struct {
+type OsExitHarness struct {
 	osExitCode int
 }
 
+// NewOsExitMockHarness generates new structure to simulate os.Exit() with
+func NewOsExitMockHarness() *OsExitHarness {
+	return &OsExitHarness{}
+}
+
 // GetMock returns the mocked implementation of os.Exit().
-func (emh *osExitHarnessStruct) GetMock() func(int) {
+func (emh *OsExitHarness) GetMock() func(int) {
 	return func(status int) {
 		emh.osExitCode = status
 		panic(emh)
@@ -21,10 +19,10 @@ func (emh *osExitHarnessStruct) GetMock() func(int) {
 }
 
 // InvokeCallThatMightExit run passed function, catching any calls to mocked os.Exit().
-func (emh *osExitHarnessStruct) InvokeCallThatMightExit(wrapped func()) {
+func (emh *OsExitHarness) InvokeCallThatMightExit(wrapped func()) {
 	defer func() {
 		if r := recover(); r != nil {
-			if v, ok := r.(*osExitHarnessStruct); !ok || (v != emh) {
+			if v, ok := r.(*OsExitHarness); !ok || (v != emh) {
 				// not our panic... re-panic it.
 				panic(r)
 			}
@@ -36,11 +34,6 @@ func (emh *osExitHarnessStruct) InvokeCallThatMightExit(wrapped func()) {
 }
 
 // GetExitStatus returns the value that was passed to mock of os.Exit() or 0 if none.
-func (emh *osExitHarnessStruct) GetExitStatus() int {
+func (emh *OsExitHarness) GetExitStatus() int {
 	return emh.osExitCode
-}
-
-// NewOsExitMockHarness generates new structure to simulate os.Exit() with
-func NewOsExitMockHarness() OsExitHarness {
-	return &osExitHarnessStruct{}
 }

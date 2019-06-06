@@ -17,7 +17,11 @@ func TestOsExitMock(t *testing.T) {
 	var codeAfterExitRan bool
 	osExitHarness.InvokeCallThatMightExit(func() {
 		codeBeforeExitRan = true
-		mockedOsExit(5)
+		nestedExitHarness := mocks.NewOsExitMockHarness()
+		// this check tests that the nested harness has no effect on the osExitHarness
+		nestedExitHarness.InvokeCallThatMightExit(func() {
+			mockedOsExit(5)
+		})
 		codeAfterExitRan = true
 	})
 	if !codeBeforeExitRan {
