@@ -473,3 +473,54 @@ func TestCloneStringSlice(t *testing.T) {
 		)
 	}
 }
+
+// TestWrapFuncCallWithCounter tests testtools.WrapFuncCallWithCounter()
+// properly adds a call counter to the provided function
+func TestWrapFuncCallWithCounter(t *testing.T) {
+	aExpected := 0
+	bExpected := 0
+	aCounter := 0
+	bCounter := 0
+	aFunc := func() {
+		aCounter++
+	}
+	bFunc := func() {
+		bCounter++
+	}
+	aWrapped, aPtrCounter := testtools.WrapFuncCallWithCounter(aFunc)
+	bWrapped, bPtrCounter := testtools.WrapFuncCallWithCounter(bFunc)
+	if aCounter != 0 {
+		t.Errorf("aFunc should have run zero times. Instead ran %d", aCounter)
+	}
+	if bCounter != 0 {
+		t.Errorf("bFunc should have run zero times. Instead ran %d", bCounter)
+	}
+	if *aPtrCounter != 0 {
+		t.Errorf("aPtrCounter reports aFunc ran %d times, but never ran.", *aPtrCounter)
+	}
+	if *bPtrCounter != 0 {
+		t.Errorf("aPtrCounter reports aFunc ran %d times, but never ran.", *aPtrCounter)
+	}
+	for i := 0; i < 5; i++ {
+		aWrapped()
+		aExpected++
+		if aCounter != aExpected {
+			t.Errorf("aFunc should have run %d times. Instead ran %d", aExpected, aCounter)
+		}
+		if *aPtrCounter != aCounter {
+			t.Errorf("aPtrCounter reports aFunc ran %d times, but really ran %d.", *aPtrCounter, aCounter)
+		}
+		for j := 0; j <= 5; j++ {
+			bWrapped()
+			bExpected++
+			if bCounter != bExpected {
+				t.Errorf("bFunc should have run %d times. Instead ran %d", bExpected, bCounter)
+			}
+			if *bPtrCounter != bCounter {
+				t.Errorf("bPtrCounter reports bFunc ran %d times, but really ran %d.", *bPtrCounter, bCounter)
+			}
+
+		}
+	}
+
+}

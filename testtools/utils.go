@@ -123,3 +123,14 @@ func CloneStringSlice(inSlice []string) []string {
 	}
 	return result
 }
+
+// WrapFuncCallWithCounter wraps the provided function, adding a returned
+// pointer to a call counter.
+func WrapFuncCallWithCounter(f func()) (func(), *int) {
+	counter := 0
+	wrapped := func() {
+		f()
+		counter++
+	}
+	return wrapped, &counter
+}
