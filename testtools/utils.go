@@ -94,3 +94,20 @@ func AreFuncsEqual(a interface{}, b interface{}) (bool, error) {
 	}
 	return (valueInfos[0].valueReflection.Pointer() == valueInfos[1].valueReflection.Pointer()), nil
 }
+
+// AreStringSlicesEqual determines if two string slices are equal. Equality
+// distinguishes nil-ness, but not capacity
+func AreStringSlicesEqual(a []string, b []string) bool {
+	if (a == nil) || (b == nil) {
+		return (a == nil) && (b == nil)
+	}
+	if len(a) != len(b) {
+		return false
+	}
+	for i, v := range a {
+		if b[i] != v {
+			return false
+		}
+	}
+	return true
+}

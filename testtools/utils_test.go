@@ -374,3 +374,54 @@ func TestAreFuncsEqual(t *testing.T) {
 		}
 	}
 }
+
+// TestAreStringSlicesEqual tests AreStringSlicesEqual() properly compares slices of strings
+func TestAreStringSlicesEqual(t *testing.T) {
+	doReMi := []string{"do", "re", "mi"}
+	doReMiDuplicate := []string{"do", "re", "mi"}    // same content as doReMi, elsewhere in memory
+	faSoLaTi := []string{"fa", "so", "la", "ti"}     // totally distinct
+	nums := []string{"1", "2", "3"}                  // same length (3) as doReMi
+	emptySlice := []string{}                         // same length (3) as doReMi
+	emptyElementSlice := []string{""}                // empty is always a good test case.
+	var zeroSlice []string                           // a nil slice is also important to test
+	doReMiWithSpareCapacity := make([]string, 3, 13) // to test slices with different internal configurations
+	doReMiWithSpareCapacity[0] = "do"
+	doReMiWithSpareCapacity[1] = "re"
+	doReMiWithSpareCapacity[2] = "mi"
+	if !testtools.AreStringSlicesEqual(doReMi, doReMi) {
+		t.Errorf("A string slice must be identical to itself. AreStringSlicesEqual() says it isn't:\n\t%#v\n\t%#v", doReMi, doReMi)
+	}
+	if !testtools.AreStringSlicesEqual(doReMi, doReMiDuplicate) {
+		t.Errorf("Two identical string slices must be equal. AreStringSlicesEqual() says they aren't:\n\t%#v\n\t%#v", doReMi, doReMiDuplicate)
+	}
+	if testtools.AreStringSlicesEqual(doReMi, faSoLaTi) {
+		t.Errorf("Two distinct string slices must not be equal. AreStringSlicesEqual() says they are:\n\t%#v\n\t%#v", doReMi, faSoLaTi)
+	}
+	if testtools.AreStringSlicesEqual(doReMi, nums) {
+		t.Errorf("Two distinct string slices with the same number of items must not be equal. AreStringSlicesEqual() says they are:\n\t%#v\n\t%#v", doReMi, nums)
+	}
+	if testtools.AreStringSlicesEqual(doReMi, emptySlice) {
+		t.Errorf("An empty and a non-empty string slice must not be equal. AreStringSlicesEqual() says they are:\n\t%#v\n\t%#v", doReMi, emptySlice)
+	}
+	if testtools.AreStringSlicesEqual(doReMi, zeroSlice) {
+		t.Errorf("A nil slice and a non-empty string slice must not be equal. AreStringSlicesEqual() says they are:\n\t%#v\n\t%#v", doReMi, zeroSlice)
+	}
+	if !testtools.AreStringSlicesEqual(emptySlice, []string{}) {
+		t.Errorf("Two empty string slices must be equal. AreStringSlicesEqual() says they aren't\n\t%#v\n\t%#v", emptySlice, []string{})
+	}
+	if testtools.AreStringSlicesEqual(emptySlice, emptyElementSlice) {
+		t.Errorf("An empty string slices must not be equal to a string slice with a single empty element. AreStringSlicesEqual() says they aren't\n\t%#v\n\t%#v", emptySlice, emptyElementSlice)
+	}
+	if !testtools.AreStringSlicesEqual(zeroSlice, nil) {
+		t.Errorf("Two nil string slices must be equal. AreStringSlicesEqual() says they aren't\n\t%#v\n\t%#v", zeroSlice, []string(nil))
+	}
+	if !testtools.AreStringSlicesEqual(emptySlice, []string{}) {
+		t.Errorf("Two empty string slices must be equal. AreStringSlicesEqual() says they aren't\n\t%#v\n\t%#v", emptySlice, []string{})
+	}
+	if testtools.AreStringSlicesEqual(zeroSlice, emptySlice) {
+		t.Errorf("A nil slice and an empty slice must not be equal. AreStringSlicesEqual() says they aren\n\t%#v\n\t%#v", zeroSlice, emptySlice)
+	}
+	if !testtools.AreStringSlicesEqual(doReMi, doReMiWithSpareCapacity) {
+		t.Errorf("Two identical string slices with different capacities must be equal. AreStringSlicesEqual() says they aren't:\n\t%#v\n\t%#v", doReMi, doReMiWithSpareCapacity)
+	}
+}
