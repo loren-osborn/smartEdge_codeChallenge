@@ -111,3 +111,15 @@ func AreStringSlicesEqual(a []string, b []string) bool {
 	}
 	return true
 }
+
+// CloneStringSlice create a non-shared copy of inSlice
+func CloneStringSlice(inSlice []string) []string {
+	if inSlice == nil {
+		return nil
+	}
+	result := make([]string, len(inSlice), cap(inSlice))
+	for i, v := range inSlice {
+		result[i] = v
+	}
+	return result
+}

@@ -425,3 +425,51 @@ func TestAreStringSlicesEqual(t *testing.T) {
 		t.Errorf("Two identical string slices with different capacities must be equal. AreStringSlicesEqual() says they aren't:\n\t%#v\n\t%#v", doReMi, doReMiWithSpareCapacity)
 	}
 }
+
+// TestCloneStringSlice tests CloneStringSlice() properly clones a slice of strings
+func TestCloneStringSlice(t *testing.T) {
+	for _, tc := range []struct {
+		slice []string
+		desc  string
+	}{
+		{
+			slice: []string{"do", "re", "mi"},
+			desc:  "a non-empty string slice",
+		},
+		{
+			slice: []string{""},
+			desc:  "a string slice with a single empty element",
+		},
+		{
+			slice: []string{},
+			desc:  "an empty string slice",
+		},
+		{
+			slice: nil,
+			desc:  "a nil string slice",
+		},
+	} {
+		t.Run(
+			fmt.Sprintf("Ensuring CloneStringSlice() can clone %s", tc.desc),
+			func(tt *testing.T) {
+				if !testtools.AreStringSlicesEqual(tc.slice, tc.slice) {
+					tt.Errorf("%s isn't equal to itself.\n\t%#v", tc.desc, tc.slice)
+				}
+				clone := testtools.CloneStringSlice(tc.slice)
+				if !testtools.AreStringSlicesEqual(tc.slice, clone) {
+					tt.Errorf("%s isn't equal to itself.\n\t%#v\n\t%#v", tc.desc, tc.slice, clone)
+				}
+				if len(tc.slice) > 0 {
+					naiveCopy := tc.slice
+					tc.slice[0] = "MODIFIED"
+					if !testtools.AreStringSlicesEqual(tc.slice, naiveCopy) {
+						tt.Errorf("%s and naiveCopy should have changed.\n\t%#v\n\t%#v", tc.desc, tc.slice, naiveCopy)
+					}
+					if testtools.AreStringSlicesEqual(tc.slice, clone) {
+						tt.Errorf("%s should have changed, but clone should not have.\n\t%#v\n\t%#v", tc.desc, tc.slice, clone)
+					}
+				}
+			},
+		)
+	}
+}
