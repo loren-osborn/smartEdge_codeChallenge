@@ -38,5 +38,30 @@ func TestDependencies(t *testing.T) {
 			} else if !eq {
 				tt.Error("d.Os.Exit should evaluate to os.Exit")
 			}
+			if eq, actualErr := testtools.AreFuncsEqual(os.Getenv, depObjs[0].Os.Getenv); actualErr != nil {
+				tt.Error(actualErr.Error())
+			} else if !eq {
+				tt.Error("d.Os.Getenv should evaluate to os.Getenv")
+			}
+			if eq, actualErr := testtools.AreFuncsEqual(os.Setenv, depObjs[0].Os.Setenv); actualErr != nil {
+				tt.Error(actualErr.Error())
+			} else if !eq {
+				tt.Error("d.Os.Setenv should evaluate to os.Setenv")
+			}
+			if eq, actualErr := testtools.AreFuncsEqual(os.MkdirAll, depObjs[0].Os.MkdirAll); actualErr != nil {
+				tt.Error(actualErr.Error())
+			} else if !eq {
+				tt.Error("d.Os.MkdirAll should evaluate to os.MkdirAll")
+			}
+			if eq, actualErr := testtools.AreFuncsEqual(os.MkdirAll, depObjs[0].Os.MkdirAll); actualErr != nil {
+				tt.Error(actualErr.Error())
+			} else if !eq {
+				tt.Error("d.Os.MkdirAll should evaluate to os.MkdirAll")
+			}
+			if eq, actualErr := testtools.AreFuncsEqual(os.RemoveAll, depObjs[0].Os.RemoveAll); actualErr != nil {
+				tt.Error(actualErr.Error())
+			} else if !eq {
+				tt.Error("d.Os.RemoveAll should evaluate to os.RemoveAll")
+			}
 		})
 }

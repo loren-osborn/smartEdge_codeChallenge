@@ -19,7 +19,7 @@ func (emh *OsExitHarness) GetMock() func(int) {
 }
 
 // InvokeCallThatMightExit run passed function, catching any calls to mocked os.Exit().
-func (emh *OsExitHarness) InvokeCallThatMightExit(wrapped func()) {
+func (emh *OsExitHarness) InvokeCallThatMightExit(wrapped func() error) error {
 	defer func() {
 		if r := recover(); r != nil {
 			if v, ok := r.(*OsExitHarness); !ok || (v != emh) {
@@ -30,7 +30,7 @@ func (emh *OsExitHarness) InvokeCallThatMightExit(wrapped func()) {
 			// Continue with not further warnings.
 		}
 	}()
-	wrapped()
+	return wrapped()
 }
 
 // GetExitStatus returns the value that was passed to mock of os.Exit() or 0 if none.

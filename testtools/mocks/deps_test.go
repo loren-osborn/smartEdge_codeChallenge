@@ -2,6 +2,7 @@ package mocks_test
 
 import (
 	"bytes"
+	"errors"
 	"flag"
 	"fmt"
 	"github.com/smartedge/codechallenge"
@@ -10,6 +11,7 @@ import (
 	"io"
 	"io/ioutil"
 	"os"
+	"path/filepath"
 	"testing"
 )
 
@@ -38,7 +40,7 @@ var mockEnvTestCases []mockEnvTestCaseInfo = []mockEnvTestCaseInfo{
 		fakeOutContent: "I have a result!",
 		fakeErrContent: "but I stubbed my toe",
 		fakeArgList:    []string{"codechallenge", "-rsa"},
-		homeDirPath:    "/root/",
+		homeDirPath:    "/not_root/",
 		fakeFileSystem: &map[string]*string{},
 		fakeExitStatus: 3,
 	},
@@ -56,6 +58,10 @@ func TestNewDefaultMockDepsNotNil(t *testing.T) {
 		var deps *codechallenge.Dependencies = mockDepsBundle.Deps
 		if deps == nil {
 			t.Error("mockDepsBundle.Deps should never be nil.")
+		}
+		var nativeDeps *codechallenge.Dependencies = mockDepsBundle.NativeDeps
+		if nativeDeps == nil {
+			t.Error("mockDepsBundle.NativeDeps should never be nil.")
 		}
 	}
 }
@@ -121,10 +127,14 @@ func TestNewDefaultMockDepsExitStatus(t *testing.T) {
 			t.Errorf("mockDepsBundle.GetExitStatus() should default to 0. Got %#v instead.", mockDepsBundle.GetExitStatus())
 		}
 		var codeAfterExitExecuted bool
-		mockDepsBundle.InvokeCallInMockedEnv(func() {
+		err := mockDepsBundle.InvokeCallInMockedEnv(func() error {
 			mockDepsBundle.Deps.Os.Exit(tc.fakeExitStatus)
 			codeAfterExitExecuted = true
+			return nil
 		})
+		if err != nil {
+			t.Errorf("Unexpected error calling mockDepsBundle.InvokeCallInMockedEnv(): %s", err.Error())
+		}
 		if mockDepsBundle.GetExitStatus() != tc.fakeExitStatus {
 			t.Errorf("mockDepsBundle.GetExitStatus() should report value of %d passed to mockDepsBundle.Deps.Os.Exit(). Got %#v instead.", tc.fakeExitStatus, mockDepsBundle.GetExitStatus())
 		}
@@ -155,7 +165,7 @@ func TestNewDefaultMockDepsArgsList(t *testing.T) {
 		flag.CommandLine.Usage = wrappedRealFlagCommandLineUsage
 		mockDepsBundle := mocks.NewDefaultMockDeps(
 			tc.fakeInContent, tc.fakeArgList, tc.homeDirPath, tc.fakeFileSystem)
-		mockDepsBundle.InvokeCallInMockedEnv(func() {
+		err := mockDepsBundle.InvokeCallInMockedEnv(func() error {
 			if !testtools.AreStringSlicesEqual(os.Args, tc.fakeArgList) {
 				t.Errorf("os.Args should be identical to tc.fakeArgList within the mocked environment.  Got tc.fakeArgList == %#v and os.Args == %#v.", tc.fakeArgList, os.Args)
 			}
@@ -190,7 +200,11 @@ func TestNewDefaultMockDepsArgsList(t *testing.T) {
 			if realFlagErrHelp == flag.ErrHelp {
 				t.Error("Mock version of flag.ErrHelp not installed")
 			}
+			return nil
 		})
+		if err != nil {
+			t.Errorf("Unexpected error calling mockDepsBundle.InvokeCallInMockedEnv(): %s", err.Error())
+		}
 		if !testtools.AreStringSlicesEqual(os.Args, realArgList) {
 			t.Errorf("os.Args should be restored to realArgList after exiting the mocked environment.  Got realArgList == %#v and os.Args == %#v.", realArgList, os.Args)
 		}
@@ -220,5 +234,136 @@ func TestNewDefaultMockDepsArgsList(t *testing.T) {
 		flag.CommandLine.Usage = realFlagCommandLineUsage
 		flag.Usage = realFlagUsage
 		flag.CommandLine.SetOutput(realFlagCommandLineOutput)
+	}
+}
+
+// TestNewDefaultMockDepsExitStatus tests mocking of the home dir and
+// filesystem calls. Due to language constraints, it's turned out to be more
+// practical to map filesystem calls into a temporary filesystem directory
+// rather than simulating filesystem activity in memory.
+func TestNewDefaultMockDepsFileSystem(t *testing.T) {
+	realHomeDir := os.Getenv("HOME")
+	anticipatedFakeRootPath := filepath.Join(os.TempDir(), "tmpfs", fmt.Sprintf("sm_codechallenge_test_%d", os.Getpid()))
+	for _, tc := range mockEnvTestCases {
+		mockDepsBundle := mocks.NewDefaultMockDeps(
+			tc.fakeInContent, tc.fakeArgList, tc.homeDirPath, tc.fakeFileSystem)
+		if _, err := os.Stat(anticipatedFakeRootPath); !os.IsNotExist(err) {
+			t.Errorf("Path %#v should not exist yet, but it does.", anticipatedFakeRootPath)
+		}
+		err := mockDepsBundle.InvokeCallInMockedEnv(func() error {
+			if os.Getenv("HOME") != tc.homeDirPath {
+				t.Errorf("Mocked HOME path should be %#v, but saw %#v instead", tc.homeDirPath, os.Getenv("HOME"))
+			}
+			anticipatedFakeHomePath := filepath.Join(anticipatedFakeRootPath, tc.homeDirPath)
+			if _, err := os.Stat(anticipatedFakeHomePath); os.IsNotExist(err) {
+				t.Errorf("Path %#v should exist inside mock but doesn't", anticipatedFakeHomePath)
+			}
+			return nil
+		})
+		if err != nil {
+			t.Errorf("Unexpected error calling mockDepsBundle.InvokeCallInMockedEnv(): %s", err.Error())
+		}
+		if os.Getenv("HOME") != realHomeDir {
+			t.Errorf("HOME path should be restored to %#v, but saw %#v instead", realHomeDir, os.Getenv("HOME"))
+		}
+		if _, err := os.Stat(anticipatedFakeRootPath); !os.IsNotExist(err) {
+			t.Errorf("Path %#v should not exist anymore, but it still does.", anticipatedFakeRootPath)
+		}
+	}
+}
+
+// TestNewDefaultMockDepsRogueHomeDir tests rare cases where home directory
+// contains illegal \0 characters.
+func TestNewDefaultMockDepsRogueHomeDir(t *testing.T) {
+	mockDepsBundle := mocks.NewDefaultMockDeps("data", []string{"progname"}, "illegal\x00name", &map[string]*string{})
+	realHomeDir := os.Getenv("HOME")
+	argCodeRan := false
+	err := mockDepsBundle.InvokeCallInMockedEnv(func() error {
+		argCodeRan = true
+		return nil
+	})
+	expectedOsErr := &testtools.ErrorSpec{
+		Type:    "*os.SyscallError",
+		Message: "setenv: invalid argument",
+	}
+	if matchErr := expectedOsErr.EnsureMatches(err); matchErr != nil {
+		t.Error(matchErr.Error())
+	}
+	if os.Getenv("HOME") != realHomeDir {
+		t.Errorf("HOME path should be restored to %#v, but saw %#v instead", realHomeDir, os.Getenv("HOME"))
+	}
+	if argCodeRan {
+		t.Error("closure code should not have run")
+	}
+	mockDepsBundle = mocks.NewDefaultMockDeps("data", []string{"progname"}, "/some/path", &map[string]*string{})
+	mockDepsBundle.NativeDeps.Os.Setenv = func(name, val string) error {
+		if (name != "HOME") || (val != realHomeDir) {
+			return os.Setenv(name, val)
+		}
+		return errors.New("Dummy Setenv() error message")
+	}
+	err = mockDepsBundle.InvokeCallInMockedEnv(func() error {
+		argCodeRan = true
+		return nil
+	})
+	expectedDummyErr := &testtools.ErrorSpec{
+		Type:    "*errors.errorString",
+		Message: "Dummy Setenv() error message",
+	}
+	if matchErr := expectedDummyErr.EnsureMatches(err); matchErr != nil {
+		t.Error(matchErr.Error())
+	}
+	if !argCodeRan {
+		t.Error("Error should have occured after closure code ran")
+	}
+	os.Setenv("HOME", realHomeDir)
+}
+
+// TestNewDefaultMockDepsRogueHomeDir tests rare cases where home directory
+// contains illegal \0 characters.
+func TestNewDefaultMockDepsRogueFileIO(t *testing.T) {
+	mockDepsBundle := mocks.NewDefaultMockDeps("data", []string{"progname"}, "/home/someone", &map[string]*string{})
+	realHomeDir := os.Getenv("HOME")
+	argCodeRan := false
+	mockDepsBundle.NativeDeps.Os.MkdirAll = func(_ string, _ os.FileMode) error {
+		return errors.New("Dummy MkdirAll() error message")
+	}
+	calledInMockEnv := func() error {
+		argCodeRan = true
+		return nil
+	}
+	err := mockDepsBundle.InvokeCallInMockedEnv(calledInMockEnv)
+	expectedOsErr := &testtools.ErrorSpec{
+		Type:    "*errors.errorString",
+		Message: "Dummy MkdirAll() error message",
+	}
+	if matchErr := expectedOsErr.EnsureMatches(err); matchErr != nil {
+		t.Error(matchErr.Error())
+	}
+	if argCodeRan {
+		t.Error("closure code should not have run")
+	}
+	anticipatedFakeRootPath := filepath.Join(os.TempDir(), "tmpfs", fmt.Sprintf("sm_codechallenge_test_%d", os.Getpid()))
+	mockDepsBundle.NativeDeps.Os.MkdirAll = os.MkdirAll
+	mockDepsBundle.NativeDeps.Os.RemoveAll = func(_ string) error {
+		return errors.New("Dummy RemoveAll() error message")
+	}
+	expectedOsErr.Message = "Dummy RemoveAll() error message"
+	err = mockDepsBundle.InvokeCallInMockedEnv(calledInMockEnv)
+	if matchErr := expectedOsErr.EnsureMatches(err); matchErr != nil {
+		t.Error(matchErr.Error())
+	}
+	if !argCodeRan {
+		t.Error("Error should have occured after closure code ran")
+	}
+	cleanupErrs := []error{
+		os.RemoveAll(anticipatedFakeRootPath),
+		os.Setenv("HOME", realHomeDir),
+	}
+	expectedOsErr = nil // expect no error for last two checks
+	for _, cuErr := range cleanupErrs {
+		if matchErr := expectedOsErr.EnsureMatches(cuErr); matchErr != nil {
+			t.Error(matchErr.Error())
+		}
 	}
 }

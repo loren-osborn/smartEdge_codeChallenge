@@ -15,15 +15,20 @@ func TestOsExitMock(t *testing.T) {
 	var mockedOsExit func(int) = osExitHarness.GetMock()
 	var codeBeforeExitRan bool
 	var codeAfterExitRan bool
-	osExitHarness.InvokeCallThatMightExit(func() {
+	err := osExitHarness.InvokeCallThatMightExit(func() error {
 		codeBeforeExitRan = true
 		nestedExitHarness := mocks.NewOsExitMockHarness()
 		// this check tests that the nested harness has no effect on the osExitHarness
-		nestedExitHarness.InvokeCallThatMightExit(func() {
+		nestedExitHarness.InvokeCallThatMightExit(func() error {
 			mockedOsExit(5)
+			return nil
 		})
 		codeAfterExitRan = true
+		return nil
 	})
+	if err != nil {
+		t.Errorf("Unexpected error calling nestedExitHarness.InvokeCallThatMightExit(): %s", err.Error())
+	}
 	if !codeBeforeExitRan {
 		t.Error("Code passed to osExitHarness.InvokeCallThatMightExit() should run.")
 	}
