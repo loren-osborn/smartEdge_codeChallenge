@@ -7,6 +7,7 @@ import (
 
 // OsDependencies contains all external dependencies from the os package.
 type OsDependencies struct {
+	Args      []string
 	Stdin     io.Reader
 	Stdout    io.Writer
 	Stderr    io.Writer

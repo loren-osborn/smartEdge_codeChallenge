@@ -20,6 +20,7 @@ var RealEntryPoint func(*codechallenge.Dependencies) = codechallenge.RealMain
 func main() {
 	RealEntryPoint(&codechallenge.Dependencies{
 		Os: codechallenge.OsDependencies{
+			Args:      os.Args,
 			Stdin:     os.Stdin,
 			Stdout:    os.Stdout,
 			Stderr:    os.Stderr,

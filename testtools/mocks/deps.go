@@ -34,6 +34,7 @@ func NewDefaultMockDeps(stdinContent string, cmdLnArgs []string, homeDir string,
 	return &MockDepsBundle{
 		Deps: &codechallenge.Dependencies{
 			Os: codechallenge.OsDependencies{
+				Args:      cmdLnArgs,
 				Stdin:     bytes.NewBufferString(stdinContent),
 				Stdout:    fakeStdout,
 				Stderr:    fakeStderr,
@@ -46,6 +47,7 @@ func NewDefaultMockDeps(stdinContent string, cmdLnArgs []string, homeDir string,
 		},
 		NativeDeps: &codechallenge.Dependencies{
 			Os: codechallenge.OsDependencies{
+				Args:      os.Args,
 				Stdin:     os.Stdin,
 				Stdout:    os.Stdout,
 				Stderr:    os.Stderr,
