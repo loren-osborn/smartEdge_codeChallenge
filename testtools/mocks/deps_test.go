@@ -141,6 +141,13 @@ func TestNewDefaultMockDepsExitStatus(t *testing.T) {
 		if codeAfterExitExecuted {
 			t.Error("Call to mockDepsBundle.Deps.Os.Exit() didn't interrupt flow of execution.")
 		}
+		dummyMockEnvExitError := errors.New("Dummy Mock environment Exit error.")
+		err = mockDepsBundle.InvokeCallInMockedEnv(func() error {
+			return dummyMockEnvExitError
+		})
+		if matchErr := testtools.NewErrorSpecFrom(dummyMockEnvExitError).EnsureMatches(err); matchErr != nil {
+			t.Error(matchErr.Error())
+		}
 	}
 }
 
@@ -237,13 +244,14 @@ func TestNewDefaultMockDepsArgsList(t *testing.T) {
 	}
 }
 
+var anticipatedFakeRootPath string = filepath.Join(os.TempDir(), "tmpfs", fmt.Sprintf("sm_codechallenge_test_%d", os.Getpid()))
+
 // TestNewDefaultMockDepsExitStatus tests mocking of the home dir and
 // filesystem calls. Due to language constraints, it's turned out to be more
 // practical to map filesystem calls into a temporary filesystem directory
 // rather than simulating filesystem activity in memory.
 func TestNewDefaultMockDepsFileSystem(t *testing.T) {
 	realHomeDir := os.Getenv("HOME")
-	anticipatedFakeRootPath := filepath.Join(os.TempDir(), "tmpfs", fmt.Sprintf("sm_codechallenge_test_%d", os.Getpid()))
 	for _, tc := range mockEnvTestCases {
 		mockDepsBundle := mocks.NewDefaultMockDeps(
 			tc.fakeInContent, tc.fakeArgList, tc.homeDirPath, tc.fakeFileSystem)
@@ -296,25 +304,38 @@ func TestNewDefaultMockDepsRogueHomeDir(t *testing.T) {
 		t.Error("closure code should not have run")
 	}
 	mockDepsBundle = mocks.NewDefaultMockDeps("data", []string{"progname"}, "/some/path", &map[string]*string{})
+	dummySetenvError := errors.New("Dummy Setenv() error message")
+	setenvCallLog := make([][2]string, 0, 5)
 	mockDepsBundle.NativeDeps.Os.Setenv = func(name, val string) error {
+		setenvCallLog = append(setenvCallLog, [2]string{name, val})
 		if (name != "HOME") || (val != realHomeDir) {
 			return os.Setenv(name, val)
 		}
-		return errors.New("Dummy Setenv() error message")
+		return dummySetenvError
 	}
 	err = mockDepsBundle.InvokeCallInMockedEnv(func() error {
 		argCodeRan = true
 		return nil
 	})
-	expectedDummyErr := &testtools.ErrorSpec{
-		Type:    "*errors.errorString",
-		Message: "Dummy Setenv() error message",
-	}
+	expectedDummyErr := testtools.NewErrorSpecFrom(dummySetenvError)
 	if matchErr := expectedDummyErr.EnsureMatches(err); matchErr != nil {
 		t.Error(matchErr.Error())
 	}
 	if !argCodeRan {
 		t.Error("Error should have occured after closure code ran")
+	}
+	if len(setenvCallLog) != 2 {
+		t.Errorf("mockDepsBundle.NativeDeps.Os.Setenv should have been called twice, but call log shows:\n%#v", setenvCallLog)
+	}
+	dummyMockEnvExitError := errors.New("Dummy Mock environment Exit error.")
+	err = mockDepsBundle.InvokeCallInMockedEnv(func() error {
+		return dummyMockEnvExitError
+	})
+	if matchErr := testtools.NewErrorSpecFrom(dummyMockEnvExitError).EnsureMatches(err); matchErr != nil {
+		t.Errorf("Ensure mock environment error isn't clobbered by Setenv error:\n%s", matchErr.Error())
+	}
+	if len(setenvCallLog) != 4 {
+		t.Errorf("mockDepsBundle.NativeDeps.Os.Setenv should have been called a fourth time, after an error in the mock environment, but call log shows:\n%#v", setenvCallLog)
 	}
 	os.Setenv("HOME", realHomeDir)
 }
@@ -325,27 +346,26 @@ func TestNewDefaultMockDepsRogueFileIO(t *testing.T) {
 	mockDepsBundle := mocks.NewDefaultMockDeps("data", []string{"progname"}, "/home/someone", &map[string]*string{})
 	realHomeDir := os.Getenv("HOME")
 	argCodeRan := false
+	dummyMkdirAllError := errors.New("Dummy MkdirAll() error message")
 	mockDepsBundle.NativeDeps.Os.MkdirAll = func(_ string, _ os.FileMode) error {
-		return errors.New("Dummy MkdirAll() error message")
+		return dummyMkdirAllError
 	}
 	calledInMockEnv := func() error {
 		argCodeRan = true
 		return nil
 	}
 	err := mockDepsBundle.InvokeCallInMockedEnv(calledInMockEnv)
-	expectedOsErr := &testtools.ErrorSpec{
-		Type:    "*errors.errorString",
-		Message: "Dummy MkdirAll() error message",
-	}
+	expectedOsErr := testtools.NewErrorSpecFrom(dummyMkdirAllError)
 	if matchErr := expectedOsErr.EnsureMatches(err); matchErr != nil {
 		t.Error(matchErr.Error())
 	}
 	if argCodeRan {
 		t.Error("closure code should not have run")
 	}
-	anticipatedFakeRootPath := filepath.Join(os.TempDir(), "tmpfs", fmt.Sprintf("sm_codechallenge_test_%d", os.Getpid()))
 	mockDepsBundle.NativeDeps.Os.MkdirAll = os.MkdirAll
-	mockDepsBundle.NativeDeps.Os.RemoveAll = func(_ string) error {
+	removeAllCallLog := make([]string, 0, 3)
+	mockDepsBundle.NativeDeps.Os.RemoveAll = func(path string) error {
+		removeAllCallLog = append(removeAllCallLog, path)
 		return errors.New("Dummy RemoveAll() error message")
 	}
 	expectedOsErr.Message = "Dummy RemoveAll() error message"
@@ -355,6 +375,19 @@ func TestNewDefaultMockDepsRogueFileIO(t *testing.T) {
 	}
 	if !argCodeRan {
 		t.Error("Error should have occured after closure code ran")
+	}
+	if len(removeAllCallLog) != 1 {
+		t.Errorf("mockDepsBundle.NativeDeps.Os.Setenv should have been called once, but call log shows:\n%#v", removeAllCallLog)
+	}
+	dummyMockEnvExitError := errors.New("Dummy Mock environment Exit error.")
+	err = mockDepsBundle.InvokeCallInMockedEnv(func() error {
+		return dummyMockEnvExitError
+	})
+	if matchErr := testtools.NewErrorSpecFrom(dummyMockEnvExitError).EnsureMatches(err); matchErr != nil {
+		t.Errorf("Ensure mock environment error isn't clobbered by Setenv error:\n%s", matchErr.Error())
+	}
+	if len(removeAllCallLog) != 2 {
+		t.Errorf("mockDepsBundle.NativeDeps.Os.Setenv should have been called after an error in the mock environment, but call log shows:\n%#v", removeAllCallLog)
 	}
 	cleanupErrs := []error{
 		os.RemoveAll(anticipatedFakeRootPath),

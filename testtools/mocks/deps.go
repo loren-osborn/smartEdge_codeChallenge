@@ -125,6 +125,5 @@ func (mdb *MockDepsBundle) InvokeCallInMockedEnv(wrapped func() error) (outErr e
 	}()
 
 	// Run the code requested:
-	outErr = mdb.exitHarness.InvokeCallThatMightExit(wrapped)
-	return
+	return mdb.exitHarness.InvokeCallThatMightExit(wrapped)
 }
