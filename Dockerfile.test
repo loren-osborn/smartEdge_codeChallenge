@@ -33,13 +33,18 @@ RUN sh -xc                              \
 # Configure the container entrypoint so that it automatically runs all
 # the tests, quality metrics and docs generation:
 ENTRYPOINT sh -xc \
-	"go vet                                                             && \
+	"rm -f coverage.out coverage.html                                   ;  \
+	go vet                                                              && \
 	\"$GOPATH/bin/revive\" -formatter stylish -config revive.toml ./... && \
 	gotest -coverprofile=coverage.out ./...                             && \
 	go tool cover -html=coverage.out -o coverage.html                   && \
 	./utils/gendoc.sh \"github.com/smartedge/codechallenge\"            && \
 	cp utils/redirect.html godoc/index.html                             ;  \
 	exit_status=\$?                                                     ;  \
+	[ -f coverage.out ] && (                                               \
+	    [ -f coverage.html ] ||                                            \
+	    go tool cover -html=coverage.out -o coverage.html                  \
+	)                                                                   ;  \
 	[ -z \"$EXT_UID_GID\" ] ||                                             \
 		chown -R \"$EXT_UID_GID\" godoc coverage.out coverage.html      ;  \
 	exit \$exit_status"
