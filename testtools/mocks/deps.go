@@ -2,10 +2,12 @@ package mocks
 
 import (
 	"bytes"
+	"crypto/rand"
 	"errors"
 	"flag"
 	"fmt"
 	"github.com/smartedge/codechallenge"
+	"io/ioutil"
 	"os"
 	"path/filepath"
 )
@@ -43,6 +45,18 @@ func NewDefaultMockDeps(stdinContent string, cmdLnArgs []string, homeDir string,
 				Setenv:    os.Setenv,
 				MkdirAll:  nil,
 				RemoveAll: nil,
+				Stat:      nil,
+			},
+			Crypto: codechallenge.CryptoDependencies{
+				Rand: codechallenge.CryptoRandDependencies{
+					Reader: rand.Reader,
+				},
+			},
+			Io: codechallenge.IoDependencies{
+				Ioutil: codechallenge.IoIoutilDependencies{
+					WriteFile: nil,
+					ReadFile:  nil,
+				},
 			},
 		},
 		NativeDeps: &codechallenge.Dependencies{
@@ -56,6 +70,18 @@ func NewDefaultMockDeps(stdinContent string, cmdLnArgs []string, homeDir string,
 				Setenv:    os.Setenv,
 				MkdirAll:  os.MkdirAll,
 				RemoveAll: os.RemoveAll,
+				Stat:      os.Stat,
+			},
+			Crypto: codechallenge.CryptoDependencies{
+				Rand: codechallenge.CryptoRandDependencies{
+					Reader: rand.Reader,
+				},
+			},
+			Io: codechallenge.IoDependencies{
+				Ioutil: codechallenge.IoIoutilDependencies{
+					WriteFile: ioutil.WriteFile,
+					ReadFile:  ioutil.ReadFile,
+				},
 			},
 		},
 		OutBuf:      fakeStdout,

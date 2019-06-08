@@ -5,7 +5,9 @@
 package main
 
 import (
+	"crypto/rand"
 	"github.com/smartedge/codechallenge"
+	"io/ioutil"
 	"os"
 )
 
@@ -29,6 +31,18 @@ func main() {
 			Setenv:    os.Setenv,
 			MkdirAll:  os.MkdirAll,
 			RemoveAll: os.RemoveAll,
+			Stat:      os.Stat,
+		},
+		Crypto: codechallenge.CryptoDependencies{
+			Rand: codechallenge.CryptoRandDependencies{
+				Reader: rand.Reader,
+			},
+		},
+		Io: codechallenge.IoDependencies{
+			Ioutil: codechallenge.IoIoutilDependencies{
+				WriteFile: ioutil.WriteFile,
+				ReadFile:  ioutil.ReadFile,
+			},
 		},
 	})
 }

@@ -255,7 +255,7 @@ func TestNewDefaultMockDepsFileSystem(t *testing.T) {
 	for _, tc := range mockEnvTestCases {
 		mockDepsBundle := mocks.NewDefaultMockDeps(
 			tc.fakeInContent, tc.fakeArgList, tc.homeDirPath, tc.fakeFileSystem)
-		if _, err := os.Stat(anticipatedFakeRootPath); !os.IsNotExist(err) {
+		if codechallenge.FileExists(mockDepsBundle.NativeDeps, anticipatedFakeRootPath) {
 			t.Errorf("Path %#v should not exist yet, but it does.", anticipatedFakeRootPath)
 		}
 		err := mockDepsBundle.InvokeCallInMockedEnv(func() error {
@@ -263,7 +263,8 @@ func TestNewDefaultMockDepsFileSystem(t *testing.T) {
 				t.Errorf("Mocked HOME path should be %#v, but saw %#v instead", tc.homeDirPath, os.Getenv("HOME"))
 			}
 			anticipatedFakeHomePath := filepath.Join(anticipatedFakeRootPath, tc.homeDirPath)
-			if _, err := os.Stat(anticipatedFakeHomePath); os.IsNotExist(err) {
+
+			if !codechallenge.FileExists(mockDepsBundle.NativeDeps, anticipatedFakeRootPath) {
 				t.Errorf("Path %#v should exist inside mock but doesn't", anticipatedFakeHomePath)
 			}
 			return nil
@@ -274,7 +275,7 @@ func TestNewDefaultMockDepsFileSystem(t *testing.T) {
 		if os.Getenv("HOME") != realHomeDir {
 			t.Errorf("HOME path should be restored to %#v, but saw %#v instead", realHomeDir, os.Getenv("HOME"))
 		}
-		if _, err := os.Stat(anticipatedFakeRootPath); !os.IsNotExist(err) {
+		if codechallenge.FileExists(mockDepsBundle.NativeDeps, anticipatedFakeRootPath) {
 			t.Errorf("Path %#v should not exist anymore, but it still does.", anticipatedFakeRootPath)
 		}
 	}

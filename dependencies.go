@@ -16,10 +16,37 @@ type OsDependencies struct {
 	Setenv    func(string, string) error
 	MkdirAll  func(string, os.FileMode) error
 	RemoveAll func(string) error
+	Stat      func(string) (os.FileInfo, error)
+}
+
+// CryptoRandDependencies contains all external dependencies from the crypto/rand package.
+type CryptoRandDependencies struct {
+	Reader io.Reader
+}
+
+// CryptoDependencies contains all external dependencies from the crypto package.
+type CryptoDependencies struct {
+	Rand CryptoRandDependencies
+}
+
+// IoIoutilDependencies contains all external dependencies from the io/ioutils package.
+type IoIoutilDependencies struct {
+	WriteFile func(string, []byte, os.FileMode) error
+	ReadFile  func(string) ([]byte, error)
+}
+
+// IoDependencies contains all external dependencies from the io package.
+type IoDependencies struct {
+	Ioutil IoIoutilDependencies
 }
 
 // Dependencies contains all external dependencies injected by main()
 // into RealMain()
 type Dependencies struct {
-	Os OsDependencies
+	Os     OsDependencies
+	Crypto CryptoDependencies
+	Io     IoDependencies
 }
+
+// d.Io.Ioutil.WriteFile
+// func WriteFile(filename string, data []byte, perm os.FileMode) error

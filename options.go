@@ -1,9 +1,8 @@
-// Package codechallenge implements a tool to sign a short text message,
-// creating a key-pair if necessary
 package codechallenge
 
 import (
 	"crypto/x509"
+	"errors"
 	"flag"
 	"fmt"
 	"path/filepath"
@@ -23,6 +22,7 @@ const (
 // PkiSettings are the public key settings as specified on the command line.
 type PkiSettings struct {
 	Algorithm      x509.PublicKeyAlgorithm
+	RSAKeyBits     int
 	PrivateKeyPath string
 	PublicKeyPath  string
 }
@@ -40,6 +40,7 @@ func ParseArgs(d *Dependencies) (*RunConfig, error) {
 		Format: UTF8, // default
 		PubKeySettings: PkiSettings{
 			Algorithm:      x509.ECDSA, // default
+			RSAKeyBits:     2048,       //default
 			PrivateKeyPath: filepath.Join(defaultKeyDir, "id_{{algorithm}}.priv"),
 			PublicKeyPath:  filepath.Join(defaultKeyDir, "id_{{algorithm}}.pub"),
 		},
@@ -55,13 +56,13 @@ func ParseArgs(d *Dependencies) (*RunConfig, error) {
 		},
 		x509.ECDSA: {
 			name:    "ecdsa",
-			present: flag.Bool("ecdsa", false, "Causes the mesage to be signed with an ECDSA key-pair"),
+			present: flag.Bool("ecdsa", false, "Causes the mesage to be signed with an ECDSA key-pair [default]"),
 		},
 	}
 	formatFlags := map[ContentFormat]namedFlagValPair{
 		UTF8: {
 			name:    "utf8",
-			present: flag.Bool("utf8", false, "This specifies that the message is UTF-8 content"),
+			present: flag.Bool("utf8", false, "This specifies that the message is UTF-8 content [default]"),
 		},
 		ASCII: {
 			name:    "ascii",
@@ -74,6 +75,7 @@ func ParseArgs(d *Dependencies) (*RunConfig, error) {
 	}
 	overridePrivateKeyPath := flag.String("private", "", "filepath of the private key file. Defaults to ~/.smartEdge/id_rsa.priv for RSA and ~/.smartEdge/id_ecdsa.priv for ECDSA.")
 	overridePublicKeyPath := flag.String("public", "", "filepath of the private key file. Defaults to ~/.smartEdge/id_rsa.pub for RSA and ~/.smartEdge/id_ecdsa.pub for ECDSA.")
+	rsaKeyBits := flag.Uint("bits", 0, "Bit length of the RSA key [default=2048]")
 	if err := flag.CommandLine.Parse(d.Os.Args[1:]); err != nil {
 		return nil, err
 	}
@@ -113,6 +115,18 @@ func ParseArgs(d *Dependencies) (*RunConfig, error) {
 		"{{algorithm}}",
 		algorithmFlags[result.PubKeySettings.Algorithm].name,
 		0)
+	if result.PubKeySettings.Algorithm != x509.RSA {
+		if *rsaKeyBits != 0 {
+			return nil, errors.New("Options -bits is only valid for RSA")
+		}
+	} else {
+		if *rsaKeyBits < 256 {
+			// 2048 is the least currently considered "secure through 2030."
+			// 256 bits is 2.791 * 10^539 times weaker than that.
+			return nil, fmt.Errorf("Options -bits less than 256 not allowed. Saw -bits=%d", *rsaKeyBits)
+		}
+		result.PubKeySettings.RSAKeyBits = int(*rsaKeyBits)
+	}
 
 	// Replace if we don't see the default value of empty string
 	if *overridePrivateKeyPath != "" {
