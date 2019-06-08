@@ -32,6 +32,8 @@ func main() {
 			MkdirAll:  os.MkdirAll,
 			RemoveAll: os.RemoveAll,
 			Stat:      os.Stat,
+			Chown:     os.Chown,
+			Getuid:    os.Getuid,
 		},
 		Crypto: codechallenge.CryptoDependencies{
 			Rand: codechallenge.CryptoRandDependencies{

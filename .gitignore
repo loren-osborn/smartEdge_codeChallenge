@@ -2,3 +2,4 @@ coverage.*
 event_timestamps/
 godoc/
 .idea/
+.smartEdge/

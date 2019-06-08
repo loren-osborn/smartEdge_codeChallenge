@@ -7,6 +7,7 @@ import (
 	"flag"
 	"fmt"
 	"github.com/smartedge/codechallenge"
+	"github.com/smartedge/codechallenge/testtools"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -22,8 +23,8 @@ type MockDepsBundle struct {
 	exitHarness *OsExitHarness
 	argList     []string
 	homeDirPath string
-	mapPathIn   func(string) (string, error)
-	mapPathOut  func(string) (string, error)
+	MapPathIn   func(string) (string, error)
+	MapPathOut  func(string) (string, error)
 }
 
 // NewDefaultMockDeps generates a mock environment, along with a
@@ -48,10 +49,15 @@ func NewDefaultMockDeps(stdinContent string, cmdLnArgs []string, homeDir string,
 				MkdirAll:  nil,
 				RemoveAll: nil,
 				Stat:      nil,
+				Chown:     nil,
+				Getuid:    os.Getuid,
 			},
 			Crypto: codechallenge.CryptoDependencies{
 				Rand: codechallenge.CryptoRandDependencies{
-					Reader: rand.Reader,
+					Reader: &testtools.LoopReader{
+						// non-random bit shift pattern
+						Data: "\x00\x01\x03\x07\x0f\x1f\x3f\x7f\xff\xfe\xfc\xf8\xf0\xe0\xc0\x80",
+					},
 				},
 			},
 			Io: codechallenge.IoDependencies{
@@ -73,6 +79,8 @@ func NewDefaultMockDeps(stdinContent string, cmdLnArgs []string, homeDir string,
 				MkdirAll:  os.MkdirAll,
 				RemoveAll: os.RemoveAll,
 				Stat:      os.Stat,
+				Chown:     os.Chown,
+				Getuid:    os.Getuid,
 			},
 			Crypto: codechallenge.CryptoDependencies{
 				Rand: codechallenge.CryptoRandDependencies{
@@ -145,10 +153,10 @@ func (mdb *MockDepsBundle) InvokeCallInMockedEnv(wrapped func() error) (outErr e
 	if outErr != nil {
 		return
 	}
-	mdb.mapPathIn = func(path string) (string, error) {
+	mdb.MapPathIn = func(path string) (string, error) {
 		return filepath.Join(fakeRootPath, path), nil
 	}
-	mdb.mapPathOut = func(path string) (string, error) {
+	mdb.MapPathOut = func(path string) (string, error) {
 		cleanFakeRoot := filepath.Clean(fakeRootPath) + "/"
 		cleanPath := filepath.Clean(path)
 		if cleanPath[0:len(cleanFakeRoot)] != cleanFakeRoot {
@@ -157,35 +165,42 @@ func (mdb *MockDepsBundle) InvokeCallInMockedEnv(wrapped func() error) (outErr e
 		return cleanPath[len(cleanFakeRoot)-1:], nil
 	}
 	mdb.Deps.Os.MkdirAll = func(path string, perm os.FileMode) error {
-		realPath, err := mdb.mapPathIn(path)
+		realPath, err := mdb.MapPathIn(path)
 		if err != nil {
 			return err
 		}
 		return mdb.NativeDeps.Os.MkdirAll(realPath, perm)
 	}
 	mdb.Deps.Os.RemoveAll = func(path string) error {
-		realPath, err := mdb.mapPathIn(path)
+		realPath, err := mdb.MapPathIn(path)
 		if err != nil {
 			return err
 		}
 		return mdb.NativeDeps.Os.RemoveAll(realPath)
 	}
 	mdb.Deps.Os.Stat = func(path string) (os.FileInfo, error) {
-		realPath, err := mdb.mapPathIn(path)
+		realPath, err := mdb.MapPathIn(path)
 		if err != nil {
 			return nil, err
 		}
 		return mdb.NativeDeps.Os.Stat(realPath)
 	}
+	mdb.Deps.Os.Chown = func(path string, uid, gid int) error {
+		realPath, err := mdb.MapPathIn(path)
+		if err != nil {
+			return err
+		}
+		return mdb.NativeDeps.Os.Chown(realPath, uid, gid)
+	}
 	mdb.Deps.Io.Ioutil.WriteFile = func(path string, data []byte, perm os.FileMode) error {
-		realPath, err := mdb.mapPathIn(path)
+		realPath, err := mdb.MapPathIn(path)
 		if err != nil {
 			return err
 		}
 		return mdb.NativeDeps.Io.Ioutil.WriteFile(realPath, data, perm)
 	}
 	mdb.Deps.Io.Ioutil.ReadFile = func(path string) ([]byte, error) {
-		realPath, err := mdb.mapPathIn(path)
+		realPath, err := mdb.MapPathIn(path)
 		if err != nil {
 			return nil, err
 		}

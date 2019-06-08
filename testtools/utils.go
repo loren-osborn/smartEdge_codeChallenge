@@ -97,3 +97,25 @@ func WrapFuncCallWithCounter(f func()) (func(), *int) {
 	}
 	return wrapped, &counter
 }
+
+// LoopReader an io.Reader that endlessly reads the same series of bytes
+type LoopReader struct {
+	Data string // If empty, will be automatically promoted to "\x00"
+	Pos  int
+}
+
+// Read provides an endless stream of predictable (looping) bytes.
+func (lr *LoopReader) Read(p []byte) (n int, err error) {
+	// initialization
+	if lr.Data == "" {
+		lr.Data = "\x00"
+	}
+	if (lr.Pos < 0) || (lr.Pos >= len(lr.Data)) {
+		lr.Pos = 0
+	}
+	for i := range p {
+		p[i] = []byte(lr.Data)[(lr.Pos+i)%len(lr.Data)]
+	}
+	lr.Pos = (lr.Pos + len(p)) % len(lr.Data)
+	return len(p), nil
+}

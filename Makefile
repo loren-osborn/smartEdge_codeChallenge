@@ -15,7 +15,7 @@ ALL_SOURCE_FILES       := $(shell \
 PROD_SOURCE_FILES       = $(filter-out %_test.go,$(filter %.go, $(ALL_SOURCE_FILES)))
 TEST_SOURCE_FILES       = $(filter %_test.go,$(ALL_SOURCE_FILES)) $(filter-out %.go, $(ALL_SOURCE_FILES))
 PROD_SOURCE_FILES       = $(filter-out %_test.go,$(filter %.go, $(ALL_SOURCE_FILES)))
-GENERATED_FILES         = event_timestamps coverage.out coverage.html godoc
+GENERATED_FILES         = event_timestamps coverage.out coverage.html godoc .smartEdge
 # Putting "production_container_image" in seperate PRECIOUS_IMAGE_TAGS, as it
 # is a final output, and may be in use elsewhere on the system:
 DISCARDABLE_IMAGE_TAGS  = golang_base_image tester_image
@@ -24,7 +24,7 @@ PRECIOUS_IMAGE_TAGS     = production_container_image
 RM_IMAGES_IF_PRESENT    = @bash -c 'for img_name in $(1) ; do if docker image inspect $$img_name >/dev/null 2>/dev/null ; then >&2 echo docker image rm $$img_name ; docker image rm $$img_name ; fi ; done'
 
 
-default: event_timestamps/production_container_image
+default: event_timestamps/production_container_image demo
 
 .PRECIOUS: coverage.html
 
@@ -58,6 +58,16 @@ test coverage.out coverage.html godoc: event_timestamps/tester_image \
 		--env TERM="$$TERM"                       \
 		--env EXT_UID_GID="$$(id -u):$$(id -g)"   \
 		tester_image:latest)
+
+demo: event_timestamps/production_container_image
+	$(strip echo "Do Re Mi Fa So La Ti Do" |    \
+		docker run                              \
+		--rm                                    \
+		-i                                      \
+		-v "$$(pwd):/mnt/home"                  \
+		--env EXT_UID_GID="$$(id -u):$$(id -g)" \
+		production_container_image:latest       \
+		-rsa)
 
 event_timestamps: Makefile
 	@$(strip bash -c \

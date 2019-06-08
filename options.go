@@ -116,11 +116,10 @@ func ParseArgs(d *Dependencies) (*RunConfig, error) {
 		"{{algorithm}}",
 		algorithmFlags[result.PubKeySettings.Algorithm].name,
 		0)
-	if result.PubKeySettings.Algorithm != x509.RSA {
-		if *rsaKeyBits != 0 {
+	if *rsaKeyBits != 0 {
+		if result.PubKeySettings.Algorithm == x509.RSA {
 			return nil, errors.New("Options -bits is only valid for RSA")
 		}
-	} else {
 		if *rsaKeyBits < 256 {
 			// 2048 is the least currently considered "secure through 2030."
 			// 256 bits is 2.791 * 10^539 times weaker than that.

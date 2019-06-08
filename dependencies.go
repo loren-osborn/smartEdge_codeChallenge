@@ -17,6 +17,8 @@ type OsDependencies struct {
 	MkdirAll  func(string, os.FileMode) error
 	RemoveAll func(string) error
 	Stat      func(string) (os.FileInfo, error)
+	Chown     func(string, int, int) error
+	Getuid    func() int
 }
 
 // CryptoRandDependencies contains all external dependencies from the crypto/rand package.

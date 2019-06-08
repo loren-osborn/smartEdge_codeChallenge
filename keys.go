@@ -247,7 +247,7 @@ func (ct *CryptoTooling) HashMessage(msg string) DigestHash {
 // Sign is a thin wrapper over cryptoSigner.Sign() to ease
 // type conversions and dependencies.
 func (ct *CryptoTooling) Sign(hash DigestHash) (BinarySignature, error) {
-	signature, err := ct.Signer.Sign(ct.D.Crypto.Rand.Reader, []byte(hash), nil)
+	signature, err := ct.Signer.Sign(ct.D.Crypto.Rand.Reader, []byte(hash), &rsa.PSSOptions{Hash: crypto.SHA256})
 	if err != nil {
 		return nil, err
 	}
