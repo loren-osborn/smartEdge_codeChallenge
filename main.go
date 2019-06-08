@@ -3,6 +3,8 @@
 package codechallenge
 
 import (
+	"errors"
+	"flag"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -21,15 +23,50 @@ func DummyRealMain(d *Dependencies) {
 }`)
 }
 
+// HandleError displays an error message with Usage information to Stderr,
+// and exits with an error code.
+func HandleError(d *Dependencies, err error, exitStatus int) {
+	fmt.Fprintln(d.Os.Stderr, err.Error())
+	flag.CommandLine.Usage()
+	d.Os.Exit(exitStatus)
+}
+
 // RealMain is the program entry-point with all dependencies injected. This
 // allows us to test respecting public vs private methods by moving it outside
 // the "main" package.
 func RealMain(d *Dependencies) {
-	fmt.Fprintln(d.Os.Stdout, `{
-    "message":"theAnswerIs42",
-    "signature":"MGUCMCDwlFyVdD620p0hRLtABoJTR7UNgwj8g2r0ipNbWPi4Us57YfxtSQJ3dAkHslyBbwIxAKorQmpWl9QdlBUtACcZm4kEXfL37lJ+gZ/hANcTyuiTgmwcEC0FvEXY35u2bKFwhA==",
-    "pubkey":"-----BEGIN PUBLIC KEY-----\nMHYwEAYHKoZIzj0CAQYFK4EEACIDYgAEI5/0zKsIzou9hL3ZdjkvBeVZFKpDwxTb\nfiDVjHpJdu3+qOuaKYgsLLiO9TFfupMYHLa20IqgbJSIv/wjxANH68aewV1q2Wn6\nvLA3yg2mOTa/OHAZEiEf7bVEbnAov+6D\n-----END PUBLIC KEY-----\n"
-}`)
+	config, err := ParseArgs(d)
+	if err != nil {
+		HandleError(d, err, 1)
+	}
+	message, err := InjestMessage(d.Os.Stdin, config.Format)
+	if err != nil {
+		HandleError(d, err, 2)
+	}
+	cryptStuff, err := GetCryptoTooling(d, &config.PubKeySettings)
+	if err != nil {
+		HandleError(d, err, 3)
+	}
+	err = cryptStuff.GetKeys()
+	if err != nil {
+		HandleError(d, err, 4)
+	}
+	binSig, err := cryptStuff.SignMessage(message)
+	if err != nil {
+		HandleError(d, err, 5)
+	}
+	// Verify with a round trip:
+	valid, err := cryptStuff.VerifySignedMessage(message, binSig.Base64(), cryptStuff.PubKey.String())
+	if err != nil {
+		HandleError(d, err, 6)
+	}
+	if !valid {
+		HandleError(d, errors.New("round trip verification of signature failed"), 7)
+	}
+	err = GenerateResponse(d, message, binSig, cryptStuff.PubKey)
+	if err != nil {
+		HandleError(d, err, 8)
+	}
 }
 
 // InjestMessage reads all data from dataSource, removing any trailing

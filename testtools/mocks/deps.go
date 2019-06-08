@@ -22,6 +22,8 @@ type MockDepsBundle struct {
 	exitHarness *OsExitHarness
 	argList     []string
 	homeDirPath string
+	mapPathIn   func(string) (string, error)
+	mapPathOut  func(string) (string, error)
 }
 
 // NewDefaultMockDeps generates a mock environment, along with a
@@ -142,6 +144,52 @@ func (mdb *MockDepsBundle) InvokeCallInMockedEnv(wrapped func() error) (outErr e
 	outErr = mdb.NativeDeps.Os.MkdirAll(filepath.Join(fakeRootPath, mdb.homeDirPath), 0755)
 	if outErr != nil {
 		return
+	}
+	mdb.mapPathIn = func(path string) (string, error) {
+		return filepath.Join(fakeRootPath, path), nil
+	}
+	mdb.mapPathOut = func(path string) (string, error) {
+		cleanFakeRoot := filepath.Clean(fakeRootPath) + "/"
+		cleanPath := filepath.Clean(path)
+		if cleanPath[0:len(cleanFakeRoot)] != cleanFakeRoot {
+			return "", fmt.Errorf("File %#v not inside fake root %#v when trying to map it outside", cleanPath, cleanFakeRoot)
+		}
+		return cleanPath[len(cleanFakeRoot)-1:], nil
+	}
+	mdb.Deps.Os.MkdirAll = func(path string, perm os.FileMode) error {
+		realPath, err := mdb.mapPathIn(path)
+		if err != nil {
+			return err
+		}
+		return mdb.NativeDeps.Os.MkdirAll(realPath, perm)
+	}
+	mdb.Deps.Os.RemoveAll = func(path string) error {
+		realPath, err := mdb.mapPathIn(path)
+		if err != nil {
+			return err
+		}
+		return mdb.NativeDeps.Os.RemoveAll(realPath)
+	}
+	mdb.Deps.Os.Stat = func(path string) (os.FileInfo, error) {
+		realPath, err := mdb.mapPathIn(path)
+		if err != nil {
+			return nil, err
+		}
+		return mdb.NativeDeps.Os.Stat(realPath)
+	}
+	mdb.Deps.Io.Ioutil.WriteFile = func(path string, data []byte, perm os.FileMode) error {
+		realPath, err := mdb.mapPathIn(path)
+		if err != nil {
+			return err
+		}
+		return mdb.NativeDeps.Io.Ioutil.WriteFile(realPath, data, perm)
+	}
+	mdb.Deps.Io.Ioutil.ReadFile = func(path string) ([]byte, error) {
+		realPath, err := mdb.mapPathIn(path)
+		if err != nil {
+			return nil, err
+		}
+		return mdb.NativeDeps.Io.Ioutil.ReadFile(realPath)
 	}
 
 	// Teardown fake filesystem

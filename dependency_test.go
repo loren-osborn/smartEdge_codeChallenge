@@ -1,7 +1,6 @@
 package codechallenge_test
 
 import (
-	"bytes"
 	"github.com/smartedge/codechallenge"
 	"github.com/smartedge/codechallenge/testtools/mocks"
 	"testing"
@@ -10,16 +9,15 @@ import (
 // TestCallingMainWithMocks verifies that calling RealMain with mocked
 // dependencies works as intended.
 func TestCallingMainWithMocks(t *testing.T) {
-	osExitHarness := mocks.NewOsExitMockHarness()
-	codechallenge.RealMain(&codechallenge.Dependencies{
-		Os: codechallenge.OsDependencies{
-			Stdin:  &bytes.Buffer{},
-			Stdout: &bytes.Buffer{},
-			Stderr: &bytes.Buffer{},
-			Exit:   osExitHarness.GetMock(),
-		},
+	mockDepsBundle := mocks.NewDefaultMockDeps("Four score and seven years ago...", []string{"myProg"}, "/home/foobar", nil)
+	err := mockDepsBundle.InvokeCallInMockedEnv(func() error {
+		codechallenge.RealMain(mockDepsBundle.Deps)
+		return nil
 	})
-	if exitStatus := osExitHarness.GetExitStatus(); exitStatus != 0 {
+	if err != nil {
+		t.Errorf("Unexpected error calling mockDepsBundle.InvokeCallInMockedEnv(): %s", err.Error())
+	}
+	if exitStatus := mockDepsBundle.GetExitStatus(); exitStatus != 0 {
 		t.Errorf("RealMain() should have a normal exit status of 0. Got %#v instead.", exitStatus)
 	}
 }

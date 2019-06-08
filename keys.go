@@ -5,6 +5,7 @@ import (
 	"crypto/ecdsa"
 	"crypto/elliptic"
 	"crypto/rsa"
+	"crypto/sha256"
 	"crypto/x509"
 	"encoding/asn1"
 	"encoding/base64"
@@ -77,7 +78,7 @@ func (p *ECDSAPlugin) InjestPrivateKey(privKey X509Encoded) (signer crypto.Signe
 func (p *ECDSAPlugin) VerifySignature(sha256Hash DigestHash, binSig BinarySignature, pubKey X509Encoded) (bool, error) {
 	// Decode the signature to get R and S
 	sigStruct := ecdsaSignature{}
-	_, err := asn1.Unmarshal([]byte(binSig), sigStruct)
+	_, err := asn1.Unmarshal([]byte(binSig), &sigStruct)
 	if err != nil {
 		return false, err
 	}
@@ -201,10 +202,6 @@ func (ct *CryptoTooling) GetKeys() error {
 	if err != nil {
 		return err
 	}
-	ct.Signer, err = ct.AlgPlugin.InjestPrivateKey(x509PrivKey)
-	if err != nil {
-		return err
-	}
 	if ct.PrivKey != nil {
 		if ct.PrivKey.String() != pemPrivKey.String() {
 			return fmt.Errorf(
@@ -217,8 +214,68 @@ func (ct *CryptoTooling) GetKeys() error {
 	} else {
 		ct.PrivKey = pemPrivKey
 	}
-
+	pemPubKey, _, err := DecodeAndLoadKey(ct.D, ct.Settings.PublicKeyPath)
+	if err != nil {
+		return err
+	}
+	if ct.PubKey != nil {
+		if ct.PubKey.String() != pemPubKey.String() {
+			return fmt.Errorf(
+				"File %s contents changed between writing and reading: "+
+					"Was:\n%s\n\nNow:\n%s",
+				ct.Settings.PrivateKeyPath,
+				ct.PubKey.String(),
+				pemPubKey.String())
+		}
+	} else {
+		ct.PubKey = pemPubKey
+	}
+	ct.Signer, err = ct.AlgPlugin.InjestPrivateKey(x509PrivKey)
+	if err != nil {
+		return err
+	}
 	return nil
+}
+
+// HashMessage is a thin wrapper over crypto/sha256.Sum256() to ease
+// type conversion.
+func (ct *CryptoTooling) HashMessage(msg string) DigestHash {
+	hash := sha256.Sum256([]byte(msg))
+	return DigestHash(hash[0:])
+}
+
+// Sign is a thin wrapper over cryptoSigner.Sign() to ease
+// type conversions and dependencies.
+func (ct *CryptoTooling) Sign(hash DigestHash) (BinarySignature, error) {
+	signature, err := ct.Signer.Sign(ct.D.Crypto.Rand.Reader, []byte(hash), nil)
+	if err != nil {
+		return nil, err
+	}
+	return BinarySignature(signature), nil
+}
+
+// SignMessage simply sighs a hash of the message. It was added for
+// consistancy with VerifySignedMessage.
+func (ct *CryptoTooling) SignMessage(msg string) (BinarySignature, error) {
+	return ct.Sign(ct.HashMessage(msg))
+}
+
+// VerifySignedMessage simply sighs a hash of the message. It was added for
+// consistancy with VerifySignedMessage.
+func (ct *CryptoTooling) VerifySignedMessage(msg string, base64Sig string, pemPubKey string) (bool, error) {
+	sig, err := NewBinarySignatureFromBase64(base64Sig)
+	if err != nil {
+		return false, err
+	}
+	x509PubKey, err := NewPEMBufferFromString(pemPubKey).DecodeToX509()
+	if err != nil {
+		return false, err
+	}
+	valid, err := ct.AlgPlugin.VerifySignature(ct.HashMessage(msg), sig, x509PubKey)
+	if err != nil {
+		return false, err
+	}
+	return valid, nil
 }
 
 // X509Encoded data buffer
@@ -235,6 +292,11 @@ func (x X509Encoded) EncodeToPEM(algorithm string, kt KeyType) PEMEncoded {
 
 // PEMEncoded text data buffer
 type PEMEncoded []byte
+
+// NewPEMBufferFromString turns a string into a PEM buffer.
+func NewPEMBufferFromString(src string) PEMEncoded {
+	return PEMEncoded([]byte(src))
+}
 
 // String renders the PEM encoded data as a string.
 func (pemBuf PEMEncoded) String() string {
@@ -262,6 +324,16 @@ func (hash DigestHash) Hex() string {
 // BinarySignature data buffer
 type BinarySignature []byte
 
+// NewBinarySignatureFromBase64 creates a new BinarySignature buffer
+// from a base64 string.
+func NewBinarySignatureFromBase64(src string) (BinarySignature, error) {
+	buf, err := base64.StdEncoding.DecodeString(src)
+	if err != nil {
+		return nil, err
+	}
+	return BinarySignature(buf), nil
+}
+
 // Base64 renders the signature as a RFC 4648 compliant Base64
 // encoded string.
 func (sig BinarySignature) Base64() string {
@@ -273,134 +345,6 @@ func (sig BinarySignature) Base64() string {
 type ecdsaSignature struct {
 	R, S *big.Int
 }
-
-// GetKeys retrieves the private key from the filesystem, generating keypair
-// if necessary.
-// func GetKeys(d *Dependencies, keySettings *PkiSettings) (crypto.Signer, *AlgoSpecificOps, error) {
-// 	if FileExists(d, keySettings.PrivateKeyPath) != FileExists(d, keySettings.PublicKeyPath) {
-// 		return nil, fmt.Errorf("Files %s and %s must either both be present or missing", keySettings.PrivateKeyPath, keySettings.PublicKeyPath)
-// 	}
-// 	// keyGenLoader encapsulates the algorithm specific parts of key
-// 	// generation, saving and loading.
-// 	keyGenLoader := AlgoSpecificOps{}
-// 	switch keySettings.Algorithm {
-// 	case x509.ECDSA:
-// 		keyGenLoader.genPubPrivKeys = func() (x509EncodedPubKey []byte, x509EncodedPrivKey []byte, err error) {
-// 			pubkeyCurve := elliptic.P256()
-// 			privatekey, err := ecdsa.GenerateKey(pubkeyCurve, d.Crypto.Rand.Reader)
-// 			if err != nil {
-// 				return nil, nil, err
-// 			}
-// 			x509EncodedPriv, err := x509.MarshalECPrivateKey(privatekey)
-// 			if err != nil {
-// 				return nil, nil, err
-// 			}
-// 			x509EncodedPub, err := x509.MarshalPKIXPublicKey(&privatekey.PublicKey)
-// 			if err != nil {
-// 				return nil, nil, err
-// 			}
-// 			return x509EncodedPub, x509EncodedPriv, nil
-// 		}
-// 		keyGenLoader.injestPrivKey = func(x509EncodedPrivKey []byte) (signer crypto.Signer, err error) {
-// 			return x509.ParseECPrivateKey(x509EncodedPrivKey)
-// 		}
-// 		keyGenLoader.verifySignature = func(sha256 []byte, binarySignature []byte, x509EncodedPubKey []byte) (bool, error) {
-// 			// Decode the signature to get R and S
-// 			sig := ecdsaSignature{}
-// 			_, err := asn1.Unmarshal(binarySignature, sig)
-
-// 			// Decode the public key
-// 			genericPublicKey, err := x509.ParsePKIXPublicKey(x509EncodedPubKey)
-// 			if err != nil {
-// 				return false, err
-// 			}
-// 			publicKey, ok := genericPublicKey.(*ecdsa.PublicKey)
-// 			if !ok {
-// 				return false, fmt.Errorf("Expecting a *ecdsa.PublicKey, but encountered a %T instead", genericPublicKey)
-// 			}
-
-// 			// Verify signature
-// 			return ecdsa.Verify(publicKey, sha256, sig.R, sig.S), nil
-// 		}
-// 		keyGenLoader.algoName = "ECDSA"
-// 	case x509.RSA:
-// 		keyGenLoader.genPubPrivKeys = func() (x509EncodedPubKey []byte, x509EncodedPrivKey []byte, err error) {
-// 			privateKey, err := rsa.GenerateKey(d.Crypto.Rand.Reader, keySettings.RSAKeyBits)
-// 			if err != nil {
-// 				return nil, nil, err
-// 			}
-// 			x509EncodedPriv := x509.MarshalPKCS1PrivateKey(privateKey)
-// 			x509EncodedPub, err := x509.MarshalPKIXPublicKey(&privateKey.PublicKey)
-// 			if err != nil {
-// 				return nil, nil, err
-// 			}
-// 			return x509EncodedPub, x509EncodedPriv, nil
-// 		}
-// 		keyGenLoader.injestPrivKey = func(x509EncodedPrivKey []byte) (signer crypto.Signer, err error) {
-// 			return x509.ParsePKCS1PrivateKey(x509EncodedPrivKey)
-// 		}
-// 		keyGenLoader.verifySignature = func(sha256 []byte, binarySignature []byte, x509EncodedPubKey []byte) (bool, error) {
-// 			// Decode the signature to get R and S
-// 			sig := ecdsaSignature{}
-// 			_, err := asn1.Unmarshal(binarySignature, sig)
-
-// 			// Decode the public key
-// 			genericPublicKey, err := x509.ParsePKIXPublicKey(x509EncodedPubKey)
-// 			if err != nil {
-// 				return false, err
-// 			}
-// 			publicKey, ok := genericPublicKey.(*rsa.PublicKey)
-// 			if !ok {
-// 				return false, fmt.Errorf("Expecting a *rsa.PublicKey, but encountered a %T instead", genericPublicKey)
-// 			}
-
-// 			// Verify signature
-// 			err = rsa.VerifyPKCS1v15(publicKey, crypto.SHA256, sha256, binarySignature)
-// 			return err == nil, err
-// 		}
-// 		keyGenLoader.algoName = "RSA"
-// 	default:
-// 		return nil, fmt.Errorf("INTERNAL ERROR: Unrecognized key type: %#v", keySettings.Algorithm)
-// 	}
-
-// 	if !FileExists(d, keySettings.PrivateKeyPath) {
-// 		switch keySettings.Algorithm {
-// 		case x509.ECDSA:
-// 			pubkeyCurve := elliptic.P256()
-// 			_ /* privatekey */, err := ecdsa.GenerateKey(pubkeyCurve, d.Crypto.Rand.Reader)
-// 			if err != nil {
-// 				return nil, err
-// 			}
-// 		case x509.RSA:
-// 		}
-// 		return nil, fmt.Errorf("INTERNAL ERROR: Unrecognized key type: %#v", keySettings.Algorithm)
-// 	}
-// 	return nil, fmt.Errorf("INTERNAL ERROR: nothing should get here")
-// }
-
-// // SerializeECDSAKeyPair wip
-// func SerializeECDSAKeyPair(privateKey *ecdsa.PrivateKey, publicKey *ecdsa.PublicKey) (string, string) {
-// 	x509Encoded, _ := x509.MarshalECPrivateKey(privateKey)
-// 	pemEncoded := pem.EncodeToMemory(&pem.Block{Type: "ECDSA PRIVATE KEY", Bytes: x509Encoded})
-
-// 	x509EncodedPub, _ := x509.MarshalPKIXPublicKey(publicKey)
-// 	pemEncodedPub := pem.EncodeToMemory(&pem.Block{Type: "ECDSA PUBLIC KEY", Bytes: x509EncodedPub})
-
-// 	return string(pemEncoded), string(pemEncodedPub)
-// }
-
-// func decode(pemEncoded string, pemEncodedPub string) (*ecdsa.PrivateKey, *ecdsa.PublicKey) {
-// 	block, _ := pem.Decode([]byte(pemEncoded))
-// 	x509Encoded := block.Bytes
-// 	privateKey, _ := x509.ParseECPrivateKey(x509Encoded)
-
-// 	blockPub, _ := pem.Decode([]byte(pemEncodedPub))
-// 	x509EncodedPub := blockPub.Bytes
-// 	genericPublicKey, _ := x509.ParsePKIXPublicKey(x509EncodedPub)
-// 	publicKey := genericPublicKey.(*ecdsa.PublicKey)
-
-// 	return privateKey, publicKey
-// }
 
 // EncodeAndSaveKey PEM encodes a x509 encoded key and writes it to
 // a file. Returns the PEM encoded string data.
