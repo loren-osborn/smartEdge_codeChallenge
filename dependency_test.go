@@ -26,6 +26,8 @@ func TestCallingMainWithMocks(t *testing.T) {
 			stdOutput: "{\n\"message\": \"Four score and seven years ago...\",\n\"signature\": \"MEUCIHH0Hn6Utz2h8iRIzA6B+d6ZtYhfgyJ/chWnSptL8Mw4AiEA/d//iAXBvTKuySbBRHdBl/pzPTnVTe23DvmLHihG1PY=\",\n\"pubkey\": \"-----BEGIN ECDSA PUBLIC KEY-----\\nMFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAETt2oryDODBqRg91xm5sH0HfCkrvT\\nN4s4iMHiCIMZf8US0mFVABz9PtnmUhYfGjmBpAd6c1wgesu9Sc3peXJywQ==\\n-----END ECDSA PUBLIC KEY-----\\n\"\n}",
 			stdErr:    "",
 		},
+		// // Something is broken with RSA, and this test hangs... out of time.
+		// // Need to worry about later.
 		// {
 		// 	homeDir:   "/home/anybody",
 		// 	argList:   []string{"codechallenge", "-rsa"},
