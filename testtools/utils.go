@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"reflect"
+	"regexp"
 )
 
 // AreFuncsEqual returns true only if a and b are both functions, and
@@ -96,4 +97,51 @@ func WrapFuncCallWithCounter(f func()) (func(), *int) {
 		counter++
 	}
 	return wrapped, &counter
+}
+
+// StringMatcher is an interface for comparing strings.
+type StringMatcher interface {
+	MatchString(string) bool
+	String() string
+}
+
+// StringStringMatcher returns StringMatcher only matching itself.
+type StringStringMatcher struct {
+	str string
+}
+
+// NewStringStringMatcher returns a new StringStringMatcher from the string s.
+func NewStringStringMatcher(s string) *StringStringMatcher {
+	return &StringStringMatcher{str: s}
+}
+
+// MatchString returns whether the strings are equal
+func (ssm *StringStringMatcher) MatchString(s string) bool {
+	return ssm.str == s
+}
+
+// String returns a printable representation of the string
+func (ssm *StringStringMatcher) String() string {
+	return fmt.Sprintf("%#v", ssm.str)
+}
+
+// RegexpStringMatcher is a thin wrapper over regexp.Regexp to alter its
+// String() result.
+type RegexpStringMatcher struct {
+	re *regexp.Regexp
+}
+
+// NewRegexpStringMatcher returns a RegexpStringMatcher from the pattern.
+func NewRegexpStringMatcher(pattern string) *RegexpStringMatcher {
+	return &RegexpStringMatcher{re: regexp.MustCompile(pattern)}
+}
+
+// MatchString returns whether the strings are equal
+func (rsm *RegexpStringMatcher) MatchString(s string) bool {
+	return rsm.re.MatchString(s)
+}
+
+// MatchString returns a printable representation of the regular expression
+func (rsm *RegexpStringMatcher) String() string {
+	return fmt.Sprintf("regexp.Regexp(%#v)", rsm.re.String())
 }
