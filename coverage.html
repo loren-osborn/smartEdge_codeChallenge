@@ -72,7 +72,7 @@
 				
 				<option value="file8">github.com/smartedge/codechallenge/testtools/mocks/os_exit.go (100.0%)</option>
 				
-				<option value="file9">github.com/smartedge/codechallenge/testtools/utils.go (100.0%)</option>
+				<option value="file9">github.com/smartedge/codechallenge/testtools/utils.go (89.3%)</option>
 				
 				<option value="file10">github.com/smartedge/codechallenge/utils.go (89.5%)</option>
 				
@@ -1257,6 +1257,7 @@ import (
         "errors"
         "fmt"
         "reflect"
+        "regexp"
 )
 
 // AreFuncsEqual returns true only if a and b are both functions, and
@@ -1350,6 +1351,53 @@ func WrapFuncCallWithCounter(f func()) (func(), *int) <span class="cov8" title="
         }</span>
         <span class="cov8" title="1">return wrapped, &amp;counter</span>
 }
+
+// StringMatcher is an interface for comparing strings.
+type StringMatcher interface {
+        MatchString(string) bool
+        String() string
+}
+
+// StringStringMatcher returns StringMatcher only matching itself.
+type StringStringMatcher struct {
+        str string
+}
+
+// NewStringStringMatcher returns a new StringStringMatcher from the string s.
+func NewStringStringMatcher(s string) *StringStringMatcher <span class="cov0" title="0">{
+        return &amp;StringStringMatcher{str: s}
+}</span>
+
+// MatchString returns whether the strings are equal
+func (ssm *StringStringMatcher) MatchString(s string) bool <span class="cov0" title="0">{
+        return ssm.str == s
+}</span>
+
+// String returns a printable representation of the string
+func (ssm *StringStringMatcher) String() string <span class="cov0" title="0">{
+        return fmt.Sprintf("%#v", ssm.str)
+}</span>
+
+// RegexpStringMatcher is a thin wrapper over regexp.Regexp to alter its
+// String() result.
+type RegexpStringMatcher struct {
+        re *regexp.Regexp
+}
+
+// NewRegexpStringMatcher returns a RegexpStringMatcher from the pattern.
+func NewRegexpStringMatcher(pattern string) *RegexpStringMatcher <span class="cov0" title="0">{
+        return &amp;RegexpStringMatcher{re: regexp.MustCompile(pattern)}
+}</span>
+
+// MatchString returns whether the strings are equal
+func (rsm *RegexpStringMatcher) MatchString(s string) bool <span class="cov0" title="0">{
+        return rsm.re.MatchString(s)
+}</span>
+
+// MatchString returns a printable representation of the regular expression
+func (rsm *RegexpStringMatcher) String() string <span class="cov0" title="0">{
+        return fmt.Sprintf("regexp.Regexp(%#v)", rsm.re.String())
+}</span>
 </pre>
 		
 		<pre class="file" id="file10" style="display: none">package codechallenge

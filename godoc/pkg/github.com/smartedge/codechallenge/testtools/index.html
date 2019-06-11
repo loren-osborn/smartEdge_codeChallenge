@@ -145,6 +145,39 @@
 					<dd>&nbsp; &nbsp; <a href="index.html#ErrorSpec.String">func (es *ErrorSpec) String() string</a></dd>
 				
 			
+				
+				<dd><a href="index.html#RegexpStringMatcher">type RegexpStringMatcher</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="index.html#NewRegexpStringMatcher">func NewRegexpStringMatcher(pattern string) *RegexpStringMatcher</a></dd>
+				
+				
+					
+					<dd>&nbsp; &nbsp; <a href="index.html#RegexpStringMatcher.MatchString">func (rsm *RegexpStringMatcher) MatchString(s string) bool</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="index.html#RegexpStringMatcher.String">func (rsm *RegexpStringMatcher) String() string</a></dd>
+				
+			
+				
+				<dd><a href="index.html#StringMatcher">type StringMatcher</a></dd>
+				
+				
+			
+				
+				<dd><a href="index.html#StringStringMatcher">type StringStringMatcher</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="index.html#NewStringStringMatcher">func NewStringStringMatcher(s string) *StringStringMatcher</a></dd>
+				
+				
+					
+					<dd>&nbsp; &nbsp; <a href="index.html#StringStringMatcher.MatchString">func (ssm *StringStringMatcher) MatchString(s string) bool</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="index.html#StringStringMatcher.String">func (ssm *StringStringMatcher) String() string</a></dd>
+				
+			
 			
 			</dl>
 			</div><!-- #manual-nav -->
@@ -210,7 +243,7 @@
 		
 			
 			
-			<h2 id="AreFuncsEqual">func <a href="https://github.com/loren-osborn/smartEdge_codeChallenge/blob/master/testtools/utils.go#L13">AreFuncsEqual</a>
+			<h2 id="AreFuncsEqual">func <a href="https://github.com/loren-osborn/smartEdge_codeChallenge/blob/master/testtools/utils.go#L14">AreFuncsEqual</a>
 				<a class="permalink" href="index.html#AreFuncsEqual">&#xb6;</a>
 			</h2>
 			<pre>func AreFuncsEqual(a interface{}, b interface{}) (<a href="https://golang.org/pkg/builtin/#bool">bool</a>, <a href="https://golang.org/pkg/builtin/#error">error</a>)</pre>
@@ -227,7 +260,7 @@ arguments are nil,
 		
 			
 			
-			<h2 id="AreStringSlicesEqual">func <a href="https://github.com/loren-osborn/smartEdge_codeChallenge/blob/master/testtools/utils.go#L63">AreStringSlicesEqual</a>
+			<h2 id="AreStringSlicesEqual">func <a href="https://github.com/loren-osborn/smartEdge_codeChallenge/blob/master/testtools/utils.go#L64">AreStringSlicesEqual</a>
 				<a class="permalink" href="index.html#AreStringSlicesEqual">&#xb6;</a>
 			</h2>
 			<pre>func AreStringSlicesEqual(a []<a href="https://golang.org/pkg/builtin/#string">string</a>, b []<a href="https://golang.org/pkg/builtin/#string">string</a>) <a href="https://golang.org/pkg/builtin/#bool">bool</a></pre>
@@ -242,7 +275,7 @@ distinguishes nil-ness, but not capacity
 		
 			
 			
-			<h2 id="CloneStringSlice">func <a href="https://github.com/loren-osborn/smartEdge_codeChallenge/blob/master/testtools/utils.go#L79">CloneStringSlice</a>
+			<h2 id="CloneStringSlice">func <a href="https://github.com/loren-osborn/smartEdge_codeChallenge/blob/master/testtools/utils.go#L80">CloneStringSlice</a>
 				<a class="permalink" href="index.html#CloneStringSlice">&#xb6;</a>
 			</h2>
 			<pre>func CloneStringSlice(inSlice []<a href="https://golang.org/pkg/builtin/#string">string</a>) []<a href="https://golang.org/pkg/builtin/#string">string</a></pre>
@@ -271,7 +304,7 @@ blob against a JSON schema
 		
 			
 			
-			<h2 id="WrapFuncCallWithCounter">func <a href="https://github.com/loren-osborn/smartEdge_codeChallenge/blob/master/testtools/utils.go#L92">WrapFuncCallWithCounter</a>
+			<h2 id="WrapFuncCallWithCounter">func <a href="https://github.com/loren-osborn/smartEdge_codeChallenge/blob/master/testtools/utils.go#L93">WrapFuncCallWithCounter</a>
 				<a class="permalink" href="index.html#WrapFuncCallWithCounter">&#xb6;</a>
 			</h2>
 			<pre>func WrapFuncCallWithCounter(f func()) (func(), *<a href="https://golang.org/pkg/builtin/#int">int</a>)</pre>
@@ -342,6 +375,159 @@ EnsureMatches returns an error is inErr doesn&#39;t match.
 				<pre>func (es *<a href="index.html#ErrorSpec">ErrorSpec</a>) String() <a href="https://golang.org/pkg/builtin/#string">string</a></pre>
 				<p>
 String returns string representation of es.
+</p>
+
+				
+				
+				
+			
+		
+			
+			
+			<h2 id="RegexpStringMatcher">type <a href="https://github.com/loren-osborn/smartEdge_codeChallenge/blob/master/testtools/utils.go#L130">RegexpStringMatcher</a>
+				<a class="permalink" href="index.html#RegexpStringMatcher">&#xb6;</a>
+			</h2>
+			<p>
+RegexpStringMatcher is a thin wrapper over regexp.Regexp to alter its
+String() result.
+</p>
+
+			<pre>type RegexpStringMatcher struct {
+    <span class="comment">// contains filtered or unexported fields</span>
+}</pre>
+
+			
+
+			
+
+			
+			
+			
+
+			
+				
+				<h3 id="NewRegexpStringMatcher">func <a href="https://github.com/loren-osborn/smartEdge_codeChallenge/blob/master/testtools/utils.go#L135">NewRegexpStringMatcher</a>
+					<a class="permalink" href="index.html#NewRegexpStringMatcher">&#xb6;</a>
+				</h3>
+				<pre>func NewRegexpStringMatcher(pattern <a href="https://golang.org/pkg/builtin/#string">string</a>) *<a href="index.html#RegexpStringMatcher">RegexpStringMatcher</a></pre>
+				<p>
+NewRegexpStringMatcher returns a RegexpStringMatcher from the pattern.
+</p>
+
+				
+				
+			
+
+			
+				
+				<h3 id="RegexpStringMatcher.MatchString">func (*RegexpStringMatcher) <a href="https://github.com/loren-osborn/smartEdge_codeChallenge/blob/master/testtools/utils.go#L140">MatchString</a>
+					<a class="permalink" href="index.html#RegexpStringMatcher.MatchString">&#xb6;</a>
+				</h3>
+				<pre>func (rsm *<a href="index.html#RegexpStringMatcher">RegexpStringMatcher</a>) MatchString(s <a href="https://golang.org/pkg/builtin/#string">string</a>) <a href="https://golang.org/pkg/builtin/#bool">bool</a></pre>
+				<p>
+MatchString returns whether the strings are equal
+</p>
+
+				
+				
+				
+			
+				
+				<h3 id="RegexpStringMatcher.String">func (*RegexpStringMatcher) <a href="https://github.com/loren-osborn/smartEdge_codeChallenge/blob/master/testtools/utils.go#L145">String</a>
+					<a class="permalink" href="index.html#RegexpStringMatcher.String">&#xb6;</a>
+				</h3>
+				<pre>func (rsm *<a href="index.html#RegexpStringMatcher">RegexpStringMatcher</a>) String() <a href="https://golang.org/pkg/builtin/#string">string</a></pre>
+				<p>
+MatchString returns a printable representation of the regular expression
+</p>
+
+				
+				
+				
+			
+		
+			
+			
+			<h2 id="StringMatcher">type <a href="https://github.com/loren-osborn/smartEdge_codeChallenge/blob/master/testtools/utils.go#L103">StringMatcher</a>
+				<a class="permalink" href="index.html#StringMatcher">&#xb6;</a>
+			</h2>
+			<p>
+StringMatcher is an interface for comparing strings.
+</p>
+
+			<pre>type StringMatcher interface {
+    MatchString(<a href="https://golang.org/pkg/builtin/#string">string</a>) <a href="https://golang.org/pkg/builtin/#bool">bool</a>
+    String() <a href="https://golang.org/pkg/builtin/#string">string</a>
+}</pre>
+
+			
+
+			
+
+			
+			
+			
+
+			
+
+			
+		
+			
+			
+			<h2 id="StringStringMatcher">type <a href="https://github.com/loren-osborn/smartEdge_codeChallenge/blob/master/testtools/utils.go?s=2993:3040#L99">StringStringMatcher</a>
+				<a class="permalink" href="index.html#StringStringMatcher">&#xb6;</a>
+			</h2>
+			<p>
+StringStringMatcher returns StringMatcher only matching itself.
+</p>
+
+			<pre>type StringStringMatcher struct {
+    <span class="comment">// contains filtered or unexported fields</span>
+}</pre>
+
+			
+
+			
+
+			
+			
+			
+
+			
+				
+				<h3 id="NewStringStringMatcher">func <a href="https://github.com/loren-osborn/smartEdge_codeChallenge/blob/master/testtools/utils.go#L114">NewStringStringMatcher</a>
+					<a class="permalink" href="index.html#NewStringStringMatcher">&#xb6;</a>
+				</h3>
+				<pre>func NewStringStringMatcher(s <a href="https://golang.org/pkg/builtin/#string">string</a>) *<a href="index.html#StringStringMatcher">StringStringMatcher</a></pre>
+				<p>
+NewStringStringMatcher returns a new StringStringMatcher from the string s.
+</p>
+
+				
+				
+			
+
+			
+				
+				<h3 id="StringStringMatcher.MatchString">func (*StringStringMatcher) <a href="https://github.com/loren-osborn/smartEdge_codeChallenge/blob/master/testtools/utils.go#L119">MatchString</a>
+					<a class="permalink" href="index.html#StringStringMatcher.MatchString">&#xb6;</a>
+				</h3>
+				<pre>func (ssm *<a href="index.html#StringStringMatcher">StringStringMatcher</a>) MatchString(s <a href="https://golang.org/pkg/builtin/#string">string</a>) <a href="https://golang.org/pkg/builtin/#bool">bool</a></pre>
+				<p>
+MatchString returns whether the strings are equal
+</p>
+
+				
+				
+				
+			
+				
+				<h3 id="StringStringMatcher.String">func (*StringStringMatcher) <a href="https://github.com/loren-osborn/smartEdge_codeChallenge/blob/master/testtools/utils.go#L124">String</a>
+					<a class="permalink" href="index.html#StringStringMatcher.String">&#xb6;</a>
+				</h3>
+				<pre>func (ssm *<a href="index.html#StringStringMatcher">StringStringMatcher</a>) String() <a href="https://golang.org/pkg/builtin/#string">string</a></pre>
+				<p>
+String returns a printable representation of the string
 </p>
 
 				
