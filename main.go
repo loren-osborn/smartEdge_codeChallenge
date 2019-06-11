@@ -61,7 +61,9 @@ func RealMain(d *Dependencies) {
 
 // InjestMessage reads all data from dataSource, removing any trailing
 // whitespace. Returns an error if the content is longer than 250 characters.
-// Input is assumed to be UTF-8. Invalid UTF-8 will also produce an error.
+// Input is allowed to be ASCII, Binary or UTF-8: ASCII and Binary data have a
+// 250 byte limit, while UTF-8 has a 250 character limit with up to 4 bytes per
+// character. ASCII and UTF-8 inputs are both trimmed of trailing whitespace.
 func InjestMessage(dataSource io.Reader, format ContentFormat) (string, error) {
 	buff, err := ioutil.ReadAll(dataSource)
 	if err != nil {
