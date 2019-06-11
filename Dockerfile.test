@@ -34,7 +34,7 @@ RUN sh -xc                              \
 # the tests, quality metrics and docs generation:
 ENTRYPOINT sh -xc \
 	"rm -f coverage.out coverage.html                                   ;  \
-	go vet                                                              && \
+	go vet ./...                                                        && \
 	\"$GOPATH/bin/revive\" -formatter stylish -config revive.toml ./... && \
 	gotest -coverprofile=coverage.out ./...                             && \
 	go tool cover -html=coverage.out -o coverage.html                   && \

@@ -32,8 +32,8 @@ default: event_timestamps/production_container_image demo
 
 .PHONY: clean purge
 
-event_timestamps/production_container_image: test event_timestamps Makefile \
-	Dockerfile $(PROD_SOURCE_FILES)
+event_timestamps/production_container_image: event_timestamps Makefile \
+	Dockerfile $(PROD_SOURCE_FILES) test
 	docker build -t production_container_image .
 	touch $@
 
@@ -70,6 +70,17 @@ demo: event_timestamps/demo_image
 		-i --tty                                  \
 		demo_image:latest )
 	@echo
+
+build_local: event_timestamps Makefile $(PROD_SOURCE_FILES) test
+	@sh -c \
+		'if [ "$$(pwd)" != "$$GOPATH/src/$(PROJECT_URI)"  ] ; then \
+			>&2 echo "To build this project locally, you must check it out" \
+			"in $$GOPATH/src/$(PROJECT_URI) based on your current GOPATH" ;\
+			exit 1 ; \
+		fi'
+	@# Here we are codechallenge.exe to avoid collision with the
+	@# codechallenge/ directory. (This isn't a windows thing.)
+	go build -o codechallenge.exe $(PROJECT_URI)/codechallenge
 
 event_timestamps: Makefile
 	@$(strip bash -c \
