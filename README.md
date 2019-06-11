@@ -15,6 +15,12 @@ Given a short message (250 characters or less) from standard input it will:
 
 For more details on how this tool is supposed to work, the specification document can be [found here.](https://smart-edge.com/codechallenge/)
 
+### Notable Links:
+* [Smart Edge](https://smart-edge.com/) of Irvine, CA
+* [Project Specification](https://smart-edge.com/codechallenge/)
+* [`godoc` API documentation](https://loren-osborn.github.io/smartEdge_codeChallenge/godoc/pkg/github.com/smartedge/codechallenge/index.html)
+* [Current code coverage report](https://loren-osborn.github.io/smartEdge_codeChallenge/coverage.html)
+
 ### Getting started:
 For sake of simplicity, I will assume you are working with this package from a Linux system. While Go and Docker support other sytems, for clarity, building and developing this project is most straight forward on a current Linux machine with Docker installed.
 
