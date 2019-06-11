@@ -1,0 +1,1468 @@
+
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+		<style>
+			body {
+				background: black;
+				color: rgb(80, 80, 80);
+			}
+			body, pre, #legend span {
+				font-family: Menlo, monospace;
+				font-weight: bold;
+			}
+			#topbar {
+				background: black;
+				position: fixed;
+				top: 0; left: 0; right: 0;
+				height: 42px;
+				border-bottom: 1px solid rgb(80, 80, 80);
+			}
+			#content {
+				margin-top: 50px;
+			}
+			#nav, #legend {
+				float: left;
+				margin-left: 10px;
+			}
+			#legend {
+				margin-top: 12px;
+			}
+			#nav {
+				margin-top: 10px;
+			}
+			#legend span {
+				margin: 0 5px;
+			}
+			.cov0 { color: rgb(192, 0, 0) }
+.cov1 { color: rgb(128, 128, 128) }
+.cov2 { color: rgb(116, 140, 131) }
+.cov3 { color: rgb(104, 152, 134) }
+.cov4 { color: rgb(92, 164, 137) }
+.cov5 { color: rgb(80, 176, 140) }
+.cov6 { color: rgb(68, 188, 143) }
+.cov7 { color: rgb(56, 200, 146) }
+.cov8 { color: rgb(44, 212, 149) }
+.cov9 { color: rgb(32, 224, 152) }
+.cov10 { color: rgb(20, 236, 155) }
+
+		</style>
+	</head>
+	<body>
+		<div id="topbar">
+			<div id="nav">
+				<select id="files">
+				
+				<option value="file0">github.com/smartedge/codechallenge/codechallenge/main.go (100.0%)</option>
+				
+				<option value="file1">github.com/smartedge/codechallenge/keys.go (75.7%)</option>
+				
+				<option value="file2">github.com/smartedge/codechallenge/main.go (76.1%)</option>
+				
+				<option value="file3">github.com/smartedge/codechallenge/options.go (81.0%)</option>
+				
+				<option value="file4">github.com/smartedge/codechallenge/response.go (70.0%)</option>
+				
+				<option value="file5">github.com/smartedge/codechallenge/testtools/custom_matchers.go (100.0%)</option>
+				
+				<option value="file6">github.com/smartedge/codechallenge/testtools/errorspec.go (100.0%)</option>
+				
+				<option value="file7">github.com/smartedge/codechallenge/testtools/mocks/deps.go (61.5%)</option>
+				
+				<option value="file8">github.com/smartedge/codechallenge/testtools/mocks/os_exit.go (100.0%)</option>
+				
+				<option value="file9">github.com/smartedge/codechallenge/testtools/utils.go (100.0%)</option>
+				
+				<option value="file10">github.com/smartedge/codechallenge/utils.go (89.5%)</option>
+				
+				</select>
+			</div>
+			<div id="legend">
+				<span>not tracked</span>
+			
+				<span class="cov0">not covered</span>
+				<span class="cov8">covered</span>
+			
+			</div>
+		</div>
+		<div id="content">
+		
+		<pre class="file" id="file0" style="display: none">// Package codechallenge is a stub to call into the main body of the program.
+// Having this in a seperate main package allows us to test proper use of public
+// and private methods, variables and types. It also allows us to properly
+// document the public methods with godoc.
+package main
+
+import (
+        "crypto/rand"
+        "github.com/smartedge/codechallenge"
+        "io/ioutil"
+        "os"
+)
+
+// RealEntryPoint is how main() is loosely bound to codechallenge.RealMain()
+var RealEntryPoint func(*codechallenge.Dependencies) = codechallenge.RealMain
+
+// main() calls RealEntryPoint (which defaults to codechallenge.RealMain())
+// which is RealMain() is called in production, but at testing time, the
+// test harness replaces RealEntryPoint with a stub, so both the production
+// Dependencies structure, and production RealMain() can be validated
+// independantly
+func main() <span class="cov8" title="1">{
+        RealEntryPoint(&amp;codechallenge.Dependencies{
+                Os: codechallenge.OsDependencies{
+                        Args:      os.Args,
+                        Stdin:     os.Stdin,
+                        Stdout:    os.Stdout,
+                        Stderr:    os.Stderr,
+                        Exit:      os.Exit,
+                        Getenv:    os.Getenv,
+                        Setenv:    os.Setenv,
+                        MkdirAll:  os.MkdirAll,
+                        RemoveAll: os.RemoveAll,
+                        Stat:      os.Stat,
+                        Chown:     os.Chown,
+                        Getuid:    os.Getuid,
+                },
+                Crypto: codechallenge.CryptoDependencies{
+                        Rand: codechallenge.CryptoRandDependencies{
+                                Reader: rand.Reader,
+                        },
+                },
+                Io: codechallenge.IoDependencies{
+                        Ioutil: codechallenge.IoIoutilDependencies{
+                                WriteFile: ioutil.WriteFile,
+                                ReadFile:  ioutil.ReadFile,
+                        },
+                },
+        })
+}</span>
+</pre>
+		
+		<pre class="file" id="file1" style="display: none">package codechallenge
+
+import (
+        "crypto"
+        "crypto/ecdsa"
+        "crypto/elliptic"
+        "crypto/rsa"
+        "crypto/sha256"
+        "crypto/x509"
+        "encoding/asn1"
+        "encoding/base64"
+        "encoding/hex"
+        "encoding/pem"
+        "errors"
+        "fmt"
+        "io"
+        "math/big"
+        "os"
+        "strings"
+)
+
+// KeyType indicates if the key is public or private
+type KeyType int
+
+// PublicKey indicates a public key
+const (
+        PublicKey KeyType = iota
+        PrivateKey
+)
+
+func (t KeyType) String() string <span class="cov8" title="1">{
+        nameLookup := map[KeyType]string{
+                PublicKey:  "public",
+                PrivateKey: "private",
+        }
+        name, ok := nameLookup[t]
+        if !ok </span><span class="cov0" title="0">{
+                return fmt.Sprintf("Unknown KeyType %#v (INTERNAL ERROR)", t)
+        }</span>
+        <span class="cov8" title="1">return name</span>
+}
+
+// AlgorithmPlugin is used to encapsulate algorithm specific code.
+type AlgorithmPlugin interface {
+        GenKeyPair(randReader io.Reader) (pubKey X509Encoded, privKey X509Encoded, err error)
+        InjestPrivateKey(privKey X509Encoded) (signer crypto.Signer, err error)
+        HashMessage(message string) DigestHash
+        VerifySignature(sha256Hash DigestHash, binSig BinarySignature, pubKey X509Encoded) (bool, error)
+        GetAlgorithmName() string
+}
+
+// ECDSAPlugin Implementation details for ECDSA.
+type ECDSAPlugin struct{}
+
+// GenKeyPair generates a new ECDSA public and private key pair
+func (p *ECDSAPlugin) GenKeyPair(randReader io.Reader) (pubKey X509Encoded, privKey X509Encoded, err error) <span class="cov8" title="1">{
+        pubkeyCurve := elliptic.P256()
+        privatekey, err := ecdsa.GenerateKey(pubkeyCurve, randReader)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, nil, err
+        }</span>
+        <span class="cov8" title="1">x509EncodedPriv, err := x509.MarshalECPrivateKey(privatekey)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, nil, err
+        }</span>
+        <span class="cov8" title="1">x509EncodedPub, err := x509.MarshalPKIXPublicKey(&amp;privatekey.PublicKey)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, nil, err
+        }</span>
+        <span class="cov8" title="1">return X509Encoded(x509EncodedPub), X509Encoded(x509EncodedPriv), nil</span>
+}
+
+// InjestPrivateKey loads a ECDSA private key from a X509Encoded buffer,
+func (p *ECDSAPlugin) InjestPrivateKey(privKey X509Encoded) (signer crypto.Signer, err error) <span class="cov8" title="1">{
+        return x509.ParseECPrivateKey([]byte(privKey))
+}</span>
+
+// HashMessage respecting whatever salting is necessary, Since
+// ECDSA needs no special hashing, this is a thin wrapper over
+// crypto/sha256.Sum256()
+func (p *ECDSAPlugin) HashMessage(message string) DigestHash <span class="cov8" title="1">{
+        digest := sha256.Sum256([]byte(message))
+        return DigestHash(digest[0:])
+}</span>
+
+// VerifySignature verifies a ECDSA signature for a message digest,
+func (p *ECDSAPlugin) VerifySignature(sha256Hash DigestHash, binSig BinarySignature, pubKey X509Encoded) (bool, error) <span class="cov8" title="1">{
+        // Decode the signature to get R and S
+        sigStruct := ecdsaSignature{}
+        _, err := asn1.Unmarshal([]byte(binSig), &amp;sigStruct)
+        if err != nil </span><span class="cov0" title="0">{
+                return false, err
+        }</span>
+
+        // Decode the public key
+        <span class="cov8" title="1">genericPublicKey, err := x509.ParsePKIXPublicKey([]byte(pubKey))
+        if err != nil </span><span class="cov0" title="0">{
+                return false, err
+        }</span>
+        <span class="cov8" title="1">publicKey, ok := genericPublicKey.(*ecdsa.PublicKey)
+        if !ok </span><span class="cov0" title="0">{
+                return false, fmt.Errorf("Expecting a *ecdsa.PublicKey, but encountered a %T instead", genericPublicKey)
+        }</span>
+
+        // Verify signature
+        <span class="cov8" title="1">return ecdsa.Verify(publicKey, []byte(sha256Hash), sigStruct.R, sigStruct.S), nil</span>
+}
+
+// GetAlgorithmName returns the string "ECDSA"
+func (p *ECDSAPlugin) GetAlgorithmName() string <span class="cov8" title="1">{
+        return "ECDSA"
+}</span>
+
+// RSAPlugin Implementation details for RSA.
+type RSAPlugin struct {
+        KeyLen int
+}
+
+// GenKeyPair generates a new RSA public and private key pair
+func (p *RSAPlugin) GenKeyPair(randReader io.Reader) (pubKey X509Encoded, privKey X509Encoded, err error) <span class="cov8" title="1">{
+        privateKey, err := rsa.GenerateKey(randReader, p.KeyLen)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, nil, err
+        }</span>
+        <span class="cov8" title="1">x509EncodedPriv := x509.MarshalPKCS1PrivateKey(privateKey)
+        x509EncodedPub, err := x509.MarshalPKIXPublicKey(&amp;privateKey.PublicKey)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, nil, err
+        }</span>
+        <span class="cov8" title="1">return X509Encoded(x509EncodedPub), X509Encoded(x509EncodedPriv), nil</span>
+}
+
+// InjestPrivateKey loads a RSA private key from a X509Encoded buffer,
+func (p *RSAPlugin) InjestPrivateKey(privKey X509Encoded) (signer crypto.Signer, err error) <span class="cov8" title="1">{
+        return x509.ParsePKCS1PrivateKey([]byte(privKey))
+}</span>
+
+// HashMessage respecting whatever salting is necessary, Here we
+// handle PSS salting
+func (p *RSAPlugin) HashMessage(message string) DigestHash <span class="cov8" title="1">{
+        pssh := crypto.SHA256.New()
+        pssh.Write([]byte(message))
+        return DigestHash(pssh.Sum(nil))
+}</span>
+
+// VerifySignature verifies a RSA signature for a message digest,
+func (p *RSAPlugin) VerifySignature(sha256Hash DigestHash, binSig BinarySignature, pubKey X509Encoded) (bool, error) <span class="cov8" title="1">{
+        // Decode the public key
+        genericPublicKey, err := x509.ParsePKIXPublicKey([]byte(pubKey))
+        if err != nil </span><span class="cov0" title="0">{
+                return false, err
+        }</span>
+        <span class="cov8" title="1">publicKey, ok := genericPublicKey.(*rsa.PublicKey)
+        if !ok </span><span class="cov0" title="0">{
+                return false, fmt.Errorf("Expecting a *rsa.PublicKey, but encountered a %T instead", genericPublicKey)
+        }</span>
+
+        // Verify signature
+        <span class="cov8" title="1">err = rsa.VerifyPSS(
+                publicKey,
+                crypto.SHA256,
+                []byte(sha256Hash),
+                []byte(binSig),
+                &amp;rsa.PSSOptions{
+                        SaltLength: rsa.PSSSaltLengthAuto,
+                        Hash:       crypto.SHA256,
+                })
+        return err == nil, err</span>
+}
+
+// GetAlgorithmName returns the string "RSA"
+func (p *RSAPlugin) GetAlgorithmName() string <span class="cov8" title="1">{
+        return "RSA"
+}</span>
+
+// CryptoTooling home to all crypto tool state.
+type CryptoTooling struct {
+        D         *Dependencies
+        Settings  *PkiSettings
+        AlgPlugin AlgorithmPlugin
+        PubKey    PEMEncoded
+        PrivKey   PEMEncoded
+        Signer    crypto.Signer
+}
+
+// GetCryptoTooling returns a home where all the keys, signing and
+// verification lives.
+func GetCryptoTooling(deps *Dependencies, keySettings *PkiSettings) (*CryptoTooling, error) <span class="cov8" title="1">{
+        result := CryptoTooling{
+                D:        deps,
+                Settings: keySettings,
+        }
+        switch result.Settings.Algorithm </span>{
+        case x509.ECDSA:<span class="cov8" title="1">
+                result.AlgPlugin = &amp;ECDSAPlugin{}</span>
+        case x509.RSA:<span class="cov8" title="1">
+                result.AlgPlugin = &amp;RSAPlugin{
+                        KeyLen: result.Settings.RSAKeyBits,
+                }</span>
+        default:<span class="cov0" title="0">
+                return nil, fmt.Errorf("INTERNAL ERROR: Unrecognized algorithm: %#v", result.Settings.Algorithm)</span>
+        }
+        <span class="cov8" title="1">return &amp;result, nil</span>
+}
+
+// GetKeys retrieves the private key from the filesystem, generating keypair
+// if necessary.
+func (ct *CryptoTooling) GetKeys() error <span class="cov8" title="1">{
+        if FileExists(ct.D, ct.Settings.PrivateKeyPath) != FileExists(ct.D, ct.Settings.PublicKeyPath) </span><span class="cov0" title="0">{
+                return fmt.Errorf("Files %s and %s must either both be present or missing", ct.Settings.PrivateKeyPath, ct.Settings.PublicKeyPath)
+        }</span>
+        <span class="cov8" title="1">if !FileExists(ct.D, ct.Settings.PrivateKeyPath) </span><span class="cov8" title="1">{
+                x509PubKey, x509PrivKey, err := ct.AlgPlugin.GenKeyPair(ct.D.Crypto.Rand.Reader)
+                if err != nil </span><span class="cov0" title="0">{
+                        return err
+                }</span>
+                <span class="cov8" title="1">ct.PubKey, err = EncodeAndSaveKey(ct.D, x509PubKey, ct.AlgPlugin.GetAlgorithmName(), PublicKey, ct.Settings.PublicKeyPath, 0444)
+                if err != nil </span><span class="cov0" title="0">{
+                        return err
+                }</span>
+                <span class="cov8" title="1">ct.PrivKey, err = EncodeAndSaveKey(ct.D, x509PrivKey, ct.AlgPlugin.GetAlgorithmName(), PrivateKey, ct.Settings.PrivateKeyPath, 0400)
+                if err != nil </span><span class="cov0" title="0">{
+                        return err
+                }</span>
+        }
+        <span class="cov8" title="1">pemPrivKey, x509PrivKey, err := DecodeAndLoadKey(ct.D, ct.Settings.PrivateKeyPath)
+        if err != nil </span><span class="cov0" title="0">{
+                return err
+        }</span>
+        <span class="cov8" title="1">if ct.PrivKey != nil </span><span class="cov8" title="1">{
+                if ct.PrivKey.String() != pemPrivKey.String() </span><span class="cov0" title="0">{
+                        return fmt.Errorf(
+                                "File %s contents changed between writing and reading: "+
+                                        "Was:\n%s\n\nNow:\n%s",
+                                ct.Settings.PrivateKeyPath,
+                                ct.PrivKey.String(),
+                                pemPrivKey.String())
+                }</span>
+        } else<span class="cov0" title="0"> {
+                ct.PrivKey = pemPrivKey
+        }</span>
+        <span class="cov8" title="1">pemPubKey, _, err := DecodeAndLoadKey(ct.D, ct.Settings.PublicKeyPath)
+        if err != nil </span><span class="cov0" title="0">{
+                return err
+        }</span>
+        <span class="cov8" title="1">if ct.PubKey != nil </span><span class="cov8" title="1">{
+                if ct.PubKey.String() != pemPubKey.String() </span><span class="cov0" title="0">{
+                        return fmt.Errorf(
+                                "File %s contents changed between writing and reading: "+
+                                        "Was:\n%s\n\nNow:\n%s",
+                                ct.Settings.PrivateKeyPath,
+                                ct.PubKey.String(),
+                                pemPubKey.String())
+                }</span>
+        } else<span class="cov0" title="0"> {
+                ct.PubKey = pemPubKey
+        }</span>
+        <span class="cov8" title="1">ct.Signer, err = ct.AlgPlugin.InjestPrivateKey(x509PrivKey)
+        if err != nil </span><span class="cov0" title="0">{
+                return err
+        }</span>
+        <span class="cov8" title="1">return nil</span>
+}
+
+// HashMessage defers to the AlgPlugin to handle hashing.
+func (ct *CryptoTooling) HashMessage(msg string) DigestHash <span class="cov8" title="1">{
+        return ct.AlgPlugin.HashMessage(msg)
+}</span>
+
+// Sign is a thin wrapper over cryptoSigner.Sign() to ease
+// type conversions and dependencies.
+func (ct *CryptoTooling) Sign(digest DigestHash) (BinarySignature, error) <span class="cov8" title="1">{
+        signature, err := ct.Signer.Sign(
+                ct.D.Crypto.Rand.Reader,
+                []byte(digest),
+                &amp;rsa.PSSOptions{
+                        SaltLength: rsa.PSSSaltLengthAuto,
+                        Hash:       crypto.SHA256,
+                })
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, err
+        }</span>
+        <span class="cov8" title="1">return BinarySignature(signature), nil</span>
+}
+
+// SignMessage simply sighs a hash of the message. It was added for
+// consistancy with VerifySignedMessage.
+func (ct *CryptoTooling) SignMessage(msg string) (BinarySignature, error) <span class="cov8" title="1">{
+        return ct.Sign(ct.HashMessage(msg))
+}</span>
+
+// VerifySignedMessage simply sighs a hash of the message. It was added for
+// consistancy with VerifySignedMessage.
+func (ct *CryptoTooling) VerifySignedMessage(msg string, base64Sig string, pemPubKey string) (bool, error) <span class="cov8" title="1">{
+        sig, err := NewBinarySignatureFromBase64(base64Sig)
+        if err != nil </span><span class="cov0" title="0">{
+                return false, err
+        }</span>
+        <span class="cov8" title="1">x509PubKey, err := NewPEMBufferFromString(pemPubKey).DecodeToX509()
+        if err != nil </span><span class="cov0" title="0">{
+                return false, err
+        }</span>
+        <span class="cov8" title="1">valid, err := ct.AlgPlugin.VerifySignature(ct.HashMessage(msg), sig, x509PubKey)
+        if err != nil </span><span class="cov0" title="0">{
+                return false, err
+        }</span>
+        <span class="cov8" title="1">return valid, nil</span>
+}
+
+// X509Encoded data buffer
+type X509Encoded []byte
+
+// EncodeToPEM encodes the x509 key as a PEM text block
+func (x X509Encoded) EncodeToPEM(algorithm string, kt KeyType) PEMEncoded <span class="cov8" title="1">{
+        pemEncodedKey := pem.EncodeToMemory(&amp;pem.Block{
+                Type:  strings.ToUpper(fmt.Sprintf("%s %s key", algorithm, kt.String())),
+                Bytes: []byte(x),
+        })
+        return PEMEncoded(pemEncodedKey)
+}</span>
+
+// PEMEncoded text data buffer
+type PEMEncoded []byte
+
+// NewPEMBufferFromString turns a string into a PEM buffer.
+func NewPEMBufferFromString(src string) PEMEncoded <span class="cov8" title="1">{
+        return PEMEncoded([]byte(src))
+}</span>
+
+// String renders the PEM encoded data as a string.
+func (pemBuf PEMEncoded) String() string <span class="cov8" title="1">{
+        return string([]byte(pemBuf))
+}</span>
+
+// DecodeToX509 decodes the PEM key data block to a x509 buffer
+func (pemBuf PEMEncoded) DecodeToX509() (X509Encoded, error) <span class="cov8" title="1">{
+        blockPub, _ := pem.Decode([]byte(pemBuf))
+        if blockPub == nil </span><span class="cov0" title="0">{
+                return nil, errors.New("No PEM data was found")
+        }</span>
+        <span class="cov8" title="1">return X509Encoded(blockPub.Bytes), nil</span>
+}
+
+// DigestHash data buffer
+type DigestHash []byte
+
+// Hex renders the hash digest as a hex string.
+// This is primarily for debugging and error messages.
+func (hash DigestHash) Hex() string <span class="cov0" title="0">{
+        return hex.EncodeToString([]byte(hash))
+}</span>
+
+// BinarySignature data buffer
+type BinarySignature []byte
+
+// NewBinarySignatureFromBase64 creates a new BinarySignature buffer
+// from a base64 string.
+func NewBinarySignatureFromBase64(src string) (BinarySignature, error) <span class="cov8" title="1">{
+        buf, err := base64.StdEncoding.DecodeString(src)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, err
+        }</span>
+        <span class="cov8" title="1">return BinarySignature(buf), nil</span>
+}
+
+// Base64 renders the signature as a RFC 4648 compliant Base64
+// encoded string.
+func (sig BinarySignature) Base64() string <span class="cov8" title="1">{
+        return base64.StdEncoding.EncodeToString([]byte(sig))
+}</span>
+
+// ecdsaSignature is copy of unexported type from ecdsa package for
+// unpacking the ECDSA signature.
+type ecdsaSignature struct {
+        R, S *big.Int
+}
+
+// EncodeAndSaveKey PEM encodes a x509 encoded key and writes it to
+// a file. Returns the PEM encoded string data.
+func EncodeAndSaveKey(
+        d *Dependencies,
+        keyBuf X509Encoded,
+        algorithm string,
+        kt KeyType,
+        filename string,
+        perm os.FileMode,
+) (PEMEncoded, error) <span class="cov8" title="1">{
+        pemEncodedKey := keyBuf.EncodeToPEM(algorithm, kt)
+        var dirPerm os.FileMode = 0700
+        if (perm &amp; 0070) != 0 </span><span class="cov8" title="1">{
+                dirPerm += 0050
+                if (perm &amp; 0007) != 0 </span><span class="cov8" title="1">{
+                        dirPerm += 0005
+                }</span>
+        }
+        <span class="cov8" title="1">err := WriteDirAndFile(d, filename, []byte(pemEncodedKey.String()), perm, dirPerm)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, err
+        }</span>
+        <span class="cov8" title="1">return pemEncodedKey, nil</span>
+}
+
+// DecodeAndLoadKey loads PEM encoded file and decodes it into a
+// x509 encoded key block. Returns PEM encoded data with key block.
+func DecodeAndLoadKey(d *Dependencies, filename string) (PEMEncoded, X509Encoded, error) <span class="cov8" title="1">{
+        pemEncodedKey, err := d.Io.Ioutil.ReadFile(filename)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, nil, err
+        }</span>
+        <span class="cov8" title="1">pemKey := PEMEncoded(pemEncodedKey)
+        x509Key, err := pemKey.DecodeToX509()
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, nil, err
+        }</span>
+        <span class="cov8" title="1">return pemKey, x509Key, err</span>
+}
+</pre>
+		
+		<pre class="file" id="file2" style="display: none">// Package codechallenge implements a tool to sign a short text message,
+// creating a key-pair if necessary
+package codechallenge
+
+import (
+        "errors"
+        "flag"
+        "fmt"
+        "io"
+        "io/ioutil"
+        "strings"
+        "unicode"
+        "unicode/utf8"
+)
+
+// HandleError displays an error message with Usage information to Stderr,
+// and exits with an error code.
+func HandleError(d *Dependencies, err error, exitStatus int) <span class="cov8" title="1">{
+        fmt.Fprintln(d.Os.Stderr, err.Error())
+        flag.CommandLine.Usage()
+        d.Os.Exit(exitStatus)
+}</span>
+
+// RealMain is the program entry-point with all dependencies injected. This
+// allows us to test respecting public vs private methods by moving it outside
+// the "main" package.
+func RealMain(d *Dependencies) <span class="cov8" title="1">{
+        config, err := ParseArgs(d)
+        if err != nil </span><span class="cov8" title="1">{
+                HandleError(d, err, 1)
+        }</span>
+        <span class="cov8" title="1">message, err := InjestMessage(d.Os.Stdin, config.Format)
+        if err != nil </span><span class="cov8" title="1">{
+                HandleError(d, err, 2)
+        }</span>
+        <span class="cov8" title="1">cryptStuff, err := GetCryptoTooling(d, &amp;config.PubKeySettings)
+        if err != nil </span><span class="cov0" title="0">{
+                HandleError(d, err, 3)
+        }</span>
+        <span class="cov8" title="1">err = cryptStuff.GetKeys()
+        if err != nil </span><span class="cov0" title="0">{
+                HandleError(d, err, 4)
+        }</span>
+        <span class="cov8" title="1">binSig, err := cryptStuff.SignMessage(message)
+        if err != nil </span><span class="cov0" title="0">{
+                HandleError(d, err, 5)
+        }</span>
+        // Verify with a round trip:
+        <span class="cov8" title="1">valid, err := cryptStuff.VerifySignedMessage(message, binSig.Base64(), cryptStuff.PubKey.String())
+        if err != nil </span><span class="cov0" title="0">{
+                HandleError(d, err, 6)
+        }</span>
+        <span class="cov8" title="1">if !valid </span><span class="cov0" title="0">{
+                HandleError(d, errors.New("round trip verification of signature failed"), 7)
+        }</span>
+        <span class="cov8" title="1">err = GenerateResponse(d, message, binSig, cryptStuff.PubKey)
+        if err != nil </span><span class="cov0" title="0">{
+                HandleError(d, err, 8)
+        }</span>
+}
+
+// InjestMessage reads all data from dataSource, removing any trailing
+// whitespace. Returns an error if the content is longer than 250 characters.
+// Input is assumed to be UTF-8. Invalid UTF-8 will also produce an error.
+func InjestMessage(dataSource io.Reader, format ContentFormat) (string, error) <span class="cov8" title="1">{
+        buff, err := ioutil.ReadAll(dataSource)
+        if err != nil </span><span class="cov0" title="0">{
+                return "", err
+        }</span>
+        <span class="cov8" title="1">msg := string(buff)
+        // format is meaningless for an empty string
+        if msg == "" </span><span class="cov0" title="0">{
+                return "", nil
+        }</span>
+        <span class="cov8" title="1">switch format </span>{
+        case ASCII, Binary:<span class="cov8" title="1">
+                // ASCII is technically only bytes &lt; 127, but related character sets
+                // use bytes &gt; 128, so the only difference between ASCII and Binary
+                // is the trimming of trailing of trailing whitespace:
+                if format == ASCII </span><span class="cov8" title="1">{
+                        msg = strings.TrimRightFunc(msg, unicode.IsSpace)
+                }</span>
+                <span class="cov8" title="1">if len(msg) &gt; 250 </span><span class="cov8" title="1">{
+                        return "", fmt.Errorf("Input contains more than 250 bytes (exactly %d):\n%#v", len(msg), msg)
+                }</span>
+                <span class="cov8" title="1">return msg, nil</span>
+        case UTF8:<span class="cov8" title="1">
+                if !utf8.ValidString(msg) </span><span class="cov0" title="0">{
+                        return "", fmt.Errorf("Input contains invalid UTF-8 character(s):\n%#v", msg)
+                }</span>
+                <span class="cov8" title="1">msg = TrimRightUTF8Func(msg, unicode.IsSpace)
+                charCount := utf8.RuneCountInString(msg)
+                if charCount &gt; 250 </span><span class="cov0" title="0">{
+                        return "", fmt.Errorf("Input contains more than 250 UTF-8 characters:\n%#v", msg)
+                }</span>
+                <span class="cov8" title="1">return msg, nil</span>
+        }
+        <span class="cov0" title="0">return "", fmt.Errorf("INTERNAL ERROR: Unrecognized content format: %#v", format)</span>
+}
+</pre>
+		
+		<pre class="file" id="file3" style="display: none">package codechallenge
+
+import (
+        "crypto/x509"
+        "errors"
+        "flag"
+        "fmt"
+        "path/filepath"
+        "strings"
+)
+
+// ContentFormat the data format of the message to be signed
+type ContentFormat int
+
+// Content character encodings
+const (
+        UTF8 ContentFormat = iota
+        ASCII
+        Binary
+)
+
+// ReplaceAll tells strings.Replace() to replace all
+const (
+        ReplaceAll = -1
+)
+
+// PkiSettings are the public key settings as specified on the command line.
+type PkiSettings struct {
+        Algorithm      x509.PublicKeyAlgorithm
+        RSAKeyBits     int
+        PrivateKeyPath string
+        PublicKeyPath  string
+}
+
+// RunConfig program's running config as specified on the command line.
+type RunConfig struct {
+        Format         ContentFormat
+        PubKeySettings PkiSettings
+}
+
+// ParseArgs parses the runtime configuration from the command line arguemnts.
+func ParseArgs(d *Dependencies) (*RunConfig, error) <span class="cov8" title="1">{
+        defaultKeyDir := filepath.Join(d.Os.Getenv("HOME"), ".smartEdge")
+        flag.CommandLine.SetOutput(d.Os.Stderr)
+        result := RunConfig{
+                Format: UTF8, // default
+                PubKeySettings: PkiSettings{
+                        Algorithm:      x509.ECDSA, // default
+                        RSAKeyBits:     2048,       //default
+                        PrivateKeyPath: filepath.Join(defaultKeyDir, "id_{{algorithm}}.priv"),
+                        PublicKeyPath:  filepath.Join(defaultKeyDir, "id_{{algorithm}}.pub"),
+                },
+        }
+        type namedFlagValPair struct {
+                name    string
+                present *bool
+        }
+        algorithmFlags := map[x509.PublicKeyAlgorithm]namedFlagValPair{
+                x509.RSA: {
+                        name:    "rsa",
+                        present: flag.Bool("rsa", false, "Causes the mesage to be signed with an RSA key-pair"),
+                },
+                x509.ECDSA: {
+                        name:    "ecdsa",
+                        present: flag.Bool("ecdsa", false, "Causes the mesage to be signed with an ECDSA key-pair [default]"),
+                },
+        }
+        formatFlags := map[ContentFormat]namedFlagValPair{
+                UTF8: {
+                        name:    "utf8",
+                        present: flag.Bool("utf8", false, "This specifies that the message is UTF-8 content [default]"),
+                },
+                ASCII: {
+                        name:    "ascii",
+                        present: flag.Bool("ascii", false, "This specifies that the message is ASCII content"),
+                },
+                Binary: {
+                        name:    "binary",
+                        present: flag.Bool("binary", false, "This specifies that the message is raw binary content"),
+                },
+        }
+        overridePrivateKeyPath := flag.String("private", "", "filepath of the private key file. Defaults to ~/.smartEdge/id_rsa.priv for RSA and ~/.smartEdge/id_ecdsa.priv for ECDSA.")
+        overridePublicKeyPath := flag.String("public", "", "filepath of the private key file. Defaults to ~/.smartEdge/id_rsa.pub for RSA and ~/.smartEdge/id_ecdsa.pub for ECDSA.")
+        rsaKeyBits := flag.Uint("bits", 0, "Bit length of the RSA key [default=2048]")
+        if err := flag.CommandLine.Parse(d.Os.Args[1:]); err != nil </span><span class="cov0" title="0">{
+                return nil, err
+        }</span>
+        <span class="cov8" title="1">mutuallyExclusiveFlagCount := 0
+        lastNamedOption := ""
+        for val, flagPair := range algorithmFlags </span><span class="cov8" title="1">{
+                if *(flagPair.present) </span><span class="cov8" title="1">{
+                        if mutuallyExclusiveFlagCount &gt; 0 </span><span class="cov8" title="1">{
+                                return nil, fmt.Errorf("Options -%s and -%s may not be used together", lastNamedOption, flagPair.name)
+                        }</span>
+                        <span class="cov8" title="1">mutuallyExclusiveFlagCount++
+                        lastNamedOption = flagPair.name
+                        result.PubKeySettings.Algorithm = val</span>
+                }
+        }
+        <span class="cov8" title="1">mutuallyExclusiveFlagCount = 0
+        lastNamedOption = ""
+        for val, flagPair := range formatFlags </span><span class="cov8" title="1">{
+                if *(flagPair.present) </span><span class="cov8" title="1">{
+                        if mutuallyExclusiveFlagCount &gt; 0 </span><span class="cov8" title="1">{
+                                return nil, fmt.Errorf("Options -%s and -%s may not be used together", lastNamedOption, flagPair.name)
+                        }</span>
+                        <span class="cov8" title="1">mutuallyExclusiveFlagCount++
+                        lastNamedOption = flagPair.name
+                        result.Format = val</span>
+                }
+        }
+        // we only want to replace the "{{algorithm}}" token in the defaults, not in
+        // the command arguments.
+        <span class="cov8" title="1">result.PubKeySettings.PrivateKeyPath = strings.Replace(
+                result.PubKeySettings.PrivateKeyPath,
+                "{{algorithm}}",
+                algorithmFlags[result.PubKeySettings.Algorithm].name,
+                ReplaceAll)
+        result.PubKeySettings.PublicKeyPath = strings.Replace(
+                result.PubKeySettings.PublicKeyPath,
+                "{{algorithm}}",
+                algorithmFlags[result.PubKeySettings.Algorithm].name,
+                ReplaceAll)
+        if *rsaKeyBits != 0 </span><span class="cov0" title="0">{
+                if result.PubKeySettings.Algorithm == x509.RSA </span><span class="cov0" title="0">{
+                        return nil, errors.New("Options -bits is only valid for RSA")
+                }</span>
+                <span class="cov0" title="0">if *rsaKeyBits &lt; 256 </span><span class="cov0" title="0">{
+                        // 2048 is the least currently considered "secure through 2030."
+                        // 256 bits is 2.791 * 10^539 times weaker than that.
+                        return nil, fmt.Errorf("Options -bits less than 256 not allowed. Saw -bits=%d", *rsaKeyBits)
+                }</span>
+                <span class="cov0" title="0">result.PubKeySettings.RSAKeyBits = int(*rsaKeyBits)</span>
+        }
+
+        // Replace if we don't see the default value of empty string
+        <span class="cov8" title="1">if *overridePrivateKeyPath != "" </span><span class="cov0" title="0">{
+                result.PubKeySettings.PrivateKeyPath = *overridePrivateKeyPath
+        }</span>
+        <span class="cov8" title="1">if *overridePublicKeyPath != "" </span><span class="cov0" title="0">{
+                result.PubKeySettings.PublicKeyPath = *overridePublicKeyPath
+        }</span>
+        <span class="cov8" title="1">return &amp;result, nil</span>
+}
+</pre>
+		
+		<pre class="file" id="file4" style="display: none">package codechallenge
+
+import (
+        "encoding/json"
+        "errors"
+)
+
+// SignedMessage the final response to be rendered to JSON.
+type SignedMessage struct {
+        Message   string `json:"message"`
+        Signature string `json:"signature"`
+        Pubkey    string `json:"pubkey"`
+}
+
+// GenerateResponse takes the message, signature and public key and writes them
+// in JSON format to d.Os.Stdout
+func GenerateResponse(d *Dependencies, message string, sig BinarySignature, pubKey PEMEncoded) error <span class="cov8" title="1">{
+        response := SignedMessage{
+                Message:   message,
+                Signature: sig.Base64(),
+                Pubkey:    pubKey.String(),
+        }
+        buff, err := json.MarshalIndent(&amp;response, "", "")
+        if err != nil </span><span class="cov0" title="0">{
+                return err
+        }</span>
+        <span class="cov8" title="1">n, err := d.Os.Stdout.Write(buff)
+        if err != nil </span><span class="cov0" title="0">{
+                return err
+        }</span>
+        <span class="cov8" title="1">if n &lt; len(buff) </span><span class="cov0" title="0">{
+                return errors.New("failed to write all of response. Should have produced an error to explain failure")
+        }</span>
+        <span class="cov8" title="1">return nil</span>
+}
+</pre>
+		
+		<pre class="file" id="file5" style="display: none">package testtools
+
+import (
+        "errors"
+        "fmt"
+        "github.com/onsi/gomega/types"
+        "github.com/xeipuuv/gojsonschema"
+        "strings"
+)
+
+type conformToJSONSchemaFileMatcher struct {
+        schemaFileURL string
+}
+
+type resultOfJSONSchemaMatch struct {
+        matcher          *conformToJSONSchemaFileMatcher
+        actualJSONString string
+        docLoader        gojsonschema.JSONLoader
+        schemaLoader     gojsonschema.JSONLoader
+        result           *gojsonschema.Result
+        err              error
+}
+
+// internalMatch contains all the shared logic from all of
+// conformToJSONSchemaFileMatcher's methods
+func (sfm *conformToJSONSchemaFileMatcher) internalMatch(actual interface{}) *resultOfJSONSchemaMatch <span class="cov8" title="1">{
+        result := resultOfJSONSchemaMatch{
+                matcher: sfm,
+        }
+        result.schemaLoader = gojsonschema.NewReferenceLoader(sfm.schemaFileURL)
+        var ok bool
+        if result.actualJSONString, ok = actual.(string); !ok </span><span class="cov8" title="1">{
+                result.err = errors.New("actual must be a string")
+                return &amp;result
+        }</span>
+        <span class="cov8" title="1">result.docLoader = gojsonschema.NewStringLoader(result.actualJSONString)
+
+        result.result, result.err = gojsonschema.Validate(result.schemaLoader, result.docLoader)
+        return &amp;result</span>
+}
+
+// ConformToJSONSchemaFile returns a Gomega "custom matcher" to validate a JSON
+// blob against a JSON schema
+func ConformToJSONSchemaFile(schemaURL string) types.GomegaMatcher <span class="cov8" title="1">{
+        return &amp;conformToJSONSchemaFileMatcher{
+                schemaFileURL: schemaURL,
+        }
+}</span>
+
+// Match returns whether actual conforms to the provided schema, and returns a
+// non-nil error if there is an issue reading or parsing the provided schema
+func (sfm *conformToJSONSchemaFileMatcher) Match(actual interface{}) (success bool, err error) <span class="cov8" title="1">{
+        result := sfm.internalMatch(actual)
+        if result.err != nil </span><span class="cov8" title="1">{
+                return false, result.err
+        }</span>
+        <span class="cov8" title="1">return result.result.Valid(), nil</span>
+}
+
+// FailureMessage describes why actual failed to conform to the
+// provided schema
+func (sfm *conformToJSONSchemaFileMatcher) FailureMessage(actual interface{}) (message string) <span class="cov8" title="1">{
+        actualDisplay := " a non-string "
+        result := sfm.internalMatch(actual)
+        if (result.err == nil) || (result.actualJSONString != "") </span><span class="cov8" title="1">{
+                actualDisplay = fmt.Sprintf("\n\t%#v\n", result.actualJSONString)
+        }</span>
+        <span class="cov8" title="1">var sb strings.Builder
+        sb.WriteString(fmt.Sprintf("Expected%sto conform to the JSON schema in %s but failed because", actualDisplay, sfm.schemaFileURL))
+        if result.err != nil </span><span class="cov8" title="1">{
+                sb.WriteString(" ")
+                sb.WriteString(result.err.Error())
+        }</span> else<span class="cov8" title="1"> if result.result != nil </span><span class="cov8" title="1">{
+                sb.WriteString(":")
+                for _, desc := range result.result.Errors() </span><span class="cov8" title="1">{
+                        sb.WriteString("\n\t- ")
+                        sb.WriteString(desc.String())
+                }</span>
+        }
+        <span class="cov8" title="1">return sb.String()</span>
+}
+
+// NegatedFailureMessage describes why actual unexpectedly conformed to the
+// provided schema
+func (sfm *conformToJSONSchemaFileMatcher) NegatedFailureMessage(actual interface{}) (message string) <span class="cov8" title="1">{
+        actualDisplay := "a non-string"
+        result := sfm.internalMatch(actual)
+        if (result.err == nil) || (result.actualJSONString != "") </span><span class="cov8" title="1">{
+                actualDisplay = fmt.Sprintf("%#v", result.actualJSONString)
+        }</span>
+        <span class="cov8" title="1">return fmt.Sprintf("Expected\n\t%s\nnot to conform to the JSON schema in %s", actualDisplay, sfm.schemaFileURL)</span>
+}
+</pre>
+		
+		<pre class="file" id="file6" style="display: none">package testtools
+
+import (
+        "fmt"
+)
+
+// ErrorSpec defines the expected value of an error.
+type ErrorSpec struct {
+        Type    string
+        Message string
+}
+
+// NewErrorSpecFrom returns a *ErrorSpec that matches inErr.
+func NewErrorSpecFrom(inErr error) *ErrorSpec <span class="cov8" title="1">{
+        if inErr == nil </span><span class="cov8" title="1">{
+                return nil
+        }</span>
+        <span class="cov8" title="1">return &amp;ErrorSpec{
+                Type:    fmt.Sprintf("%T", inErr),
+                Message: inErr.Error(),
+        }</span>
+}
+
+// EnsureMatches returns an error is inErr doesn't match.
+func (es *ErrorSpec) EnsureMatches(inErr error) error <span class="cov8" title="1">{
+        if (es == nil) &amp;&amp; (inErr == nil) </span><span class="cov8" title="1">{
+                return nil
+        }</span>
+        <span class="cov8" title="1">if (es != nil) &amp;&amp; (inErr != nil) </span><span class="cov8" title="1">{
+                if ((es.Type == "") || (es.Type == fmt.Sprintf("%T", inErr))) &amp;&amp;
+                        (es.Message == inErr.Error()) </span><span class="cov8" title="1">{
+                        return nil
+                }</span>
+        }
+        <span class="cov8" title="1">actualStr := "didn't see any error"
+        if inErr != nil </span><span class="cov8" title="1">{
+                actualStr = fmt.Sprintf("saw a %T with message %#v instead", inErr, inErr.Error())
+        }</span>
+        <span class="cov8" title="1">return fmt.Errorf("%s, but %s", es.String(), actualStr)</span>
+}
+
+// String returns string representation of es.
+func (es *ErrorSpec) String() string <span class="cov8" title="1">{
+        result := "No error expected"
+        if es != nil </span><span class="cov8" title="1">{
+                expType := "an error"
+                if es.Type != "" </span><span class="cov8" title="1">{
+                        expType = fmt.Sprintf("a %s error", es.Type)
+                }</span>
+                <span class="cov8" title="1">result = fmt.Sprintf("Expected %s with message %#v", expType, es.Message)</span>
+        }
+        <span class="cov8" title="1">return result</span>
+}
+</pre>
+		
+		<pre class="file" id="file7" style="display: none">package mocks
+
+import (
+        "bytes"
+        cryptoRand "crypto/rand"
+        "errors"
+        "flag"
+        "fmt"
+        "github.com/smartedge/codechallenge"
+        "io/ioutil"
+        mathRand "math/rand"
+        "os"
+        "path/filepath"
+)
+
+// MockDepsBundle is a bundle of dependencies along with a mock environment it
+// talks to.
+type MockDepsBundle struct {
+        Deps        *codechallenge.Dependencies
+        NativeDeps  *codechallenge.Dependencies
+        OutBuf      *bytes.Buffer
+        ErrBuf      *bytes.Buffer
+        exitHarness *OsExitHarness
+        argList     []string
+        homeDirPath string
+        MapPathIn   func(string) (string, error)
+        MapPathOut  func(string) (string, error)
+}
+
+// NewDefaultMockDeps generates a mock environment, along with a
+// *codechallenge.Dependencies that operates in this mock environment.
+// Due to language constraints, it's turned out to be more practical to map
+// filesystem calls into a temporary filesystem directory rather than
+// simulating filesystem activity in memory.
+func NewDefaultMockDeps(stdinContent string, cmdLnArgs []string, homeDir string, _ *map[string]*string) *MockDepsBundle <span class="cov8" title="1">{
+        fakeStdout := &amp;bytes.Buffer{}
+        fakeStderr := &amp;bytes.Buffer{}
+        osExitHarness := NewOsExitMockHarness()
+        return &amp;MockDepsBundle{
+                Deps: &amp;codechallenge.Dependencies{
+                        Os: codechallenge.OsDependencies{
+                                Args:      cmdLnArgs,
+                                Stdin:     bytes.NewBufferString(stdinContent),
+                                Stdout:    fakeStdout,
+                                Stderr:    fakeStderr,
+                                Exit:      osExitHarness.GetMock(),
+                                Getenv:    os.Getenv,
+                                Setenv:    os.Setenv,
+                                MkdirAll:  nil,
+                                RemoveAll: nil,
+                                Stat:      nil,
+                                Chown:     nil,
+                                Getuid:    os.Getuid,
+                        },
+                        Crypto: codechallenge.CryptoDependencies{
+                                Rand: codechallenge.CryptoRandDependencies{
+                                        Reader: mathRand.New(mathRand.NewSource(0x0123456789abcdef)),
+                                },
+                        },
+                        Io: codechallenge.IoDependencies{
+                                Ioutil: codechallenge.IoIoutilDependencies{
+                                        WriteFile: nil,
+                                        ReadFile:  nil,
+                                },
+                        },
+                },
+                NativeDeps: &amp;codechallenge.Dependencies{
+                        Os: codechallenge.OsDependencies{
+                                Args:      os.Args,
+                                Stdin:     os.Stdin,
+                                Stdout:    os.Stdout,
+                                Stderr:    os.Stderr,
+                                Exit:      os.Exit,
+                                Getenv:    os.Getenv,
+                                Setenv:    os.Setenv,
+                                MkdirAll:  os.MkdirAll,
+                                RemoveAll: os.RemoveAll,
+                                Stat:      os.Stat,
+                                Chown:     os.Chown,
+                                Getuid:    os.Getuid,
+                        },
+                        Crypto: codechallenge.CryptoDependencies{
+                                Rand: codechallenge.CryptoRandDependencies{
+                                        Reader: cryptoRand.Reader,
+                                },
+                        },
+                        Io: codechallenge.IoDependencies{
+                                Ioutil: codechallenge.IoIoutilDependencies{
+                                        WriteFile: ioutil.WriteFile,
+                                        ReadFile:  ioutil.ReadFile,
+                                },
+                        },
+                },
+                OutBuf:      fakeStdout,
+                ErrBuf:      fakeStderr,
+                exitHarness: osExitHarness,
+                argList:     cmdLnArgs,
+                homeDirPath: homeDir,
+        }
+}</span>
+
+// GetExitStatus returns the value that was passed to mock of os.Exit() or 0 if none.
+func (mdb *MockDepsBundle) GetExitStatus() int <span class="cov8" title="1">{
+        return mdb.exitHarness.GetExitStatus()
+}</span>
+
+// InvokeCallInMockedEnv run passed function, responding liked mocked
+// environment.
+func (mdb *MockDepsBundle) InvokeCallInMockedEnv(wrapped func() error) (outErr error) <span class="cov8" title="1">{
+        // Save command line argument state:
+        realOsArgsList := os.Args
+        realFlagCommandLineUsage := flag.CommandLine.Usage
+        realFlagCommandLine := flag.CommandLine
+        realFlagErrHelp := flag.ErrHelp
+        realFlagUsage := flag.Usage
+        realHomeDir := mdb.NativeDeps.Os.Getenv("HOME")
+
+        // Restore command line argument state: (before return)
+        defer func() </span><span class="cov8" title="1">{
+                setenvErr := mdb.NativeDeps.Os.Setenv("HOME", realHomeDir)
+                if outErr == nil </span><span class="cov8" title="1">{
+                        outErr = setenvErr
+                }</span>
+                <span class="cov8" title="1">flag.Usage = realFlagUsage
+                flag.ErrHelp = realFlagErrHelp
+                flag.CommandLine = realFlagCommandLine
+                flag.CommandLine.Usage = realFlagCommandLineUsage
+                os.Args = realOsArgsList</span>
+        }()
+
+        // Reset command line argument to initial state: (with fake mdb.argList)
+        <span class="cov8" title="1">os.Args = mdb.argList
+        flag.CommandLine = flag.NewFlagSet(os.Args[0], flag.ExitOnError)
+        flag.CommandLine.Usage = func() </span><span class="cov8" title="1">{
+                flag.Usage()
+        }</span>
+        <span class="cov8" title="1">flag.ErrHelp = errors.New("flag: help requested")
+        flag.Usage = func() </span><span class="cov8" title="1">{
+                fmt.Fprintf(flag.CommandLine.Output(), "Usage of %s:\n", os.Args[0])
+                flag.PrintDefaults()
+        }</span>
+        <span class="cov8" title="1">outErr = mdb.NativeDeps.Os.Setenv("HOME", mdb.homeDirPath)
+        if outErr != nil </span><span class="cov8" title="1">{
+                return
+        }</span>
+
+        // Setup fake filesystem
+        <span class="cov8" title="1">fakeRootPath := filepath.Join(os.TempDir(), "tmpfs", fmt.Sprintf("sm_codechallenge_test_%d", os.Getpid()))
+        outErr = mdb.NativeDeps.Os.MkdirAll(filepath.Join(fakeRootPath, mdb.homeDirPath), 0755)
+        if outErr != nil </span><span class="cov8" title="1">{
+                return
+        }</span>
+        <span class="cov8" title="1">mdb.MapPathIn = func(path string) (string, error) </span><span class="cov0" title="0">{
+                return filepath.Join(fakeRootPath, path), nil
+        }</span>
+        <span class="cov8" title="1">mdb.MapPathOut = func(path string) (string, error) </span><span class="cov0" title="0">{
+                cleanFakeRoot := filepath.Clean(fakeRootPath) + "/"
+                cleanPath := filepath.Clean(path)
+                if cleanPath[0:len(cleanFakeRoot)] != cleanFakeRoot </span><span class="cov0" title="0">{
+                        return "", fmt.Errorf("File %#v not inside fake root %#v when trying to map it outside", cleanPath, cleanFakeRoot)
+                }</span>
+                <span class="cov0" title="0">return cleanPath[len(cleanFakeRoot)-1:], nil</span>
+        }
+        <span class="cov8" title="1">mdb.Deps.Os.MkdirAll = func(path string, perm os.FileMode) error </span><span class="cov0" title="0">{
+                realPath, err := mdb.MapPathIn(path)
+                if err != nil </span><span class="cov0" title="0">{
+                        return err
+                }</span>
+                <span class="cov0" title="0">return mdb.NativeDeps.Os.MkdirAll(realPath, perm)</span>
+        }
+        <span class="cov8" title="1">mdb.Deps.Os.RemoveAll = func(path string) error </span><span class="cov0" title="0">{
+                realPath, err := mdb.MapPathIn(path)
+                if err != nil </span><span class="cov0" title="0">{
+                        return err
+                }</span>
+                <span class="cov0" title="0">return mdb.NativeDeps.Os.RemoveAll(realPath)</span>
+        }
+        <span class="cov8" title="1">mdb.Deps.Os.Stat = func(path string) (os.FileInfo, error) </span><span class="cov0" title="0">{
+                realPath, err := mdb.MapPathIn(path)
+                if err != nil </span><span class="cov0" title="0">{
+                        return nil, err
+                }</span>
+                <span class="cov0" title="0">return mdb.NativeDeps.Os.Stat(realPath)</span>
+        }
+        <span class="cov8" title="1">mdb.Deps.Os.Chown = func(path string, uid, gid int) error </span><span class="cov0" title="0">{
+                realPath, err := mdb.MapPathIn(path)
+                if err != nil </span><span class="cov0" title="0">{
+                        return err
+                }</span>
+                <span class="cov0" title="0">return mdb.NativeDeps.Os.Chown(realPath, uid, gid)</span>
+        }
+        <span class="cov8" title="1">mdb.Deps.Io.Ioutil.WriteFile = func(path string, data []byte, perm os.FileMode) error </span><span class="cov0" title="0">{
+                realPath, err := mdb.MapPathIn(path)
+                if err != nil </span><span class="cov0" title="0">{
+                        return err
+                }</span>
+                <span class="cov0" title="0">return mdb.NativeDeps.Io.Ioutil.WriteFile(realPath, data, perm)</span>
+        }
+        <span class="cov8" title="1">mdb.Deps.Io.Ioutil.ReadFile = func(path string) ([]byte, error) </span><span class="cov0" title="0">{
+                realPath, err := mdb.MapPathIn(path)
+                if err != nil </span><span class="cov0" title="0">{
+                        return nil, err
+                }</span>
+                <span class="cov0" title="0">return mdb.NativeDeps.Io.Ioutil.ReadFile(realPath)</span>
+        }
+
+        // Teardown fake filesystem
+        <span class="cov8" title="1">defer func() </span><span class="cov8" title="1">{
+                removeAllErr := mdb.NativeDeps.Os.RemoveAll(fakeRootPath)
+                if outErr == nil </span><span class="cov8" title="1">{
+                        outErr = removeAllErr
+                }</span>
+        }()
+
+        // Run the code requested:
+        <span class="cov8" title="1">return mdb.exitHarness.InvokeCallThatMightExit(wrapped)</span>
+}
+</pre>
+		
+		<pre class="file" id="file8" style="display: none">package mocks
+
+// OsExitHarness provides an easy mechanism for simulating an os.Exit in a mock.
+type OsExitHarness struct {
+        osExitCode int
+}
+
+// NewOsExitMockHarness generates new structure to simulate os.Exit() with
+func NewOsExitMockHarness() *OsExitHarness <span class="cov8" title="1">{
+        return &amp;OsExitHarness{}
+}</span>
+
+// GetMock returns the mocked implementation of os.Exit().
+func (emh *OsExitHarness) GetMock() func(int) <span class="cov8" title="1">{
+        return func(status int) </span><span class="cov8" title="1">{
+                emh.osExitCode = status
+                panic(emh)</span>
+        }
+}
+
+// InvokeCallThatMightExit run passed function, catching any calls to mocked os.Exit().
+func (emh *OsExitHarness) InvokeCallThatMightExit(wrapped func() error) error <span class="cov8" title="1">{
+        defer func() </span><span class="cov8" title="1">{
+                if r := recover(); r != nil </span><span class="cov8" title="1">{
+                        if v, ok := r.(*OsExitHarness); !ok || (v != emh) </span><span class="cov8" title="1">{
+                                // not our panic... re-panic it.
+                                panic(r)</span>
+                        }
+                        // Exit was called, and now caught.
+                        // Continue with not further warnings.
+                }
+        }()
+        <span class="cov8" title="1">return wrapped()</span>
+}
+
+// GetExitStatus returns the value that was passed to mock of os.Exit() or 0 if none.
+func (emh *OsExitHarness) GetExitStatus() int <span class="cov8" title="1">{
+        return emh.osExitCode
+}</span>
+</pre>
+		
+		<pre class="file" id="file9" style="display: none">package testtools
+
+import (
+        "errors"
+        "fmt"
+        "reflect"
+)
+
+// AreFuncsEqual returns true only if a and b are both functions, and
+// both point to the same function. Returns false and a non-nil error if either
+// argument is not a function. Returns true and a non-nil error if both
+// arguments are nil,
+func AreFuncsEqual(a interface{}, b interface{}) (bool, error) <span class="cov8" title="1">{
+        checkTwoVals := func(matcher func(int) bool, matchDesc string, expectedDesc string) error </span><span class="cov8" title="1">{
+                matches := 0
+                for i := 0; i &lt; 2; i++ </span><span class="cov8" title="1">{
+                        if matcher(i) </span><span class="cov8" title="1">{
+                                matches++
+                        }</span>
+                }
+                <span class="cov8" title="1">if matches &gt; 0 </span><span class="cov8" title="1">{
+                        errMsg := fmt.Sprintf("Both values %s when %s expected", matchDesc, expectedDesc)
+                        if matches == 1 </span><span class="cov8" title="1">{
+                                which := "Second"
+                                if matcher(0) </span><span class="cov8" title="1">{
+                                        which = "First"
+                                }</span>
+                                <span class="cov8" title="1">errMsg = fmt.Sprintf("%s value %s when two %s expected", which, matchDesc, expectedDesc)</span>
+                        }
+                        <span class="cov8" title="1">return errors.New(errMsg)</span>
+                }
+                <span class="cov8" title="1">return nil</span>
+        }
+
+        <span class="cov8" title="1">valueInfos := [2]struct {
+                val             interface{}
+                isNil           bool
+                valueReflection reflect.Value
+                typeReflection  reflect.Type
+        }{}
+        valueInfos[0].val = a
+        valueInfos[1].val = b
+        for i := 0; i &lt; 2; i++ </span><span class="cov8" title="1">{
+                valueInfos[i].isNil = valueInfos[i].val == nil
+                if !valueInfos[i].isNil </span><span class="cov8" title="1">{
+                        valueInfos[i].valueReflection = reflect.ValueOf(valueInfos[i].val)
+                        valueInfos[i].isNil = valueInfos[i].valueReflection.IsNil()
+                        valueInfos[i].typeReflection = valueInfos[i].valueReflection.Type()
+                }</span>
+        }
+        <span class="cov8" title="1">if err := checkTwoVals(func(i int) bool </span><span class="cov8" title="1">{ return valueInfos[i].isNil }</span>, "nil", "funcs"); err != nil <span class="cov8" title="1">{
+                result := valueInfos[0].isNil &amp;&amp; valueInfos[1].isNil &amp;&amp; (valueInfos[0].typeReflection == valueInfos[1].typeReflection)
+                return result, err
+        }</span>
+        <span class="cov8" title="1">if err := checkTwoVals(func(i int) bool </span><span class="cov8" title="1">{ return valueInfos[i].typeReflection.Kind() != reflect.Func }</span>, "not a func", "funcs"); err != nil <span class="cov8" title="1">{
+                return false, err
+        }</span>
+        <span class="cov8" title="1">return (valueInfos[0].valueReflection.Pointer() == valueInfos[1].valueReflection.Pointer()), nil</span>
+}
+
+// AreStringSlicesEqual determines if two string slices are equal. Equality
+// distinguishes nil-ness, but not capacity
+func AreStringSlicesEqual(a []string, b []string) bool <span class="cov8" title="1">{
+        if (a == nil) || (b == nil) </span><span class="cov8" title="1">{
+                return (a == nil) &amp;&amp; (b == nil)
+        }</span>
+        <span class="cov8" title="1">if len(a) != len(b) </span><span class="cov8" title="1">{
+                return false
+        }</span>
+        <span class="cov8" title="1">for i, v := range a </span><span class="cov8" title="1">{
+                if b[i] != v </span><span class="cov8" title="1">{
+                        return false
+                }</span>
+        }
+        <span class="cov8" title="1">return true</span>
+}
+
+// CloneStringSlice create a non-shared copy of inSlice
+func CloneStringSlice(inSlice []string) []string <span class="cov8" title="1">{
+        if inSlice == nil </span><span class="cov8" title="1">{
+                return nil
+        }</span>
+        <span class="cov8" title="1">result := make([]string, len(inSlice), cap(inSlice))
+        for i, v := range inSlice </span><span class="cov8" title="1">{
+                result[i] = v
+        }</span>
+        <span class="cov8" title="1">return result</span>
+}
+
+// WrapFuncCallWithCounter wraps the provided function, adding a returned
+// pointer to a call counter.
+func WrapFuncCallWithCounter(f func()) (func(), *int) <span class="cov8" title="1">{
+        counter := 0
+        wrapped := func() </span><span class="cov8" title="1">{
+                f()
+                counter++
+        }</span>
+        <span class="cov8" title="1">return wrapped, &amp;counter</span>
+}
+</pre>
+		
+		<pre class="file" id="file10" style="display: none">package codechallenge
+
+import (
+        "fmt"
+        "os"
+        "path/filepath"
+        "strconv"
+        "strings"
+        "unicode/utf8"
+)
+
+// FileExists reports if a file exists.
+func FileExists(d *Dependencies, name string) bool <span class="cov8" title="1">{
+        _, err := d.Os.Stat(name)
+        return !os.IsNotExist(err)
+}</span>
+
+// WriteDirAndFile writes a file at once from a single data buffer. Similar to
+// io/ioutil.WriteFile() except ensures all parent directories exist first.
+func WriteDirAndFile(d *Dependencies, filename string, data []byte, filePerm os.FileMode, dirPerm os.FileMode) error <span class="cov8" title="1">{
+        // This is a hack to keep us from generating root-owned files from within
+        // docker.
+        //     * Only root can chown files
+        //     * Only chown files if environment variable EXT_UID_GID is set
+        //     * Only chown files they don't exist
+        cleanUpUids := func(err error) error </span><span class="cov0" title="0">{
+                return err
+        }</span>
+        <span class="cov8" title="1">if (d.Os.Getuid() == 0) &amp;&amp; (d.Os.Getenv("EXT_UID_GID") != "") &amp;&amp; !FileExists(d, filename) </span><span class="cov8" title="1">{
+                idStrs := strings.Split(d.Os.Getenv("EXT_UID_GID"), ":")
+                if len(idStrs) != 2 </span><span class="cov0" title="0">{
+                        return fmt.Errorf("Environment variable EXT_UID_GID must have 2 integer ids seperated by colons. We found %d", len(idStrs))
+                }</span>
+                <span class="cov8" title="1">ids := make([]int, len(idStrs))
+                idLabels := []string{"user", "group"}
+                for i, str := range idStrs </span><span class="cov8" title="1">{
+                        intID, err := strconv.Atoi(str)
+                        if err != nil </span><span class="cov0" title="0">{
+                                return fmt.Errorf("%sID %s must be an integer", idLabels[i], str)
+                        }</span>
+                        <span class="cov8" title="1">ids[i] = intID</span>
+                }
+                <span class="cov8" title="1">userID := ids[0]
+                groupID := ids[1]
+                maxDirDepth := strings.Count(filename, string(os.PathSeparator))
+                filesToChown := make([]string, 1, maxDirDepth)
+                filesToChown[0] = filename
+                for parent := filepath.Dir(filename); (len(parent) &gt; len(string(os.PathSeparator))) &amp;&amp; !FileExists(d, parent); parent = filepath.Dir(parent) </span><span class="cov8" title="1">{
+                        filesToChown = append(filesToChown, parent)
+                }</span>
+                <span class="cov8" title="1">cleanUpUids = func(err error) error </span><span class="cov8" title="1">{
+                        for _, parentFile := range filesToChown </span><span class="cov8" title="1">{
+                                newErr := d.Os.Chown(parentFile, userID, groupID)
+                                // Only report first error encountered.
+                                if err == nil </span><span class="cov8" title="1">{
+                                        err = newErr
+                                }</span>
+                        }
+                        <span class="cov8" title="1">return err</span>
+                }
+        }
+        <span class="cov8" title="1">if !FileExists(d, filepath.Dir(filename)) </span><span class="cov8" title="1">{
+                err := d.Os.MkdirAll(filepath.Dir(filename), dirPerm)
+                if err != nil </span><span class="cov0" title="0">{
+                        return err
+                }</span>
+        }
+        <span class="cov8" title="1">return cleanUpUids(d.Io.Ioutil.WriteFile(filename, data, filePerm))</span>
+}
+
+// TrimRightUTF8Func is based on strings.TrimRightFunc(). It returns a slice of
+// the string s with all trailing Unicode code points c satisfying f(c) removed.
+// Because UTF-8 isn't one byte per character, we need to slice off one rune
+// at a time, instead of one byte
+func TrimRightUTF8Func(s string, f func(rune) bool) string <span class="cov8" title="1">{
+        c, cSize := utf8.DecodeLastRuneInString(s)
+        for (len(s) &gt;= cSize) &amp;&amp; f(c) </span><span class="cov8" title="1">{
+                s = s[:len(s)-cSize]
+                c, cSize = utf8.DecodeLastRuneInString(s)
+        }</span>
+        <span class="cov8" title="1">return s</span>
+}
+</pre>
+		
+		</div>
+	</body>
+	<script>
+	(function() {
+		var files = document.getElementById('files');
+		var visible;
+		files.addEventListener('change', onChange, false);
+		function select(part) {
+			if (visible)
+				visible.style.display = 'none';
+			visible = document.getElementById(part);
+			if (!visible)
+				return;
+			files.value = part;
+			visible.style.display = 'block';
+			location.hash = part;
+		}
+		function onChange() {
+			select(files.value);
+			window.scrollTo(0, 0);
+		}
+		if (location.hash != "") {
+			select(location.hash.substr(1));
+		}
+		if (!visible) {
+			select("file0");
+		}
+	})();
+	</script>
+</html>

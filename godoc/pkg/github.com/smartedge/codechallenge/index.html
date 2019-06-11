@@ -1,0 +1,1477 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#375EAB">
+
+  <title>codechallenge - The Go Programming Language</title>
+
+<link type="text/css" rel="stylesheet" href="../../../../lib/godoc/style.css">
+
+<link rel="stylesheet" href="../../../../lib/godoc/jquery.treeview.css">
+<script type="text/javascript">window.initFuncs = [];</script>
+</head>
+<body>
+
+<div id='lowframe' style="position: fixed; bottom: 0; left: 0; height: 0; width: 100%; border-top: thin solid grey; background-color: white; overflow: auto;">
+...
+</div><!-- #lowframe -->
+
+<div id="topbar" class="wide"><div class="container">
+<div class="top-heading" id="heading-wide"><a href="http://localhost:6060/">The Go Programming Language</a></div>
+<div class="top-heading" id="heading-narrow"><a href="http://localhost:6060/">Go</a></div>
+<a href="index.html#" id="menu-button"><span id="menu-button-arrow">&#9661;</span></a>
+<form method="GET" action="http://localhost:6060/search">
+<div id="menu">
+<a href="http://localhost:6060/doc/">Documents</a>
+<a href="http://localhost:6060/pkg/">Packages</a>
+<a href="http://localhost:6060/project/">The Project</a>
+<a href="http://localhost:6060/help/">Help</a>
+
+<a href="http://localhost:6060/blog/">Blog</a>
+
+
+<span class="search-box"><input type="search" id="search" name="q" placeholder="Search" aria-label="Search" required><button type="submit"><span><!-- magnifying glass: --><svg width="24" height="24" viewBox="0 0 24 24"><title>submit search</title><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/><path d="M0 0h24v24H0z" fill="none"/></svg></span></button></span>
+</div>
+</form>
+
+</div></div>
+
+
+
+<div id="page" class="wide">
+<div class="container">
+
+
+  <h1>
+    Package codechallenge
+    <span class="text-muted"></span>
+  </h1>
+
+
+
+
+
+
+
+<div id="nav"></div>
+
+
+<!--
+	Copyright 2009 The Go Authors. All rights reserved.
+	Use of this source code is governed by a BSD-style
+	license that can be found in the LICENSE file.
+-->
+<!--
+	Note: Static (i.e., not template-generated) href and id
+	attributes start with "pkg-" to make it impossible for
+	them to conflict with generated attributes (some of which
+	correspond to Go identifiers).
+-->
+
+	<script type='text/javascript'>
+	document.ANALYSIS_DATA = null;
+	document.CALLGRAPH = null;
+	</script>
+
+	
+		
+		<div id="short-nav">
+			<dl>
+			<dd><code>import "github.com/smartedge/codechallenge"</code></dd>
+			</dl>
+			<dl>
+			<dd><a href="index.html#pkg-overview" class="overviewLink">Overview</a></dd>
+			<dd><a href="index.html#pkg-index" class="indexLink">Index</a></dd>
+			
+			
+				<dd><a href="index.html#pkg-subdirectories">Subdirectories</a></dd>
+			
+			</dl>
+		</div>
+		<!-- The package's Name is printed as title by the top-level template -->
+		<div id="pkg-overview" class="toggleVisible">
+			<div class="collapsed">
+				<h2 class="toggleButton" title="Click to show Overview section">Overview ▹</h2>
+			</div>
+			<div class="expanded">
+				<h2 class="toggleButton" title="Click to hide Overview section">Overview ▾</h2>
+				<p>
+Package codechallenge implements a tool to sign a short text message,
+creating a key-pair if necessary
+</p>
+
+			</div>
+		</div>
+		
+
+		<div id="pkg-index" class="toggleVisible">
+		<div class="collapsed">
+			<h2 class="toggleButton" title="Click to show Index section">Index ▹</h2>
+		</div>
+		<div class="expanded">
+			<h2 class="toggleButton" title="Click to hide Index section">Index ▾</h2>
+
+		<!-- Table of contents for API; must be named manual-nav to turn off auto nav. -->
+			<div id="manual-nav">
+			<dl>
+			
+				<dd><a href="index.html#pkg-constants">Constants</a></dd>
+			
+			
+			
+				
+				<dd><a href="index.html#FileExists">func FileExists(d *Dependencies, name string) bool</a></dd>
+			
+				
+				<dd><a href="index.html#GenerateResponse">func GenerateResponse(d *Dependencies, message string, sig BinarySignature, pubKey PEMEncoded) error</a></dd>
+			
+				
+				<dd><a href="index.html#HandleError">func HandleError(d *Dependencies, err error, exitStatus int)</a></dd>
+			
+				
+				<dd><a href="index.html#InjestMessage">func InjestMessage(dataSource io.Reader, format ContentFormat) (string, error)</a></dd>
+			
+				
+				<dd><a href="index.html#RealMain">func RealMain(d *Dependencies)</a></dd>
+			
+				
+				<dd><a href="index.html#TrimRightUTF8Func">func TrimRightUTF8Func(s string, f func(rune) bool) string</a></dd>
+			
+				
+				<dd><a href="index.html#WriteDirAndFile">func WriteDirAndFile(d *Dependencies, filename string, data []byte, filePerm os.FileMode, dirPerm os.FileMode) error</a></dd>
+			
+			
+				
+				<dd><a href="index.html#AlgorithmPlugin">type AlgorithmPlugin</a></dd>
+				
+				
+			
+				
+				<dd><a href="index.html#BinarySignature">type BinarySignature</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="index.html#NewBinarySignatureFromBase64">func NewBinarySignatureFromBase64(src string) (BinarySignature, error)</a></dd>
+				
+				
+					
+					<dd>&nbsp; &nbsp; <a href="index.html#BinarySignature.Base64">func (sig BinarySignature) Base64() string</a></dd>
+				
+			
+				
+				<dd><a href="index.html#ContentFormat">type ContentFormat</a></dd>
+				
+				
+			
+				
+				<dd><a href="index.html#CryptoDependencies">type CryptoDependencies</a></dd>
+				
+				
+			
+				
+				<dd><a href="index.html#CryptoRandDependencies">type CryptoRandDependencies</a></dd>
+				
+				
+			
+				
+				<dd><a href="index.html#CryptoTooling">type CryptoTooling</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="index.html#GetCryptoTooling">func GetCryptoTooling(deps *Dependencies, keySettings *PkiSettings) (*CryptoTooling, error)</a></dd>
+				
+				
+					
+					<dd>&nbsp; &nbsp; <a href="index.html#CryptoTooling.GetKeys">func (ct *CryptoTooling) GetKeys() error</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="index.html#CryptoTooling.HashMessage">func (ct *CryptoTooling) HashMessage(msg string) DigestHash</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="index.html#CryptoTooling.Sign">func (ct *CryptoTooling) Sign(digest DigestHash) (BinarySignature, error)</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="index.html#CryptoTooling.SignMessage">func (ct *CryptoTooling) SignMessage(msg string) (BinarySignature, error)</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="index.html#CryptoTooling.VerifySignedMessage">func (ct *CryptoTooling) VerifySignedMessage(msg string, base64Sig string, pemPubKey string) (bool, error)</a></dd>
+				
+			
+				
+				<dd><a href="index.html#Dependencies">type Dependencies</a></dd>
+				
+				
+			
+				
+				<dd><a href="index.html#DigestHash">type DigestHash</a></dd>
+				
+				
+					
+					<dd>&nbsp; &nbsp; <a href="index.html#DigestHash.Hex">func (hash DigestHash) Hex() string</a></dd>
+				
+			
+				
+				<dd><a href="index.html#ECDSAPlugin">type ECDSAPlugin</a></dd>
+				
+				
+					
+					<dd>&nbsp; &nbsp; <a href="index.html#ECDSAPlugin.GenKeyPair">func (p *ECDSAPlugin) GenKeyPair(randReader io.Reader) (pubKey X509Encoded, privKey X509Encoded, err error)</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="index.html#ECDSAPlugin.GetAlgorithmName">func (p *ECDSAPlugin) GetAlgorithmName() string</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="index.html#ECDSAPlugin.HashMessage">func (p *ECDSAPlugin) HashMessage(message string) DigestHash</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="index.html#ECDSAPlugin.InjestPrivateKey">func (p *ECDSAPlugin) InjestPrivateKey(privKey X509Encoded) (signer crypto.Signer, err error)</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="index.html#ECDSAPlugin.VerifySignature">func (p *ECDSAPlugin) VerifySignature(sha256Hash DigestHash, binSig BinarySignature, pubKey X509Encoded) (bool, error)</a></dd>
+				
+			
+				
+				<dd><a href="index.html#IoDependencies">type IoDependencies</a></dd>
+				
+				
+			
+				
+				<dd><a href="index.html#IoIoutilDependencies">type IoIoutilDependencies</a></dd>
+				
+				
+			
+				
+				<dd><a href="index.html#KeyType">type KeyType</a></dd>
+				
+				
+					
+					<dd>&nbsp; &nbsp; <a href="index.html#KeyType.String">func (t KeyType) String() string</a></dd>
+				
+			
+				
+				<dd><a href="index.html#OsDependencies">type OsDependencies</a></dd>
+				
+				
+			
+				
+				<dd><a href="index.html#PEMEncoded">type PEMEncoded</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="index.html#DecodeAndLoadKey">func DecodeAndLoadKey(d *Dependencies, filename string) (PEMEncoded, X509Encoded, error)</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="index.html#EncodeAndSaveKey">func EncodeAndSaveKey(d *Dependencies, keyBuf X509Encoded, algorithm string, kt KeyType, filename string, perm os.FileMode) (PEMEncoded, error)</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="index.html#NewPEMBufferFromString">func NewPEMBufferFromString(src string) PEMEncoded</a></dd>
+				
+				
+					
+					<dd>&nbsp; &nbsp; <a href="index.html#PEMEncoded.DecodeToX509">func (pemBuf PEMEncoded) DecodeToX509() (X509Encoded, error)</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="index.html#PEMEncoded.String">func (pemBuf PEMEncoded) String() string</a></dd>
+				
+			
+				
+				<dd><a href="index.html#PkiSettings">type PkiSettings</a></dd>
+				
+				
+			
+				
+				<dd><a href="index.html#RSAPlugin">type RSAPlugin</a></dd>
+				
+				
+					
+					<dd>&nbsp; &nbsp; <a href="index.html#RSAPlugin.GenKeyPair">func (p *RSAPlugin) GenKeyPair(randReader io.Reader) (pubKey X509Encoded, privKey X509Encoded, err error)</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="index.html#RSAPlugin.GetAlgorithmName">func (p *RSAPlugin) GetAlgorithmName() string</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="index.html#RSAPlugin.HashMessage">func (p *RSAPlugin) HashMessage(message string) DigestHash</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="index.html#RSAPlugin.InjestPrivateKey">func (p *RSAPlugin) InjestPrivateKey(privKey X509Encoded) (signer crypto.Signer, err error)</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="index.html#RSAPlugin.VerifySignature">func (p *RSAPlugin) VerifySignature(sha256Hash DigestHash, binSig BinarySignature, pubKey X509Encoded) (bool, error)</a></dd>
+				
+			
+				
+				<dd><a href="index.html#RunConfig">type RunConfig</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="index.html#ParseArgs">func ParseArgs(d *Dependencies) (*RunConfig, error)</a></dd>
+				
+				
+			
+				
+				<dd><a href="index.html#SignedMessage">type SignedMessage</a></dd>
+				
+				
+			
+				
+				<dd><a href="index.html#X509Encoded">type X509Encoded</a></dd>
+				
+				
+					
+					<dd>&nbsp; &nbsp; <a href="index.html#X509Encoded.EncodeToPEM">func (x X509Encoded) EncodeToPEM(algorithm string, kt KeyType) PEMEncoded</a></dd>
+				
+			
+			
+			</dl>
+			</div><!-- #manual-nav -->
+
+		
+
+		
+			<h3>Package files</h3>
+			<p>
+			<span style="font-size:90%">
+			
+				<a href="http://localhost:6060/src/github.com/smartedge/codechallenge/dependencies.go">dependencies.go</a>
+			
+				<a href="http://localhost:6060/src/github.com/smartedge/codechallenge/keys.go">keys.go</a>
+			
+				<a href="http://localhost:6060/src/github.com/smartedge/codechallenge/main.go">main.go</a>
+			
+				<a href="http://localhost:6060/src/github.com/smartedge/codechallenge/options.go">options.go</a>
+			
+				<a href="http://localhost:6060/src/github.com/smartedge/codechallenge/response.go">response.go</a>
+			
+				<a href="http://localhost:6060/src/github.com/smartedge/codechallenge/utils.go">utils.go</a>
+			
+			</span>
+			</p>
+		
+		</div><!-- .expanded -->
+		</div><!-- #pkg-index -->
+
+		<div id="pkg-callgraph" class="toggle" style="display: none">
+		<div class="collapsed">
+			<h2 class="toggleButton" title="Click to show Internal Call Graph section">Internal call graph ▹</h2>
+		</div> <!-- .expanded -->
+		<div class="expanded">
+			<h2 class="toggleButton" title="Click to hide Internal Call Graph section">Internal call graph ▾</h2>
+			<p>
+			  In the call graph viewer below, each node
+			  is a function belonging to this package
+			  and its children are the functions it
+			  calls&mdash;perhaps dynamically.
+			</p>
+			<p>
+			  The root nodes are the entry points of the
+			  package: functions that may be called from
+			  outside the package.
+			  There may be non-exported or anonymous
+			  functions among them if they are called
+			  dynamically from another package.
+			</p>
+			<p>
+			  Click a node to visit that function's source code.
+			  From there you can visit its callers by
+			  clicking its declaring <code>func</code>
+			  token.
+			</p>
+			<p>
+			  Functions may be omitted if they were
+			  determined to be unreachable in the
+			  particular programs or tests that were
+			  analyzed.
+			</p>
+			<!-- Zero means show all package entry points. -->
+			<ul style="margin-left: 0.5in" id="callgraph-0" class="treeview"></ul>
+		</div>
+		</div> <!-- #pkg-callgraph -->
+
+		
+			<h2 id="pkg-constants">Constants</h2>
+			
+				<p>
+ReplaceAll tells strings.Replace() to replace all
+</p>
+
+				<pre>const (
+    <span id="ReplaceAll">ReplaceAll</span> = -1
+)</pre>
+			
+		
+		
+		
+			
+			
+			<h2 id="FileExists">func <a href="http://localhost:6060/src/github.com/smartedge/codechallenge/utils.go?s=143:193#L3">FileExists</a>
+				<a class="permalink" href="index.html#FileExists">&#xb6;</a>
+			</h2>
+			<pre>func FileExists(d *<a href="index.html#Dependencies">Dependencies</a>, name <a href="http://localhost:6060/pkg/builtin/#string">string</a>) <a href="http://localhost:6060/pkg/builtin/#bool">bool</a></pre>
+			<p>
+FileExists reports if a file exists.
+</p>
+
+			
+			
+
+		
+			
+			
+			<h2 id="GenerateResponse">func <a href="http://localhost:6060/src/github.com/smartedge/codechallenge/response.go?s=372:472#L7">GenerateResponse</a>
+				<a class="permalink" href="index.html#GenerateResponse">&#xb6;</a>
+			</h2>
+			<pre>func GenerateResponse(d *<a href="index.html#Dependencies">Dependencies</a>, message <a href="http://localhost:6060/pkg/builtin/#string">string</a>, sig <a href="index.html#BinarySignature">BinarySignature</a>, pubKey <a href="index.html#PEMEncoded">PEMEncoded</a>) <a href="http://localhost:6060/pkg/builtin/#error">error</a></pre>
+			<p>
+GenerateResponse takes the message, signature and public key and writes them
+in JSON format to d.Os.Stdout
+</p>
+
+			
+			
+
+		
+			
+			
+			<h2 id="HandleError">func <a href="http://localhost:6060/src/github.com/smartedge/codechallenge/main.go?s=334:394#L8">HandleError</a>
+				<a class="permalink" href="index.html#HandleError">&#xb6;</a>
+			</h2>
+			<pre>func HandleError(d *<a href="index.html#Dependencies">Dependencies</a>, err <a href="http://localhost:6060/pkg/builtin/#error">error</a>, exitStatus <a href="http://localhost:6060/pkg/builtin/#int">int</a>)</pre>
+			<p>
+HandleError displays an error message with Usage information to Stderr,
+and exits with an error code.
+</p>
+
+			
+			
+
+		
+			
+			
+			<h2 id="InjestMessage">func <a href="http://localhost:6060/src/github.com/smartedge/codechallenge/main.go?s=1757:1835#L55">InjestMessage</a>
+				<a class="permalink" href="index.html#InjestMessage">&#xb6;</a>
+			</h2>
+			<pre>func InjestMessage(dataSource <a href="http://localhost:6060/pkg/io/">io</a>.<a href="http://localhost:6060/pkg/io/#Reader">Reader</a>, format <a href="index.html#ContentFormat">ContentFormat</a>) (<a href="http://localhost:6060/pkg/builtin/#string">string</a>, <a href="http://localhost:6060/pkg/builtin/#error">error</a>)</pre>
+			<p>
+InjestMessage reads all data from dataSource, removing any trailing
+whitespace. Returns an error if the content is longer than 250 characters.
+Input is assumed to be UTF-8. Invalid UTF-8 will also produce an error.
+</p>
+
+			
+			
+
+		
+			
+			
+			<h2 id="RealMain">func <a href="http://localhost:6060/src/github.com/smartedge/codechallenge/main.go?s=667:697#L17">RealMain</a>
+				<a class="permalink" href="index.html#RealMain">&#xb6;</a>
+			</h2>
+			<pre>func RealMain(d *<a href="index.html#Dependencies">Dependencies</a>)</pre>
+			<p>
+RealMain is the program entry-point with all dependencies injected. This
+allows us to test respecting public vs private methods by moving it outside
+the &#34;main&#34; package.
+</p>
+
+			
+			
+
+		
+			
+			
+			<h2 id="TrimRightUTF8Func">func <a href="http://localhost:6060/src/github.com/smartedge/codechallenge/utils.go?s=2501:2559#L65">TrimRightUTF8Func</a>
+				<a class="permalink" href="index.html#TrimRightUTF8Func">&#xb6;</a>
+			</h2>
+			<pre>func TrimRightUTF8Func(s <a href="http://localhost:6060/pkg/builtin/#string">string</a>, f func(<a href="http://localhost:6060/pkg/builtin/#rune">rune</a>) <a href="http://localhost:6060/pkg/builtin/#bool">bool</a>) <a href="http://localhost:6060/pkg/builtin/#string">string</a></pre>
+			<p>
+TrimRightUTF8Func is based on strings.TrimRightFunc(). It returns a slice of
+the string s with all trailing Unicode code points c satisfying f(c) removed.
+Because UTF-8 isn&#39;t one byte per character, we need to slice off one rune
+at a time, instead of one byte
+</p>
+
+			
+			
+
+		
+			
+			
+			<h2 id="WriteDirAndFile">func <a href="http://localhost:6060/src/github.com/smartedge/codechallenge/utils.go?s=409:525#L10">WriteDirAndFile</a>
+				<a class="permalink" href="index.html#WriteDirAndFile">&#xb6;</a>
+			</h2>
+			<pre>func WriteDirAndFile(d *<a href="index.html#Dependencies">Dependencies</a>, filename <a href="http://localhost:6060/pkg/builtin/#string">string</a>, data []<a href="http://localhost:6060/pkg/builtin/#byte">byte</a>, filePerm <a href="http://localhost:6060/pkg/os/">os</a>.<a href="http://localhost:6060/pkg/os/#FileMode">FileMode</a>, dirPerm <a href="http://localhost:6060/pkg/os/">os</a>.<a href="http://localhost:6060/pkg/os/#FileMode">FileMode</a>) <a href="http://localhost:6060/pkg/builtin/#error">error</a></pre>
+			<p>
+WriteDirAndFile writes a file at once from a single data buffer. Similar to
+io/ioutil.WriteFile() except ensures all parent directories exist first.
+</p>
+
+			
+			
+
+		
+		
+			
+			
+			<h2 id="AlgorithmPlugin">type <a href="http://localhost:6060/src/github.com/smartedge/codechallenge/keys.go?s=711:1070#L34">AlgorithmPlugin</a>
+				<a class="permalink" href="index.html#AlgorithmPlugin">&#xb6;</a>
+			</h2>
+			<p>
+AlgorithmPlugin is used to encapsulate algorithm specific code.
+</p>
+
+			<pre>type AlgorithmPlugin interface {
+    GenKeyPair(randReader <a href="http://localhost:6060/pkg/io/">io</a>.<a href="http://localhost:6060/pkg/io/#Reader">Reader</a>) (pubKey <a href="index.html#X509Encoded">X509Encoded</a>, privKey <a href="index.html#X509Encoded">X509Encoded</a>, err <a href="http://localhost:6060/pkg/builtin/#error">error</a>)
+    InjestPrivateKey(privKey <a href="index.html#X509Encoded">X509Encoded</a>) (signer <a href="http://localhost:6060/pkg/crypto/">crypto</a>.<a href="http://localhost:6060/pkg/crypto/#Signer">Signer</a>, err <a href="http://localhost:6060/pkg/builtin/#error">error</a>)
+    HashMessage(message <a href="http://localhost:6060/pkg/builtin/#string">string</a>) <a href="index.html#DigestHash">DigestHash</a>
+    VerifySignature(sha256Hash <a href="index.html#DigestHash">DigestHash</a>, binSig <a href="index.html#BinarySignature">BinarySignature</a>, pubKey <a href="index.html#X509Encoded">X509Encoded</a>) (<a href="http://localhost:6060/pkg/builtin/#bool">bool</a>, <a href="http://localhost:6060/pkg/builtin/#error">error</a>)
+    GetAlgorithmName() <a href="http://localhost:6060/pkg/builtin/#string">string</a>
+}</pre>
+
+			
+
+			
+
+			
+			
+			
+
+			
+
+			
+		
+			
+			
+			<h2 id="BinarySignature">type <a href="http://localhost:6060/src/github.com/smartedge/codechallenge/keys.go?s=10318:10345#L344">BinarySignature</a>
+				<a class="permalink" href="index.html#BinarySignature">&#xb6;</a>
+			</h2>
+			<p>
+BinarySignature data buffer
+</p>
+
+			<pre>type BinarySignature []<a href="http://localhost:6060/pkg/builtin/#byte">byte</a></pre>
+
+			
+
+			
+
+			
+			
+			
+
+			
+				
+				<h3 id="NewBinarySignatureFromBase64">func <a href="http://localhost:6060/src/github.com/smartedge/codechallenge/keys.go?s=10441:10511#L348">NewBinarySignatureFromBase64</a>
+					<a class="permalink" href="index.html#NewBinarySignatureFromBase64">&#xb6;</a>
+				</h3>
+				<pre>func NewBinarySignatureFromBase64(src <a href="http://localhost:6060/pkg/builtin/#string">string</a>) (<a href="index.html#BinarySignature">BinarySignature</a>, <a href="http://localhost:6060/pkg/builtin/#error">error</a>)</pre>
+				<p>
+NewBinarySignatureFromBase64 creates a new BinarySignature buffer
+from a base64 string.
+</p>
+
+				
+				
+			
+
+			
+				
+				<h3 id="BinarySignature.Base64">func (BinarySignature) <a href="http://localhost:6060/src/github.com/smartedge/codechallenge/keys.go?s=10721:10763#L358">Base64</a>
+					<a class="permalink" href="index.html#BinarySignature.Base64">&#xb6;</a>
+				</h3>
+				<pre>func (sig <a href="index.html#BinarySignature">BinarySignature</a>) Base64() <a href="http://localhost:6060/pkg/builtin/#string">string</a></pre>
+				<p>
+Base64 renders the signature as a RFC 4648 compliant Base64
+encoded string.
+</p>
+
+				
+				
+				
+			
+		
+			
+			
+			<h2 id="ContentFormat">type <a href="http://localhost:6060/src/github.com/smartedge/codechallenge/options.go?s=164:186#L3">ContentFormat</a>
+				<a class="permalink" href="index.html#ContentFormat">&#xb6;</a>
+			</h2>
+			<p>
+ContentFormat the data format of the message to be signed
+</p>
+
+			<pre>type ContentFormat <a href="http://localhost:6060/pkg/builtin/#int">int</a></pre>
+
+			
+				<p>
+Content character encodings
+</p>
+
+				<pre>const (
+    <span id="UTF8">UTF8</span> <a href="index.html#ContentFormat">ContentFormat</a> = <a href="http://localhost:6060/pkg/builtin/#iota">iota</a>
+    <span id="ASCII">ASCII</span>
+    <span id="Binary">Binary</span>
+)</pre>
+			
+
+			
+
+			
+			
+			
+
+			
+
+			
+		
+			
+			
+			<h2 id="CryptoDependencies">type <a href="http://localhost:6060/src/github.com/smartedge/codechallenge/dependencies.go?s=737:800#L20">CryptoDependencies</a>
+				<a class="permalink" href="index.html#CryptoDependencies">&#xb6;</a>
+			</h2>
+			<p>
+CryptoDependencies contains all external dependencies from the crypto package.
+</p>
+
+			<pre>type CryptoDependencies struct {
+<span id="CryptoDependencies.Rand"></span>    Rand <a href="index.html#CryptoRandDependencies">CryptoRandDependencies</a>
+}</pre>
+
+			
+
+			
+
+			
+			
+			
+
+			
+
+			
+		
+			
+			
+			<h2 id="CryptoRandDependencies">type <a href="http://localhost:6060/src/github.com/smartedge/codechallenge/dependencies.go?s=597:653#L15">CryptoRandDependencies</a>
+				<a class="permalink" href="index.html#CryptoRandDependencies">&#xb6;</a>
+			</h2>
+			<p>
+CryptoRandDependencies contains all external dependencies from the crypto/rand package.
+</p>
+
+			<pre>type CryptoRandDependencies struct {
+<span id="CryptoRandDependencies.Reader"></span>    Reader <a href="http://localhost:6060/pkg/io/">io</a>.<a href="http://localhost:6060/pkg/io/#Reader">Reader</a>
+}</pre>
+
+			
+
+			
+
+			
+			
+			
+
+			
+
+			
+		
+			
+			
+			<h2 id="CryptoTooling">type <a href="http://localhost:6060/src/github.com/smartedge/codechallenge/keys.go?s=5096:5270#L167">CryptoTooling</a>
+				<a class="permalink" href="index.html#CryptoTooling">&#xb6;</a>
+			</h2>
+			<p>
+CryptoTooling home to all crypto tool state.
+</p>
+
+			<pre>type CryptoTooling struct {
+<span id="CryptoTooling.D"></span>    D         *<a href="index.html#Dependencies">Dependencies</a>
+<span id="CryptoTooling.Settings"></span>    Settings  *<a href="index.html#PkiSettings">PkiSettings</a>
+<span id="CryptoTooling.AlgPlugin"></span>    AlgPlugin <a href="index.html#AlgorithmPlugin">AlgorithmPlugin</a>
+<span id="CryptoTooling.PubKey"></span>    PubKey    <a href="index.html#PEMEncoded">PEMEncoded</a>
+<span id="CryptoTooling.PrivKey"></span>    PrivKey   <a href="index.html#PEMEncoded">PEMEncoded</a>
+<span id="CryptoTooling.Signer"></span>    Signer    <a href="http://localhost:6060/pkg/crypto/">crypto</a>.<a href="http://localhost:6060/pkg/crypto/#Signer">Signer</a>
+}</pre>
+
+			
+
+			
+
+			
+			
+			
+
+			
+				
+				<h3 id="GetCryptoTooling">func <a href="http://localhost:6060/src/github.com/smartedge/codechallenge/keys.go?s=5362:5453#L178">GetCryptoTooling</a>
+					<a class="permalink" href="index.html#GetCryptoTooling">&#xb6;</a>
+				</h3>
+				<pre>func GetCryptoTooling(deps *<a href="index.html#Dependencies">Dependencies</a>, keySettings *<a href="index.html#PkiSettings">PkiSettings</a>) (*<a href="index.html#CryptoTooling">CryptoTooling</a>, <a href="http://localhost:6060/pkg/builtin/#error">error</a>)</pre>
+				<p>
+GetCryptoTooling returns a home where all the keys, signing and
+verification lives.
+</p>
+
+				
+				
+			
+
+			
+				
+				<h3 id="CryptoTooling.GetKeys">func (*CryptoTooling) <a href="http://localhost:6060/src/github.com/smartedge/codechallenge/keys.go?s=5940:5980#L198">GetKeys</a>
+					<a class="permalink" href="index.html#CryptoTooling.GetKeys">&#xb6;</a>
+				</h3>
+				<pre>func (ct *<a href="index.html#CryptoTooling">CryptoTooling</a>) GetKeys() <a href="http://localhost:6060/pkg/builtin/#error">error</a></pre>
+				<p>
+GetKeys retrieves the private key from the filesystem, generating keypair
+if necessary.
+</p>
+
+				
+				
+				
+			
+				
+				<h3 id="CryptoTooling.HashMessage">func (*CryptoTooling) <a href="http://localhost:6060/src/github.com/smartedge/codechallenge/keys.go?s=7735:7794#L256">HashMessage</a>
+					<a class="permalink" href="index.html#CryptoTooling.HashMessage">&#xb6;</a>
+				</h3>
+				<pre>func (ct *<a href="index.html#CryptoTooling">CryptoTooling</a>) HashMessage(msg <a href="http://localhost:6060/pkg/builtin/#string">string</a>) <a href="index.html#DigestHash">DigestHash</a></pre>
+				<p>
+HashMessage defers to the AlgPlugin to handle hashing.
+</p>
+
+				
+				
+				
+			
+				
+				<h3 id="CryptoTooling.Sign">func (*CryptoTooling) <a href="http://localhost:6060/src/github.com/smartedge/codechallenge/keys.go?s=7935:8008#L262">Sign</a>
+					<a class="permalink" href="index.html#CryptoTooling.Sign">&#xb6;</a>
+				</h3>
+				<pre>func (ct *<a href="index.html#CryptoTooling">CryptoTooling</a>) Sign(digest <a href="index.html#DigestHash">DigestHash</a>) (<a href="index.html#BinarySignature">BinarySignature</a>, <a href="http://localhost:6060/pkg/builtin/#error">error</a>)</pre>
+				<p>
+Sign is a thin wrapper over cryptoSigner.Sign() to ease
+type conversions and dependencies.
+</p>
+
+				
+				
+				
+			
+				
+				<h3 id="CryptoTooling.SignMessage">func (*CryptoTooling) <a href="http://localhost:6060/src/github.com/smartedge/codechallenge/keys.go?s=8373:8446#L278">SignMessage</a>
+					<a class="permalink" href="index.html#CryptoTooling.SignMessage">&#xb6;</a>
+				</h3>
+				<pre>func (ct *<a href="index.html#CryptoTooling">CryptoTooling</a>) SignMessage(msg <a href="http://localhost:6060/pkg/builtin/#string">string</a>) (<a href="index.html#BinarySignature">BinarySignature</a>, <a href="http://localhost:6060/pkg/builtin/#error">error</a>)</pre>
+				<p>
+SignMessage simply sighs a hash of the message. It was added for
+consistancy with VerifySignedMessage.
+</p>
+
+				
+				
+				
+			
+				
+				<h3 id="CryptoTooling.VerifySignedMessage">func (*CryptoTooling) <a href="http://localhost:6060/src/github.com/smartedge/codechallenge/keys.go?s=8606:8712#L284">VerifySignedMessage</a>
+					<a class="permalink" href="index.html#CryptoTooling.VerifySignedMessage">&#xb6;</a>
+				</h3>
+				<pre>func (ct *<a href="index.html#CryptoTooling">CryptoTooling</a>) VerifySignedMessage(msg <a href="http://localhost:6060/pkg/builtin/#string">string</a>, base64Sig <a href="http://localhost:6060/pkg/builtin/#string">string</a>, pemPubKey <a href="http://localhost:6060/pkg/builtin/#string">string</a>) (<a href="http://localhost:6060/pkg/builtin/#bool">bool</a>, <a href="http://localhost:6060/pkg/builtin/#error">error</a>)</pre>
+				<p>
+VerifySignedMessage simply sighs a hash of the message. It was added for
+consistancy with VerifySignedMessage.
+</p>
+
+				
+				
+				
+			
+		
+			
+			
+			<h2 id="Dependencies">type <a href="http://localhost:6060/src/github.com/smartedge/codechallenge/dependencies.go?s=1243:1344#L37">Dependencies</a>
+				<a class="permalink" href="index.html#Dependencies">&#xb6;</a>
+			</h2>
+			<p>
+Dependencies contains all external dependencies injected by main()
+into RealMain()
+</p>
+
+			<pre>type Dependencies struct {
+<span id="Dependencies.Os"></span>    Os     <a href="index.html#OsDependencies">OsDependencies</a>
+<span id="Dependencies.Crypto"></span>    Crypto <a href="index.html#CryptoDependencies">CryptoDependencies</a>
+<span id="Dependencies.Io"></span>    Io     <a href="index.html#IoDependencies">IoDependencies</a>
+}</pre>
+
+			
+
+			
+
+			
+			
+			
+
+			
+
+			
+		
+			
+			
+			<h2 id="DigestHash">type <a href="http://localhost:6060/src/github.com/smartedge/codechallenge/keys.go?s=10078:10100#L335">DigestHash</a>
+				<a class="permalink" href="index.html#DigestHash">&#xb6;</a>
+			</h2>
+			<p>
+DigestHash data buffer
+</p>
+
+			<pre>type DigestHash []<a href="http://localhost:6060/pkg/builtin/#byte">byte</a></pre>
+
+			
+
+			
+
+			
+			
+			
+
+			
+
+			
+				
+				<h3 id="DigestHash.Hex">func (DigestHash) <a href="http://localhost:6060/src/github.com/smartedge/codechallenge/keys.go?s=10205:10240#L339">Hex</a>
+					<a class="permalink" href="index.html#DigestHash.Hex">&#xb6;</a>
+				</h3>
+				<pre>func (hash <a href="index.html#DigestHash">DigestHash</a>) Hex() <a href="http://localhost:6060/pkg/builtin/#string">string</a></pre>
+				<p>
+Hex renders the hash digest as a hex string.
+This is primarily for debugging and error messages.
+</p>
+
+				
+				
+				
+			
+		
+			
+			
+			<h2 id="ECDSAPlugin">type <a href="http://localhost:6060/src/github.com/smartedge/codechallenge/keys.go?s=1121:1146#L43">ECDSAPlugin</a>
+				<a class="permalink" href="index.html#ECDSAPlugin">&#xb6;</a>
+			</h2>
+			<p>
+ECDSAPlugin Implementation details for ECDSA.
+</p>
+
+			<pre>type ECDSAPlugin struct{}</pre>
+
+			
+
+			
+
+			
+			
+			
+
+			
+
+			
+				
+				<h3 id="ECDSAPlugin.GenKeyPair">func (*ECDSAPlugin) <a href="http://localhost:6060/src/github.com/smartedge/codechallenge/keys.go?s=1212:1319#L46">GenKeyPair</a>
+					<a class="permalink" href="index.html#ECDSAPlugin.GenKeyPair">&#xb6;</a>
+				</h3>
+				<pre>func (p *<a href="index.html#ECDSAPlugin">ECDSAPlugin</a>) GenKeyPair(randReader <a href="http://localhost:6060/pkg/io/">io</a>.<a href="http://localhost:6060/pkg/io/#Reader">Reader</a>) (pubKey <a href="index.html#X509Encoded">X509Encoded</a>, privKey <a href="index.html#X509Encoded">X509Encoded</a>, err <a href="http://localhost:6060/pkg/builtin/#error">error</a>)</pre>
+				<p>
+GenKeyPair generates a new ECDSA public and private key pair
+</p>
+
+				
+				
+				
+			
+				
+				<h3 id="ECDSAPlugin.GetAlgorithmName">func (*ECDSAPlugin) <a href="http://localhost:6060/src/github.com/smartedge/codechallenge/keys.go?s=3082:3129#L100">GetAlgorithmName</a>
+					<a class="permalink" href="index.html#ECDSAPlugin.GetAlgorithmName">&#xb6;</a>
+				</h3>
+				<pre>func (p *<a href="index.html#ECDSAPlugin">ECDSAPlugin</a>) GetAlgorithmName() <a href="http://localhost:6060/pkg/builtin/#string">string</a></pre>
+				<p>
+GetAlgorithmName returns the string &#34;ECDSA&#34;
+</p>
+
+				
+				
+				
+			
+				
+				<h3 id="ECDSAPlugin.HashMessage">func (*ECDSAPlugin) <a href="http://localhost:6060/src/github.com/smartedge/codechallenge/keys.go?s=2127:2187#L71">HashMessage</a>
+					<a class="permalink" href="index.html#ECDSAPlugin.HashMessage">&#xb6;</a>
+				</h3>
+				<pre>func (p *<a href="index.html#ECDSAPlugin">ECDSAPlugin</a>) HashMessage(message <a href="http://localhost:6060/pkg/builtin/#string">string</a>) <a href="index.html#DigestHash">DigestHash</a></pre>
+				<p>
+HashMessage respecting whatever salting is necessary, Since
+ECDSA needs no special hashing, this is a thin wrapper over
+crypto/sha256.Sum256()
+</p>
+
+				
+				
+				
+			
+				
+				<h3 id="ECDSAPlugin.InjestPrivateKey">func (*ECDSAPlugin) <a href="http://localhost:6060/src/github.com/smartedge/codechallenge/keys.go?s=1828:1921#L64">InjestPrivateKey</a>
+					<a class="permalink" href="index.html#ECDSAPlugin.InjestPrivateKey">&#xb6;</a>
+				</h3>
+				<pre>func (p *<a href="index.html#ECDSAPlugin">ECDSAPlugin</a>) InjestPrivateKey(privKey <a href="index.html#X509Encoded">X509Encoded</a>) (signer <a href="http://localhost:6060/pkg/crypto/">crypto</a>.<a href="http://localhost:6060/pkg/crypto/#Signer">Signer</a>, err <a href="http://localhost:6060/pkg/builtin/#error">error</a>)</pre>
+				<p>
+InjestPrivateKey loads a ECDSA private key from a X509Encoded buffer,
+</p>
+
+				
+				
+				
+			
+				
+				<h3 id="ECDSAPlugin.VerifySignature">func (*ECDSAPlugin) <a href="http://localhost:6060/src/github.com/smartedge/codechallenge/keys.go?s=2334:2452#L77">VerifySignature</a>
+					<a class="permalink" href="index.html#ECDSAPlugin.VerifySignature">&#xb6;</a>
+				</h3>
+				<pre>func (p *<a href="index.html#ECDSAPlugin">ECDSAPlugin</a>) VerifySignature(sha256Hash <a href="index.html#DigestHash">DigestHash</a>, binSig <a href="index.html#BinarySignature">BinarySignature</a>, pubKey <a href="index.html#X509Encoded">X509Encoded</a>) (<a href="http://localhost:6060/pkg/builtin/#bool">bool</a>, <a href="http://localhost:6060/pkg/builtin/#error">error</a>)</pre>
+				<p>
+VerifySignature verifies a ECDSA signature for a message digest,
+</p>
+
+				
+				
+				
+			
+		
+			
+			
+			<h2 id="IoDependencies">type <a href="http://localhost:6060/src/github.com/smartedge/codechallenge/dependencies.go?s=1093:1152#L31">IoDependencies</a>
+				<a class="permalink" href="index.html#IoDependencies">&#xb6;</a>
+			</h2>
+			<p>
+IoDependencies contains all external dependencies from the io package.
+</p>
+
+			<pre>type IoDependencies struct {
+<span id="IoDependencies.Ioutil"></span>    Ioutil <a href="index.html#IoIoutilDependencies">IoIoutilDependencies</a>
+}</pre>
+
+			
+
+			
+
+			
+			
+			
+
+			
+
+			
+		
+			
+			
+			<h2 id="IoIoutilDependencies">type <a href="http://localhost:6060/src/github.com/smartedge/codechallenge/dependencies.go?s=890:1017#L25">IoIoutilDependencies</a>
+				<a class="permalink" href="index.html#IoIoutilDependencies">&#xb6;</a>
+			</h2>
+			<p>
+IoIoutilDependencies contains all external dependencies from the io/ioutils package.
+</p>
+
+			<pre>type IoIoutilDependencies struct {
+<span id="IoIoutilDependencies.WriteFile"></span>    WriteFile func(<a href="http://localhost:6060/pkg/builtin/#string">string</a>, []<a href="http://localhost:6060/pkg/builtin/#byte">byte</a>, <a href="http://localhost:6060/pkg/os/">os</a>.<a href="http://localhost:6060/pkg/os/#FileMode">FileMode</a>) <a href="http://localhost:6060/pkg/builtin/#error">error</a>
+<span id="IoIoutilDependencies.ReadFile"></span>    ReadFile  func(<a href="http://localhost:6060/pkg/builtin/#string">string</a>) ([]<a href="http://localhost:6060/pkg/builtin/#byte">byte</a>, <a href="http://localhost:6060/pkg/builtin/#error">error</a>)
+}</pre>
+
+			
+
+			
+
+			
+			
+			
+
+			
+
+			
+		
+			
+			
+			<h2 id="KeyType">type <a href="http://localhost:6060/src/github.com/smartedge/codechallenge/keys.go?s=299:315#L13">KeyType</a>
+				<a class="permalink" href="index.html#KeyType">&#xb6;</a>
+			</h2>
+			<p>
+KeyType indicates if the key is public or private
+</p>
+
+			<pre>type KeyType <a href="http://localhost:6060/pkg/builtin/#int">int</a></pre>
+
+			
+				<p>
+PublicKey indicates a public key
+</p>
+
+				<pre>const (
+    <span id="PublicKey">PublicKey</span> <a href="index.html#KeyType">KeyType</a> = <a href="http://localhost:6060/pkg/builtin/#iota">iota</a>
+    <span id="PrivateKey">PrivateKey</span>
+)</pre>
+			
+
+			
+
+			
+			
+			
+
+			
+
+			
+				
+				<h3 id="KeyType.String">func (KeyType) <a href="http://localhost:6060/src/github.com/smartedge/codechallenge/keys.go?s=402:434#L21">String</a>
+					<a class="permalink" href="index.html#KeyType.String">&#xb6;</a>
+				</h3>
+				<pre>func (t <a href="index.html#KeyType">KeyType</a>) String() <a href="http://localhost:6060/pkg/builtin/#string">string</a></pre>
+				
+				
+				
+				
+			
+		
+			
+			
+			<h2 id="OsDependencies">type <a href="http://localhost:6060/src/github.com/smartedge/codechallenge/dependencies.go?s=121:504#L1">OsDependencies</a>
+				<a class="permalink" href="index.html#OsDependencies">&#xb6;</a>
+			</h2>
+			<p>
+OsDependencies contains all external dependencies from the os package.
+</p>
+
+			<pre>type OsDependencies struct {
+<span id="OsDependencies.Args"></span>    Args      []<a href="http://localhost:6060/pkg/builtin/#string">string</a>
+<span id="OsDependencies.Stdin"></span>    Stdin     <a href="http://localhost:6060/pkg/io/">io</a>.<a href="http://localhost:6060/pkg/io/#Reader">Reader</a>
+<span id="OsDependencies.Stdout"></span>    Stdout    <a href="http://localhost:6060/pkg/io/">io</a>.<a href="http://localhost:6060/pkg/io/#Writer">Writer</a>
+<span id="OsDependencies.Stderr"></span>    Stderr    <a href="http://localhost:6060/pkg/io/">io</a>.<a href="http://localhost:6060/pkg/io/#Writer">Writer</a>
+<span id="OsDependencies.Exit"></span>    Exit      func(<a href="http://localhost:6060/pkg/builtin/#int">int</a>)
+<span id="OsDependencies.Getenv"></span>    Getenv    func(<a href="http://localhost:6060/pkg/builtin/#string">string</a>) <a href="http://localhost:6060/pkg/builtin/#string">string</a>
+<span id="OsDependencies.Setenv"></span>    Setenv    func(<a href="http://localhost:6060/pkg/builtin/#string">string</a>, <a href="http://localhost:6060/pkg/builtin/#string">string</a>) <a href="http://localhost:6060/pkg/builtin/#error">error</a>
+<span id="OsDependencies.MkdirAll"></span>    MkdirAll  func(<a href="http://localhost:6060/pkg/builtin/#string">string</a>, <a href="http://localhost:6060/pkg/os/">os</a>.<a href="http://localhost:6060/pkg/os/#FileMode">FileMode</a>) <a href="http://localhost:6060/pkg/builtin/#error">error</a>
+<span id="OsDependencies.RemoveAll"></span>    RemoveAll func(<a href="http://localhost:6060/pkg/builtin/#string">string</a>) <a href="http://localhost:6060/pkg/builtin/#error">error</a>
+<span id="OsDependencies.Stat"></span>    Stat      func(<a href="http://localhost:6060/pkg/builtin/#string">string</a>) (<a href="http://localhost:6060/pkg/os/">os</a>.<a href="http://localhost:6060/pkg/os/#FileInfo">FileInfo</a>, <a href="http://localhost:6060/pkg/builtin/#error">error</a>)
+<span id="OsDependencies.Chown"></span>    Chown     func(<a href="http://localhost:6060/pkg/builtin/#string">string</a>, <a href="http://localhost:6060/pkg/builtin/#int">int</a>, <a href="http://localhost:6060/pkg/builtin/#int">int</a>) <a href="http://localhost:6060/pkg/builtin/#error">error</a>
+<span id="OsDependencies.Getuid"></span>    Getuid    func() <a href="http://localhost:6060/pkg/builtin/#int">int</a>
+}</pre>
+
+			
+
+			
+
+			
+			
+			
+
+			
+
+			
+		
+			
+			
+			<h2 id="PEMEncoded">type <a href="http://localhost:6060/src/github.com/smartedge/codechallenge/keys.go?s=9462:9484#L313">PEMEncoded</a>
+				<a class="permalink" href="index.html#PEMEncoded">&#xb6;</a>
+			</h2>
+			<p>
+PEMEncoded text data buffer
+</p>
+
+			<pre>type PEMEncoded []<a href="http://localhost:6060/pkg/builtin/#byte">byte</a></pre>
+
+			
+
+			
+
+			
+			
+			
+
+			
+				
+				<h3 id="DecodeAndLoadKey">func <a href="http://localhost:6060/src/github.com/smartedge/codechallenge/keys.go?s=11708:11796#L395">DecodeAndLoadKey</a>
+					<a class="permalink" href="index.html#DecodeAndLoadKey">&#xb6;</a>
+				</h3>
+				<pre>func DecodeAndLoadKey(d *<a href="index.html#Dependencies">Dependencies</a>, filename <a href="http://localhost:6060/pkg/builtin/#string">string</a>) (<a href="index.html#PEMEncoded">PEMEncoded</a>, <a href="index.html#X509Encoded">X509Encoded</a>, <a href="http://localhost:6060/pkg/builtin/#error">error</a>)</pre>
+				<p>
+DecodeAndLoadKey loads PEM encoded file and decodes it into a
+x509 encoded key block. Returns PEM encoded data with key block.
+</p>
+
+				
+				
+			
+				
+				<h3 id="EncodeAndSaveKey">func <a href="http://localhost:6060/src/github.com/smartedge/codechallenge/keys.go?s=11089:11241#L370">EncodeAndSaveKey</a>
+					<a class="permalink" href="index.html#EncodeAndSaveKey">&#xb6;</a>
+				</h3>
+				<pre>func EncodeAndSaveKey(
+    d *<a href="index.html#Dependencies">Dependencies</a>,
+    keyBuf <a href="index.html#X509Encoded">X509Encoded</a>,
+    algorithm <a href="http://localhost:6060/pkg/builtin/#string">string</a>,
+    kt <a href="index.html#KeyType">KeyType</a>,
+    filename <a href="http://localhost:6060/pkg/builtin/#string">string</a>,
+    perm <a href="http://localhost:6060/pkg/os/">os</a>.<a href="http://localhost:6060/pkg/os/#FileMode">FileMode</a>,
+) (<a href="index.html#PEMEncoded">PEMEncoded</a>, <a href="http://localhost:6060/pkg/builtin/#error">error</a>)</pre>
+				<p>
+EncodeAndSaveKey PEM encodes a x509 encoded key and writes it to
+a file. Returns the PEM encoded string data.
+</p>
+
+				
+				
+			
+				
+				<h3 id="NewPEMBufferFromString">func <a href="http://localhost:6060/src/github.com/smartedge/codechallenge/keys.go?s=9546:9596#L316">NewPEMBufferFromString</a>
+					<a class="permalink" href="index.html#NewPEMBufferFromString">&#xb6;</a>
+				</h3>
+				<pre>func NewPEMBufferFromString(src <a href="http://localhost:6060/pkg/builtin/#string">string</a>) <a href="index.html#PEMEncoded">PEMEncoded</a></pre>
+				<p>
+NewPEMBufferFromString turns a string into a PEM buffer.
+</p>
+
+				
+				
+			
+
+			
+				
+				<h3 id="PEMEncoded.DecodeToX509">func (PEMEncoded) <a href="http://localhost:6060/src/github.com/smartedge/codechallenge/keys.go?s=9827:9887#L326">DecodeToX509</a>
+					<a class="permalink" href="index.html#PEMEncoded.DecodeToX509">&#xb6;</a>
+				</h3>
+				<pre>func (pemBuf <a href="index.html#PEMEncoded">PEMEncoded</a>) DecodeToX509() (<a href="index.html#X509Encoded">X509Encoded</a>, <a href="http://localhost:6060/pkg/builtin/#error">error</a>)</pre>
+				<p>
+DecodeToX509 decodes the PEM key data block to a x509 buffer
+</p>
+
+				
+				
+				
+			
+				
+				<h3 id="PEMEncoded.String">func (PEMEncoded) <a href="http://localhost:6060/src/github.com/smartedge/codechallenge/keys.go?s=9686:9726#L321">String</a>
+					<a class="permalink" href="index.html#PEMEncoded.String">&#xb6;</a>
+				</h3>
+				<pre>func (pemBuf <a href="index.html#PEMEncoded">PEMEncoded</a>) String() <a href="http://localhost:6060/pkg/builtin/#string">string</a></pre>
+				<p>
+String renders the PEM encoded data as a string.
+</p>
+
+				
+				
+				
+			
+		
+			
+			
+			<h2 id="PkiSettings">type <a href="http://localhost:6060/src/github.com/smartedge/codechallenge/options.go?s=430:563#L18">PkiSettings</a>
+				<a class="permalink" href="index.html#PkiSettings">&#xb6;</a>
+			</h2>
+			<p>
+PkiSettings are the public key settings as specified on the command line.
+</p>
+
+			<pre>type PkiSettings struct {
+<span id="PkiSettings.Algorithm"></span>    Algorithm      <a href="http://localhost:6060/pkg/crypto/x509/">x509</a>.<a href="http://localhost:6060/pkg/crypto/x509/#PublicKeyAlgorithm">PublicKeyAlgorithm</a>
+<span id="PkiSettings.RSAKeyBits"></span>    RSAKeyBits     <a href="http://localhost:6060/pkg/builtin/#int">int</a>
+<span id="PkiSettings.PrivateKeyPath"></span>    PrivateKeyPath <a href="http://localhost:6060/pkg/builtin/#string">string</a>
+<span id="PkiSettings.PublicKeyPath"></span>    PublicKeyPath  <a href="http://localhost:6060/pkg/builtin/#string">string</a>
+}</pre>
+
+			
+
+			
+
+			
+			
+			
+
+			
+
+			
+		
+			
+			
+			<h2 id="RSAPlugin">type <a href="http://localhost:6060/src/github.com/smartedge/codechallenge/keys.go?s=3196:3233#L105">RSAPlugin</a>
+				<a class="permalink" href="index.html#RSAPlugin">&#xb6;</a>
+			</h2>
+			<p>
+RSAPlugin Implementation details for RSA.
+</p>
+
+			<pre>type RSAPlugin struct {
+<span id="RSAPlugin.KeyLen"></span>    KeyLen <a href="http://localhost:6060/pkg/builtin/#int">int</a>
+}</pre>
+
+			
+
+			
+
+			
+			
+			
+
+			
+
+			
+				
+				<h3 id="RSAPlugin.GenKeyPair">func (*RSAPlugin) <a href="http://localhost:6060/src/github.com/smartedge/codechallenge/keys.go?s=3297:3402#L110">GenKeyPair</a>
+					<a class="permalink" href="index.html#RSAPlugin.GenKeyPair">&#xb6;</a>
+				</h3>
+				<pre>func (p *<a href="index.html#RSAPlugin">RSAPlugin</a>) GenKeyPair(randReader <a href="http://localhost:6060/pkg/io/">io</a>.<a href="http://localhost:6060/pkg/io/#Reader">Reader</a>) (pubKey <a href="index.html#X509Encoded">X509Encoded</a>, privKey <a href="index.html#X509Encoded">X509Encoded</a>, err <a href="http://localhost:6060/pkg/builtin/#error">error</a>)</pre>
+				<p>
+GenKeyPair generates a new RSA public and private key pair
+</p>
+
+				
+				
+				
+			
+				
+				<h3 id="RSAPlugin.GetAlgorithmName">func (*RSAPlugin) <a href="http://localhost:6060/src/github.com/smartedge/codechallenge/keys.go?s=4983:5028#L162">GetAlgorithmName</a>
+					<a class="permalink" href="index.html#RSAPlugin.GetAlgorithmName">&#xb6;</a>
+				</h3>
+				<pre>func (p *<a href="index.html#RSAPlugin">RSAPlugin</a>) GetAlgorithmName() <a href="http://localhost:6060/pkg/builtin/#string">string</a></pre>
+				<p>
+GetAlgorithmName returns the string &#34;RSA&#34;
+</p>
+
+				
+				
+				
+			
+				
+				<h3 id="RSAPlugin.HashMessage">func (*RSAPlugin) <a href="http://localhost:6060/src/github.com/smartedge/codechallenge/keys.go?s=4062:4120#L130">HashMessage</a>
+					<a class="permalink" href="index.html#RSAPlugin.HashMessage">&#xb6;</a>
+				</h3>
+				<pre>func (p *<a href="index.html#RSAPlugin">RSAPlugin</a>) HashMessage(message <a href="http://localhost:6060/pkg/builtin/#string">string</a>) <a href="index.html#DigestHash">DigestHash</a></pre>
+				<p>
+HashMessage respecting whatever salting is necessary, Here we
+handle PSS salting
+</p>
+
+				
+				
+				
+			
+				
+				<h3 id="RSAPlugin.InjestPrivateKey">func (*RSAPlugin) <a href="http://localhost:6060/src/github.com/smartedge/codechallenge/keys.go?s=3827:3918#L124">InjestPrivateKey</a>
+					<a class="permalink" href="index.html#RSAPlugin.InjestPrivateKey">&#xb6;</a>
+				</h3>
+				<pre>func (p *<a href="index.html#RSAPlugin">RSAPlugin</a>) InjestPrivateKey(privKey <a href="index.html#X509Encoded">X509Encoded</a>) (signer <a href="http://localhost:6060/pkg/crypto/">crypto</a>.<a href="http://localhost:6060/pkg/crypto/#Signer">Signer</a>, err <a href="http://localhost:6060/pkg/builtin/#error">error</a>)</pre>
+				<p>
+InjestPrivateKey loads a RSA private key from a X509Encoded buffer,
+</p>
+
+				
+				
+				
+			
+				
+				<h3 id="RSAPlugin.VerifySignature">func (*RSAPlugin) <a href="http://localhost:6060/src/github.com/smartedge/codechallenge/keys.go?s=4284:4400#L137">VerifySignature</a>
+					<a class="permalink" href="index.html#RSAPlugin.VerifySignature">&#xb6;</a>
+				</h3>
+				<pre>func (p *<a href="index.html#RSAPlugin">RSAPlugin</a>) VerifySignature(sha256Hash <a href="index.html#DigestHash">DigestHash</a>, binSig <a href="index.html#BinarySignature">BinarySignature</a>, pubKey <a href="index.html#X509Encoded">X509Encoded</a>) (<a href="http://localhost:6060/pkg/builtin/#bool">bool</a>, <a href="http://localhost:6060/pkg/builtin/#error">error</a>)</pre>
+				<p>
+VerifySignature verifies a RSA signature for a message digest,
+</p>
+
+				
+				
+				
+			
+		
+			
+			
+			<h2 id="RunConfig">type <a href="http://localhost:6060/src/github.com/smartedge/codechallenge/options.go?s=637:720#L26">RunConfig</a>
+				<a class="permalink" href="index.html#RunConfig">&#xb6;</a>
+			</h2>
+			<p>
+RunConfig program&#39;s running config as specified on the command line.
+</p>
+
+			<pre>type RunConfig struct {
+<span id="RunConfig.Format"></span>    Format         <a href="index.html#ContentFormat">ContentFormat</a>
+<span id="RunConfig.PubKeySettings"></span>    PubKeySettings <a href="index.html#PkiSettings">PkiSettings</a>
+}</pre>
+
+			
+
+			
+
+			
+			
+			
+
+			
+				
+				<h3 id="ParseArgs">func <a href="http://localhost:6060/src/github.com/smartedge/codechallenge/options.go?s=801:852#L32">ParseArgs</a>
+					<a class="permalink" href="index.html#ParseArgs">&#xb6;</a>
+				</h3>
+				<pre>func ParseArgs(d *<a href="index.html#Dependencies">Dependencies</a>) (*<a href="index.html#RunConfig">RunConfig</a>, <a href="http://localhost:6060/pkg/builtin/#error">error</a>)</pre>
+				<p>
+ParseArgs parses the runtime configuration from the command line arguemnts.
+</p>
+
+				
+				
+			
+
+			
+		
+			
+			
+			<h2 id="SignedMessage">type <a href="http://localhost:6060/src/github.com/smartedge/codechallenge/response.go?s=122:257#L1">SignedMessage</a>
+				<a class="permalink" href="index.html#SignedMessage">&#xb6;</a>
+			</h2>
+			<p>
+SignedMessage the final response to be rendered to JSON.
+</p>
+
+			<pre>type SignedMessage struct {
+<span id="SignedMessage.Message"></span>    Message   <a href="http://localhost:6060/pkg/builtin/#string">string</a> `json:&#34;message&#34;`
+<span id="SignedMessage.Signature"></span>    Signature <a href="http://localhost:6060/pkg/builtin/#string">string</a> `json:&#34;signature&#34;`
+<span id="SignedMessage.Pubkey"></span>    Pubkey    <a href="http://localhost:6060/pkg/builtin/#string">string</a> `json:&#34;pubkey&#34;`
+}</pre>
+
+			
+
+			
+
+			
+			
+			
+
+			
+
+			
+		
+			
+			
+			<h2 id="X509Encoded">type <a href="http://localhost:6060/src/github.com/smartedge/codechallenge/keys.go?s=9088:9111#L301">X509Encoded</a>
+				<a class="permalink" href="index.html#X509Encoded">&#xb6;</a>
+			</h2>
+			<p>
+X509Encoded data buffer
+</p>
+
+			<pre>type X509Encoded []<a href="http://localhost:6060/pkg/builtin/#byte">byte</a></pre>
+
+			
+
+			
+
+			
+			
+			
+
+			
+
+			
+				
+				<h3 id="X509Encoded.EncodeToPEM">func (X509Encoded) <a href="http://localhost:6060/src/github.com/smartedge/codechallenge/keys.go?s=9169:9242#L304">EncodeToPEM</a>
+					<a class="permalink" href="index.html#X509Encoded.EncodeToPEM">&#xb6;</a>
+				</h3>
+				<pre>func (x <a href="index.html#X509Encoded">X509Encoded</a>) EncodeToPEM(algorithm <a href="http://localhost:6060/pkg/builtin/#string">string</a>, kt <a href="index.html#KeyType">KeyType</a>) <a href="index.html#PEMEncoded">PEMEncoded</a></pre>
+				<p>
+EncodeToPEM encodes the x509 key as a PEM text block
+</p>
+
+				
+				
+				
+			
+		
+	
+
+	
+
+
+
+
+
+	
+	
+		<h2 id="pkg-subdirectories">Subdirectories</h2>
+	
+	
+
+
+	<div class="pkg-dir">
+		<table>
+			<tr>
+				<th class="pkg-name">Name</th>
+				<th class="pkg-synopsis">Synopsis</th>
+			</tr>
+
+			
+			<tr>
+				<td colspan="2"><a href="http://localhost:6060/pkg/github.com/smartedge/">..</a></td>
+			</tr>
+			
+
+			
+				
+					<tr>
+						<td class="pkg-name" style="padding-left: 0px;">
+							<a href="codechallenge/index.html">codechallenge</a>
+						</td>
+						<td class="pkg-synopsis">
+							Package codechallenge is a stub to call into the main body of the program.
+						</td>
+					</tr>
+				
+			
+				
+					<tr>
+						<td class="pkg-name" style="padding-left: 0px;">
+							<a href="testtools/index.html">testtools</a>
+						</td>
+						<td class="pkg-synopsis">
+							
+						</td>
+					</tr>
+				
+			
+				
+					<tr>
+						<td class="pkg-name" style="padding-left: 20px;">
+							<a href="testtools/mocks/index.html">mocks</a>
+						</td>
+						<td class="pkg-synopsis">
+							
+						</td>
+					</tr>
+				
+			
+		</table>
+	</div>
+
+
+	
+
+
+
+<div id="footer">
+Build version go1.10.8.<br>
+Except as <a href="https://developers.google.com/site-policies#restrictions">noted</a>,
+the content of this page is licensed under the
+Creative Commons Attribution 3.0 License,
+and code is licensed under a <a href="http://localhost:6060/LICENSE">BSD license</a>.<br>
+<a href="http://localhost:6060/doc/tos.html">Terms of Service</a> |
+<a href="http://www.google.com/intl/en/policies/privacy/">Privacy Policy</a>
+</div>
+
+</div><!-- .container -->
+</div><!-- #page -->
+
+<!-- TODO(adonovan): load these from <head> using "defer" attribute? -->
+<script type="text/javascript" src="../../../../lib/godoc/jquery.js"></script>
+<script type="text/javascript" src="../../../../lib/godoc/jquery.treeview.js"></script>
+<script type="text/javascript" src="../../../../lib/godoc/jquery.treeview.edit.js"></script>
+
+
+<script>var goVersion = "go1.10.8";</script>
+<script type="text/javascript" src="../../../../lib/godoc/godocs.js"></script>
+
+</body>
+</html>
+
