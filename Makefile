@@ -69,6 +69,7 @@ demo: event_timestamps/demo_image
 		--rm                                      \
 		-i --tty                                  \
 		demo_image:latest )
+	@echo
 
 event_timestamps: Makefile
 	@$(strip bash -c \

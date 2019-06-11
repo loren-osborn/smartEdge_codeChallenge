@@ -28,7 +28,8 @@ echo
 # Scrape the pkg directory for the API docs. Scrap lib for the CSS/JS. Ignore everything else.
 # The output is dumped to the directory "localhost:6060".
 wget -r -m -k -E -np -p -erobots=off --include-directories="/pkg,/lib" \
-	--exclude-directories="*" "http://localhost:6060/pkg/$PKG/"
+	--exclude-directories="*" "http://localhost:6060/pkg/$PKG/" \
+	"http://localhost:6060/src/$PKG/"
 
 # Stop the godoc server
 kill -9 $DOC_PID

@@ -13,16 +13,6 @@ import (
 	"unicode/utf8"
 )
 
-// DummyRealMain is the example program supplied as an example for this project
-// of working with docker... It will be removed.
-func DummyRealMain(d *Dependencies) {
-	fmt.Fprintln(d.Os.Stdout, `{
-    "message":"theAnswerIs42",
-    "signature":"MGUCMCDwlFyVdD620p0hRLtABoJTR7UNgwj8g2r0ipNbWPi4Us57YfxtSQJ3dAkHslyBbwIxAKorQmpWl9QdlBUtACcZm4kEXfL37lJ+gZ/hANcTyuiTgmwcEC0FvEXY35u2bKFwhA==",
-    "pubkey":"-----BEGIN PUBLIC KEY-----\nMHYwEAYHKoZIzj0CAQYFK4EEACIDYgAEI5/0zKsIzou9hL3ZdjkvBeVZFKpDwxTb\nfiDVjHpJdu3+qOuaKYgsLLiO9TFfupMYHLa20IqgbJSIv/wjxANH68aewV1q2Wn6\nvLA3yg2mOTa/OHAZEiEf7bVEbnAov+6D\n-----END PUBLIC KEY-----\n"
-}`)
-}
-
 // HandleError displays an error message with Usage information to Stderr,
 // and exits with an error code.
 func HandleError(d *Dependencies, err error, exitStatus int) {
@@ -91,7 +81,7 @@ func InjestMessage(dataSource io.Reader, format ContentFormat) (string, error) {
 			msg = strings.TrimRightFunc(msg, unicode.IsSpace)
 		}
 		if len(msg) > 250 {
-			return "", fmt.Errorf("Input contains more than 250 bytes:\n%#v", msg)
+			return "", fmt.Errorf("Input contains more than 250 bytes (exactly %d):\n%#v", len(msg), msg)
 		}
 		return msg, nil
 	case UTF8:

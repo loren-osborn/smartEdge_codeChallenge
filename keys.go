@@ -407,9 +407,10 @@ func DecodeAndLoadKey(d *Dependencies, filename string) (PEMEncoded, X509Encoded
 	if err != nil {
 		return nil, nil, err
 	}
-	blockPub, _ := pem.Decode([]byte(pemEncodedKey))
-	if blockPub == nil {
-		return nil, nil, errors.New("No PEM data was found")
+	pemKey := PEMEncoded(pemEncodedKey)
+	x509Key, err := pemKey.DecodeToX509()
+	if err != nil {
+		return nil, nil, err
 	}
-	return PEMEncoded(pemEncodedKey), X509Encoded(blockPub.Bytes), nil
+	return pemKey, x509Key, err
 }
