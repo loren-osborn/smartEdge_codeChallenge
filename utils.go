@@ -6,6 +6,7 @@ import (
 	"path/filepath"
 	"strconv"
 	"strings"
+	"unicode/utf8"
 )
 
 // FileExists reports if a file exists.
@@ -65,4 +66,17 @@ func WriteDirAndFile(d *Dependencies, filename string, data []byte, filePerm os.
 		}
 	}
 	return cleanUpUids(d.Io.Ioutil.WriteFile(filename, data, filePerm))
+}
+
+// TrimRightUTF8Func is based on strings.TrimRightFunc(). It returns a slice of
+// the string s with all trailing Unicode code points c satisfying f(c) removed.
+// Because UTF-8 isn't one byte per character, we need to slice off one rune
+// at a time, instead of one byte
+func TrimRightUTF8Func(s string, f func(rune) bool) string {
+	c, cSize := utf8.DecodeLastRuneInString(s)
+	for (len(s) >= cSize) && f(c) {
+		s = s[:len(s)-cSize]
+		c, cSize = utf8.DecodeLastRuneInString(s)
+	}
+	return s
 }

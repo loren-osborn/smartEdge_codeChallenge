@@ -44,6 +44,7 @@ func (t KeyType) String() string {
 type AlgorithmPlugin interface {
 	GenKeyPair(randReader io.Reader) (pubKey X509Encoded, privKey X509Encoded, err error)
 	InjestPrivateKey(privKey X509Encoded) (signer crypto.Signer, err error)
+	HashMessage(message string) DigestHash
 	VerifySignature(sha256Hash DigestHash, binSig BinarySignature, pubKey X509Encoded) (bool, error)
 	GetAlgorithmName() string
 }
@@ -72,6 +73,14 @@ func (p *ECDSAPlugin) GenKeyPair(randReader io.Reader) (pubKey X509Encoded, priv
 // InjestPrivateKey loads a ECDSA private key from a X509Encoded buffer,
 func (p *ECDSAPlugin) InjestPrivateKey(privKey X509Encoded) (signer crypto.Signer, err error) {
 	return x509.ParseECPrivateKey([]byte(privKey))
+}
+
+// HashMessage respecting whatever salting is necessary, Since
+// ECDSA needs no special hashing, this is a thin wrapper over
+// crypto/sha256.Sum256()
+func (p *ECDSAPlugin) HashMessage(message string) DigestHash {
+	digest := sha256.Sum256([]byte(message))
+	return DigestHash(digest[0:])
 }
 
 // VerifySignature verifies a ECDSA signature for a message digest,
@@ -126,6 +135,14 @@ func (p *RSAPlugin) InjestPrivateKey(privKey X509Encoded) (signer crypto.Signer,
 	return x509.ParsePKCS1PrivateKey([]byte(privKey))
 }
 
+// HashMessage respecting whatever salting is necessary, Here we
+// handle PSS salting
+func (p *RSAPlugin) HashMessage(message string) DigestHash {
+	pssh := crypto.SHA256.New()
+	pssh.Write([]byte(message))
+	return DigestHash(pssh.Sum(nil))
+}
+
 // VerifySignature verifies a RSA signature for a message digest,
 func (p *RSAPlugin) VerifySignature(sha256Hash DigestHash, binSig BinarySignature, pubKey X509Encoded) (bool, error) {
 	// Decode the public key
@@ -139,7 +156,15 @@ func (p *RSAPlugin) VerifySignature(sha256Hash DigestHash, binSig BinarySignatur
 	}
 
 	// Verify signature
-	err = rsa.VerifyPKCS1v15(publicKey, crypto.SHA256, []byte(sha256Hash), []byte(binSig))
+	err = rsa.VerifyPSS(
+		publicKey,
+		crypto.SHA256,
+		[]byte(sha256Hash),
+		[]byte(binSig),
+		&rsa.PSSOptions{
+			SaltLength: rsa.PSSSaltLengthAuto,
+			Hash:       crypto.SHA256,
+		})
 	return err == nil, err
 }
 
@@ -237,17 +262,21 @@ func (ct *CryptoTooling) GetKeys() error {
 	return nil
 }
 
-// HashMessage is a thin wrapper over crypto/sha256.Sum256() to ease
-// type conversion.
+// HashMessage defers to the AlgPlugin to handle hashing.
 func (ct *CryptoTooling) HashMessage(msg string) DigestHash {
-	hash := sha256.Sum256([]byte(msg))
-	return DigestHash(hash[0:])
+	return ct.AlgPlugin.HashMessage(msg)
 }
 
 // Sign is a thin wrapper over cryptoSigner.Sign() to ease
 // type conversions and dependencies.
-func (ct *CryptoTooling) Sign(hash DigestHash) (BinarySignature, error) {
-	signature, err := ct.Signer.Sign(ct.D.Crypto.Rand.Reader, []byte(hash), &rsa.PSSOptions{Hash: crypto.SHA256})
+func (ct *CryptoTooling) Sign(digest DigestHash) (BinarySignature, error) {
+	signature, err := ct.Signer.Sign(
+		ct.D.Crypto.Rand.Reader,
+		[]byte(digest),
+		&rsa.PSSOptions{
+			SaltLength: rsa.PSSSaltLengthAuto,
+			Hash:       crypto.SHA256,
+		})
 	if err != nil {
 		return nil, err
 	}

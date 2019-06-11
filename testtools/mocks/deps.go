@@ -2,13 +2,13 @@ package mocks
 
 import (
 	"bytes"
-	"crypto/rand"
+	cryptoRand "crypto/rand"
 	"errors"
 	"flag"
 	"fmt"
 	"github.com/smartedge/codechallenge"
-	"github.com/smartedge/codechallenge/testtools"
 	"io/ioutil"
+	mathRand "math/rand"
 	"os"
 	"path/filepath"
 )
@@ -54,10 +54,7 @@ func NewDefaultMockDeps(stdinContent string, cmdLnArgs []string, homeDir string,
 			},
 			Crypto: codechallenge.CryptoDependencies{
 				Rand: codechallenge.CryptoRandDependencies{
-					Reader: &testtools.LoopReader{
-						// non-random bit shift pattern
-						Data: "\x00\x01\x03\x07\x0f\x1f\x3f\x7f\xff\xfe\xfc\xf8\xf0\xe0\xc0\x80",
-					},
+					Reader: mathRand.New(mathRand.NewSource(0x0123456789abcdef)),
 				},
 			},
 			Io: codechallenge.IoDependencies{
@@ -84,7 +81,7 @@ func NewDefaultMockDeps(stdinContent string, cmdLnArgs []string, homeDir string,
 			},
 			Crypto: codechallenge.CryptoDependencies{
 				Rand: codechallenge.CryptoRandDependencies{
-					Reader: rand.Reader,
+					Reader: cryptoRand.Reader,
 				},
 			},
 			Io: codechallenge.IoDependencies{

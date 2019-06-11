@@ -19,6 +19,11 @@ const (
 	Binary
 )
 
+// ReplaceAll tells strings.Replace() to replace all
+const (
+	ReplaceAll = -1
+)
+
 // PkiSettings are the public key settings as specified on the command line.
 type PkiSettings struct {
 	Algorithm      x509.PublicKeyAlgorithm
@@ -110,12 +115,12 @@ func ParseArgs(d *Dependencies) (*RunConfig, error) {
 		result.PubKeySettings.PrivateKeyPath,
 		"{{algorithm}}",
 		algorithmFlags[result.PubKeySettings.Algorithm].name,
-		0)
+		ReplaceAll)
 	result.PubKeySettings.PublicKeyPath = strings.Replace(
 		result.PubKeySettings.PublicKeyPath,
 		"{{algorithm}}",
 		algorithmFlags[result.PubKeySettings.Algorithm].name,
-		0)
+		ReplaceAll)
 	if *rsaKeyBits != 0 {
 		if result.PubKeySettings.Algorithm == x509.RSA {
 			return nil, errors.New("Options -bits is only valid for RSA")

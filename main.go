@@ -98,10 +98,7 @@ func InjestMessage(dataSource io.Reader, format ContentFormat) (string, error) {
 		if !utf8.ValidString(msg) {
 			return "", fmt.Errorf("Input contains invalid UTF-8 character(s):\n%#v", msg)
 		}
-		// Because UTF-8 isn't one byte per character, we can't use strings.TrimRightFunc():
-		for rChar, rCharLen := utf8.DecodeLastRuneInString(msg); (len(msg) >= rCharLen) && unicode.IsSpace(rChar); {
-			msg = msg[:len(msg)-rCharLen]
-		}
+		msg = TrimRightUTF8Func(msg, unicode.IsSpace)
 		charCount := utf8.RuneCountInString(msg)
 		if charCount > 250 {
 			return "", fmt.Errorf("Input contains more than 250 UTF-8 characters:\n%#v", msg)

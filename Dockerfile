@@ -6,6 +6,9 @@ FROM golang:1.10 AS golang_base
 ENV PROJECT_URI=github.com/smartedge/codechallenge
 ENV PROJECT_DIR=${GOPATH}/src/${PROJECT_URI}
 
+# Disable cgo to prevent dynamically linked binaries:
+ENV CGO_ENABLED=0
+
 # Create project directory and output directory
 RUN mkdir -p ${PROJECT_DIR} /output
 
@@ -17,9 +20,6 @@ FROM golang_base AS builder
 
 # Copy source code to project directory
 COPY . ${PROJECT_DIR}
-
-# Disable cgo to prevent dynamically linked binaries:
-ENV CGO_ENABLED=0
 
 # Compile and install code
 RUN go install ${PROJECT_URI}/codechallenge

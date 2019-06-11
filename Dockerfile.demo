@@ -1,0 +1,18 @@
+# I don't like these extra long lines, but don't know a clean
+# way to insert line breaks within a string.
+
+# Run tests in throwaway environment based on our clean build environment.
+FROM golang_base_image:latest AS demo
+
+# Copy source code to project directory
+COPY . ${PROJECT_DIR}
+
+# Compile and install code
+RUN go install ${PROJECT_URI}/codechallenge
+
+# We manually bind mount the source directory ourselves on use externally.
+
+# Configure the container entrypoint so that it automatically runs all
+# the tests, quality metrics and docs generation:
+ENTRYPOINT sh -xc \
+	"echo Do Re Mi Fa So La Ti Do | ${GOPATH}/bin/codechallenge -rsa"

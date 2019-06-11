@@ -18,7 +18,7 @@ PROD_SOURCE_FILES       = $(filter-out %_test.go,$(filter %.go, $(ALL_SOURCE_FIL
 GENERATED_FILES         = event_timestamps coverage.out coverage.html godoc .smartEdge
 # Putting "production_container_image" in seperate PRECIOUS_IMAGE_TAGS, as it
 # is a final output, and may be in use elsewhere on the system:
-DISCARDABLE_IMAGE_TAGS  = golang_base_image tester_image
+DISCARDABLE_IMAGE_TAGS  = golang_base_image tester_image demo_image
 PRECIOUS_IMAGE_TAGS     = production_container_image
 # This is a GNU make $(call ) function:
 RM_IMAGES_IF_PRESENT    = @bash -c 'for img_name in $(1) ; do if docker image inspect $$img_name >/dev/null 2>/dev/null ; then >&2 echo docker image rm $$img_name ; docker image rm $$img_name ; fi ; done'
@@ -41,6 +41,11 @@ event_timestamps/golang_base_image: Makefile Dockerfile event_timestamps
 	docker build --target golang_base -t golang_base_image .
 	touch $@
 
+event_timestamps/demo_image: Makefile Dockerfile.demo event_timestamps/golang_base_image \
+	event_timestamps $(PROD_SOURCE_FILES)
+	docker build -f Dockerfile.demo -t demo_image .
+	touch $@
+
 # Source files are pulled in as a volume, so the tester_image isn't dependant
 # on them
 event_timestamps/tester_image: event_timestamps/golang_base_image Makefile \
@@ -59,15 +64,11 @@ test coverage.out coverage.html godoc: event_timestamps/tester_image \
 		--env EXT_UID_GID="$$(id -u):$$(id -g)"   \
 		tester_image:latest)
 
-demo: event_timestamps/production_container_image
-	$(strip echo "Do Re Mi Fa So La Ti Do" |    \
-		docker run                              \
-		--rm                                    \
-		-i                                      \
-		-v "$$(pwd):/mnt/home"                  \
-		--env EXT_UID_GID="$$(id -u):$$(id -g)" \
-		production_container_image:latest       \
-		-rsa)
+demo: event_timestamps/demo_image
+	$(strip docker run                            \
+		--rm                                      \
+		-i --tty                                  \
+		demo_image:latest )
 
 event_timestamps: Makefile
 	@$(strip bash -c \
