@@ -1,5 +1,5 @@
 // Package codechallenge is a stub to call into the main body of the program.
-// Having this in a seperate main package allows us to test proper use of public
+// Having this in a separate main package allows us to test proper use of public
 // and private methods, variables and types. It also allows us to properly
 // document the public methods with godoc.
 package main
