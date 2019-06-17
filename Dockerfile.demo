@@ -8,7 +8,7 @@ FROM golang_base_image:latest AS demo
 COPY . ${PROJECT_DIR}
 
 # Compile and install code
-RUN go install ${PROJECT_URI}/codechallenge
+RUN go install ${PROJECT_URI}/cmd/codechallenge
 
 # We manually bind mount the source directory ourselves on use externally.
 

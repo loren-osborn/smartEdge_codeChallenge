@@ -4,13 +4,13 @@ CONTAINER_GOPATH       := $(shell docker run --rm golang:1.10 sh -c 'echo $$GOPA
 IMAGE_TAG               = codechal
 PROJECT_URI             = github.com/smartedge/codechallenge
 CONTAINER_PROJECT_DIR   = $(CONTAINER_GOPATH)/src/$(PROJECT_URI)
-ALL_SOURCE_FILES       := $(shell \
-	find . -type f "("            \
-		-name "*.go"         -or  \
-		-name "*.iml"        -or  \
-		-name "*.toml"       -or  \
-		-path "*/utils/*"    -or  \
-		-path "*/testdata/*"      \
+ALL_SOURCE_FILES       := $(shell   \
+	find . -type f "("              \
+		-name "*.go"           -or  \
+		-name "*.iml"          -or  \
+		-name "*.toml"         -or  \
+		-path "*/buildtools/*" -or  \
+		-path "*/testdata/*"        \
 	")" | sed -e 's,^\.\/,,')
 PROD_SOURCE_FILES       = $(filter-out %_test.go,$(filter %.go, $(ALL_SOURCE_FILES)))
 TEST_SOURCE_FILES       = $(filter %_test.go,$(ALL_SOURCE_FILES)) $(filter-out %.go, $(ALL_SOURCE_FILES))
@@ -28,7 +28,7 @@ default: event_timestamps/production_container_image demo
 
 .PRECIOUS: coverage.html
 
-.SECONDARY: test
+.SECONDARY: test gh-pages
 
 .PHONY: clean purge
 
@@ -64,6 +64,47 @@ test coverage.out coverage.html godoc: event_timestamps/tester_image \
 		--env EXT_UID_GID="$$(id -u):$$(id -g)"   \
 		tester_image:latest)
 
+event_timestamps/gh-pages: coverage.html godoc Makefile
+	@git diff --quiet master -- . || (echo "Branch gh-pages need to track remote master branch." ; exit 1)
+	$(strip bash -xc \
+		"git clone . ../tmp_smcc_ghpages                                            && \
+		pushd ../tmp_smcc_ghpages                                                   && \
+		git checkout gh-pages                                                       && \
+		git rm -rq README.md coverage.html godoc                                    && \
+		popd                                                                        && \
+		cp -R README.md coverage.html godoc ../tmp_smcc_ghpages                     && \
+		pushd ../tmp_smcc_ghpages                                                   && \
+		git add README.md coverage.html godoc                                       && \
+		exit_status=\"\$$?\"                                                        ;  \
+		if [ -z \"\$$exit_status\" ] || [ \"0\" -eq \"\$$exit_status\" ] ; then        \
+			if git diff --quiet HEAD -- . ; then                                       \
+				popd                                                                ;  \
+				rm -rf ../tmp_smcc_ghpages                                          ;  \
+				exit \$$?                                                           ;  \
+			fi                                                                      ;  \
+			git commit -m \"Automated update\"                                      && \
+			popd                                                                    && \
+			git remote add tmp_ghpages ../tmp_smcc_ghpages                          && \
+			git fetch tmp_ghpages                                                   && \
+			git branch -f gh-pages tmp_ghpages/gh-pages                             ;  \
+			exit_status=\"\$$?\"                                                    ;  \
+		fi                                                                          ;  \
+		popd                                                                        ;  \
+		git remote rm tmp_ghpages                                                   ;  \
+		exit_status_2=\"\$$?\"                                                      ;  \
+		rm -rf ../tmp_smcc_ghpages                                                  ;  \
+		exit_status_3=\"\$$?\"                                                      ;  \
+		if [ -n \"\$$exit_status\" ] && [ \"0\" -ne \"\$$exit_status\" ] ; then        \
+			exit \$$exit_status                                                     ;  \
+		fi                                                                          ;  \
+		if [ -n \"\$$exit_status_2\" ] && [ \"0\" -ne \"\$$exit_status_2\" ] ; then    \
+			exit \$$exit_status_2                                                   ;  \
+		fi                                                                          ;  \
+		exit \$$exit_status_3" )
+	touch $@
+
+gh-pages: event_timestamps/gh-pages
+
 demo: event_timestamps/demo_image
 	$(strip docker run                            \
 		--rm                                      \
@@ -78,9 +119,7 @@ build_local: event_timestamps Makefile $(PROD_SOURCE_FILES) test
 			"in $$GOPATH/src/$(PROJECT_URI) based on your current GOPATH" ;\
 			exit 1 ; \
 		fi'
-	@# Here we are codechallenge.exe to avoid collision with the
-	@# codechallenge/ directory. (This isn't a windows thing.)
-	go build -o codechallenge.exe $(PROJECT_URI)/codechallenge
+	go build -o codechallenge $(PROJECT_URI)/cmd/codechallenge
 
 event_timestamps: Makefile
 	@$(strip bash -c \
@@ -90,6 +129,11 @@ event_timestamps: Makefile
 		else                                     \
 			>&2 echo mkdir -p event_timestamps ; \
 			         mkdir -p event_timestamps ; \
+		fi')
+	@$(strip bash -c \
+		'if ! [ -f .git/hooks/pre-push ] ; then                   \
+			>&2 echo cp buildtools/pre-push .git/hooks/pre-push ; \
+			         cp buildtools/pre-push .git/hooks/pre-push ; \
 		fi')
 
 clean:

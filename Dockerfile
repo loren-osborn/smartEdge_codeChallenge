@@ -22,7 +22,7 @@ FROM golang_base AS builder
 COPY . ${PROJECT_DIR}
 
 # Compile and install code
-RUN go install ${PROJECT_URI}/codechallenge
+RUN go install ${PROJECT_URI}/cmd/codechallenge
 
 # Move binary to predictable location:
 #     (Utilize the shell to enable variable substitution for the

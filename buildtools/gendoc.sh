@@ -39,7 +39,7 @@ rm -rf $DOC_DIR
 mv localhost\:6060 $DOC_DIR
 
 # Some doc postprocessing to make it github & gh pages friendly:
-go run utils/filterdocs.go
+go run buildtools/filterdocs.go
 
 echo "Docs can be found in $DOC_DIR"
 echo "Replace /lib and /pkg in the gh-pages branch to update gh-pages"

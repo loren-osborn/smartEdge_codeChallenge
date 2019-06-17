@@ -1,0 +1,6 @@
+#!/bin/bash
+set -u
+
+if [ "$(git rev-parse --abbrev-ref HEAD)" = "master" ] ; then \
+	make gh-pages ;
+fi

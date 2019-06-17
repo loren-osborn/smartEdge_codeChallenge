@@ -40,7 +40,7 @@ The `Makefile` will then (by default):
     * "Lint" the code with [`revive`](https://github.com/mgechev/revive) (enhanced alternative to `golint`)
     * Run the unit tests with colorized [`gotest`](https://github.com/rakyll/gotest) (`go test` work-alike tool)
     * Produce an HTML [code coverage report in `coverage.html`](https://loren-osborn.github.io/smartEdge_codeChallenge/coverage.html)
-    * Generate [HTML godoc documentation](https://loren-osborn.github.io/smartEdge_codeChallenge/godoc/pkg/github.com/smartedge/codechallenge/index.html) by using modified tool [`utils/gendoc.sh`](https://github.com/loren-osborn/smartEdge_codeChallenge/blob/master/utils/gendoc.sh) from [https://gist.github.com/Kegsay/84ce060f237cb9ab4e0d2d321a91d920](https://gist.github.com/Kegsay/84ce060f237cb9ab4e0d2d321a91d920) to scrape the output of the official `godoc` tool with `wget`.
+    * Generate [HTML godoc documentation](https://loren-osborn.github.io/smartEdge_codeChallenge/godoc/pkg/github.com/smartedge/codechallenge/index.html) by using modified tool [`buildtools/gendoc.sh`](https://github.com/loren-osborn/smartEdge_codeChallenge/blob/master/buildtools/gendoc.sh) from [https://gist.github.com/Kegsay/84ce060f237cb9ab4e0d2d321a91d920](https://gist.github.com/Kegsay/84ce060f237cb9ab4e0d2d321a91d920) to scrape the output of the official `godoc` tool with `wget`.
 * Build the `production_container_image` in a `scratch` docker image
 * Build a `demo_image` and demonstrate running `echo Do Re Mi Fa So La Ti Do | ${GOPATH}/bin/codechallenge -rsa` in it
 
@@ -51,15 +51,7 @@ $  make build_local
 ```
 Then you can execute it with:
 ```
-$  ./codechallenge.exe 
-```
-(the `.exe` is to avoid collision with the directory name. To avoid this use `go install`)
-```
-$  go install github.com/smartedge/codechallenge/codechallenge
-```
-but this will require executing it with:
-```
-$  $GOPATH/bin/codechallenge
+$  ./codechallenge
 ```
 
 #### Command line options
@@ -97,7 +89,7 @@ This should help you find your way around the files in the repository:
 * Code in the `testtools/` directory provide comparison and utility functions for unit testing.
 
 #### Other directories in repository:
-* A bash script in the `utils/` directory helps scrape generated godoc documentation into HTML files.
+* A bash script in the `buildtools/` directory helps scrape generated godoc documentation into HTML files.
 * The `testdata/` directory contains test data used for comparison. (Currently the unused `valid_output_schema.json` from the specification document lives here.)
 
 #### Generated files:
@@ -118,10 +110,12 @@ This should help you find your way around the files in the repository:
 ### Future Development
 These are areas where I would improve this project given more time:
 * Easy wins (minimal effort changes)
+    * ~~Move entrypoint stub into `cmd/codechallenge` to avoid silly Windows-esque `codechallenge.exe` filename.~~
     * Make the "Usage" output match the output above.
     * Add a exit-status 0  `-help` option
     * Move `dependencies.go` and `keys.go` into `deps` and `crypt` sub-packes to aid organizational
         clarity of documentation. `keys.go` should be broken into 4 files: 1 for each of the 2 plugins, 1 for buffer types, and one for everything else.
+* ~~Automate godoc link translation.~~
 * Testing:
     * Bring the project to 100% test coverage: Both for production code and testtools code.
     * Add BDD tests for "bullet point" features (and feature details) for feature tracability.
