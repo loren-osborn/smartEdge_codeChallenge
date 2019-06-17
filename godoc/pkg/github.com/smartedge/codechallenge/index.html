@@ -445,14 +445,16 @@ and exits with an error code.
 		
 			
 			
-			<h2 id="InjestMessage">func <a href="https://github.com/loren-osborn/smartEdge_codeChallenge/blob/master/main.go#L65">InjestMessage</a>
+			<h2 id="InjestMessage">func <a href="https://github.com/loren-osborn/smartEdge_codeChallenge/blob/master/main.go#L67">InjestMessage</a>
 				<a class="permalink" href="index.html#InjestMessage">&#xb6;</a>
 			</h2>
 			<pre>func InjestMessage(dataSource <a href="https://golang.org/pkg/io/">io</a>.<a href="https://golang.org/pkg/io/#Reader">Reader</a>, format <a href="index.html#ContentFormat">ContentFormat</a>) (<a href="https://golang.org/pkg/builtin/#string">string</a>, <a href="https://golang.org/pkg/builtin/#error">error</a>)</pre>
 			<p>
 InjestMessage reads all data from dataSource, removing any trailing
 whitespace. Returns an error if the content is longer than 250 characters.
-Input is assumed to be UTF-8. Invalid UTF-8 will also produce an error.
+Input is allowed to be ASCII, Binary or UTF-8: ASCII and Binary data have a
+250 byte limit, while UTF-8 has a 250 character limit with up to 4 bytes per
+character. ASCII and UTF-8 inputs are both trimmed of trailing whitespace.
 </p>
 
 			
@@ -1412,6 +1414,39 @@ EncodeToPEM encodes the x509 key as a PEM text block
 				
 					<tr>
 						<td class="pkg-name" style="padding-left: 0px;">
+							<a href="buildtools/index.html">buildtools</a>
+						</td>
+						<td class="pkg-synopsis">
+							
+						</td>
+					</tr>
+				
+			
+				
+					<tr>
+						<td class="pkg-name" style="padding-left: 0px;">
+							<a href="cmd/index.html">cmd</a>
+						</td>
+						<td class="pkg-synopsis">
+							
+						</td>
+					</tr>
+				
+			
+				
+					<tr>
+						<td class="pkg-name" style="padding-left: 20px;">
+							<a href="cmd/codechallenge/index.html">codechallenge</a>
+						</td>
+						<td class="pkg-synopsis">
+							Package codechallenge is a stub to call into the main body of the program.
+						</td>
+					</tr>
+				
+			
+				
+					<tr>
+						<td class="pkg-name" style="padding-left: 0px;">
 							<a href="codechallenge/index.html">codechallenge</a>
 						</td>
 						<td class="pkg-synopsis">
@@ -1442,6 +1477,17 @@ EncodeToPEM encodes the x509 key as a PEM text block
 					</tr>
 				
 			
+				
+					<tr>
+						<td class="pkg-name" style="padding-left: 0px;">
+							<a href="utils/index.html">utils</a>
+						</td>
+						<td class="pkg-synopsis">
+							
+						</td>
+					</tr>
+				
+			
 		</table>
 	</div>
 
@@ -1455,7 +1501,7 @@ Build version go1.10.8.<br>
 Except as <a href="https://developers.google.com/site-policies#restrictions">noted</a>,
 the content of this page is licensed under the
 Creative Commons Attribution 3.0 License,
-and code is licensed under a <a href="https://golang.org/LICENSE">BSD license</a>.<br>
+and code is licensed under a <a href="https://github.com/loren-osborn/smartEdge_codeChallenge/blob/master/LICENSE">MIT License</a>.<br>
 <a href="https://golang.org/doc/tos.html">Terms of Service</a> |
 <a href="http://www.google.com/intl/en/policies/privacy/">Privacy Policy</a>
 </div>

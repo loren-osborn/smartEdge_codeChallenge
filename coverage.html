@@ -54,27 +54,31 @@
 			<div id="nav">
 				<select id="files">
 				
-				<option value="file0">github.com/smartedge/codechallenge/codechallenge/main.go (100.0%)</option>
+				<option value="file0">github.com/smartedge/codechallenge/buildtools/filterdocs.go (20.5%)</option>
 				
-				<option value="file1">github.com/smartedge/codechallenge/keys.go (75.7%)</option>
+				<option value="file1">github.com/smartedge/codechallenge/cmd/codechallenge/main.go (100.0%)</option>
 				
-				<option value="file2">github.com/smartedge/codechallenge/main.go (76.1%)</option>
+				<option value="file2">github.com/smartedge/codechallenge/codechallenge/main.go (100.0%)</option>
 				
-				<option value="file3">github.com/smartedge/codechallenge/options.go (81.0%)</option>
+				<option value="file3">github.com/smartedge/codechallenge/keys.go (75.7%)</option>
 				
-				<option value="file4">github.com/smartedge/codechallenge/response.go (70.0%)</option>
+				<option value="file4">github.com/smartedge/codechallenge/main.go (76.1%)</option>
 				
-				<option value="file5">github.com/smartedge/codechallenge/testtools/custom_matchers.go (100.0%)</option>
+				<option value="file5">github.com/smartedge/codechallenge/options.go (81.0%)</option>
 				
-				<option value="file6">github.com/smartedge/codechallenge/testtools/errorspec.go (100.0%)</option>
+				<option value="file6">github.com/smartedge/codechallenge/response.go (70.0%)</option>
 				
-				<option value="file7">github.com/smartedge/codechallenge/testtools/mocks/deps.go (61.5%)</option>
+				<option value="file7">github.com/smartedge/codechallenge/testtools/custom_matchers.go (100.0%)</option>
 				
-				<option value="file8">github.com/smartedge/codechallenge/testtools/mocks/os_exit.go (100.0%)</option>
+				<option value="file8">github.com/smartedge/codechallenge/testtools/errorspec.go (100.0%)</option>
 				
-				<option value="file9">github.com/smartedge/codechallenge/testtools/utils.go (89.3%)</option>
+				<option value="file9">github.com/smartedge/codechallenge/testtools/mocks/deps.go (61.5%)</option>
 				
-				<option value="file10">github.com/smartedge/codechallenge/utils.go (89.5%)</option>
+				<option value="file10">github.com/smartedge/codechallenge/testtools/mocks/os_exit.go (100.0%)</option>
+				
+				<option value="file11">github.com/smartedge/codechallenge/testtools/utils.go (89.3%)</option>
+				
+				<option value="file12">github.com/smartedge/codechallenge/utils.go (89.5%)</option>
 				
 				</select>
 			</div>
@@ -88,7 +92,165 @@
 		</div>
 		<div id="content">
 		
-		<pre class="file" id="file0" style="display: none">// Package codechallenge is a stub to call into the main body of the program.
+		<pre class="file" id="file0" style="display: none">package main
+
+import (
+        "fmt"
+        "io/ioutil"
+        "net/http"
+        "os"
+        "path/filepath"
+        "regexp"
+        "strconv"
+)
+
+// DirToFilter is the directory to modify
+const (
+        DirToFilter = "godoc"
+)
+
+// PackageURI is the full package name as Go knows it
+const (
+        PackageURI = "github.com/smartedge/codechallenge"
+)
+
+// GHPagesURL is the URL for the project's GH-Pages
+const (
+        GHPagesURL = "https://loren-osborn.github.io/smartEdge_codeChallenge"
+)
+
+// PackageSourceCodeBrowsableRoot is the URL to browsable source code on
+// GitHub. Note that this typically ends in "/blob/" (branch name or commit
+// hash). This is the version of the source being browsed.
+const (
+        PackageSourceCodeBrowsableRoot = "https://github.com/loren-osborn/smartEdge_codeChallenge/blob/master"
+)
+
+// LicenseName is the name of the license the code is being licensed as. For
+// now I chose MIT License, but I may switch back to the same BSD license that
+// Go uses.
+const (
+        LicenseName = "MIT License"
+)
+
+// main traverses filesystem, transforming all files encountered.
+func main() <span class="cov0" title="0">{
+        cwd, err := os.Getwd()
+        if err != nil </span><span class="cov0" title="0">{
+                fmt.Fprintf(os.Stderr, "error fetching CWD: %v\n", err)
+                os.Exit(1)
+        }</span>
+        <span class="cov0" title="0">rootPath := filepath.Join(cwd, DirToFilter)
+        err = filepath.Walk(
+                rootPath,
+                func(path string, info os.FileInfo, err error) error </span><span class="cov0" title="0">{
+                        if err != nil </span><span class="cov0" title="0">{
+                                fmt.Fprintf(os.Stderr, "Failure accessing a path %q: %v\n", path, err)
+                                return err
+                        }</span>
+                        <span class="cov0" title="0">if info.IsDir() </span><span class="cov0" title="0">{
+                                return nil
+                        }</span>
+                        <span class="cov0" title="0">origBuf, err := ioutil.ReadFile(path)
+                        if err != nil </span><span class="cov0" title="0">{
+                                fmt.Fprintf(os.Stderr, "Error reading file %q: %v\n", path, err)
+                                return err
+                        }</span>
+                        <span class="cov0" title="0">origStr := string(origBuf)
+                        filteredStr := FilterFileContent(origStr)
+                        if filteredStr != origStr </span><span class="cov0" title="0">{
+                                err = ioutil.WriteFile(path, []byte(filteredStr), info.Mode())
+                                if err != nil </span><span class="cov0" title="0">{
+                                        fmt.Fprintf(os.Stderr, "Error writing file %q: %v\n", path, err)
+                                        return err
+                                }</span>
+                                <span class="cov0" title="0">fmt.Printf("modified file: %q\n", path)</span>
+                        }
+                        <span class="cov0" title="0">return nil</span>
+                })
+        <span class="cov0" title="0">if err != nil </span><span class="cov0" title="0">{
+                fmt.Fprintf(os.Stderr, "error walking the path %q: %v\n", rootPath, err)
+                os.Exit(2)
+        }</span>
+}
+
+// TranslationRegExps are the regular expressions that we can precompile.
+type TranslationRegExps struct {
+        HostnameToReplace    *regexp.Regexp
+        LibPathToReplace     *regexp.Regexp
+        PkgPathToReplace     *regexp.Regexp
+        SrcPathToReplace     *regexp.Regexp
+        SrcLineNumToReplace  *regexp.Regexp
+        SEqualsToRemove      *regexp.Regexp
+        LineNoToModify       *regexp.Regexp
+        LicenseURLToReplace  *regexp.Regexp
+        LicenseNameToReplace *regexp.Regexp
+}
+
+// Patterns only need to be compiled once:
+var Patterns = TranslationRegExps{
+        HostnameToReplace: regexp.MustCompile(`\bhttp://localhost:6060/`),
+        LibPathToReplace:  regexp.MustCompile(`\bhttps://golang\.org/lib/`),
+        PkgPathToReplace: regexp.MustCompile(fmt.Sprintf(
+                `\bhttps://golang\.org/pkg/%s/`,
+                regexp.QuoteMeta(PackageURI))),
+        SrcPathToReplace: regexp.MustCompile(fmt.Sprintf(
+                `\bhttps://golang\.org/src/%s/`,
+                regexp.QuoteMeta(PackageURI))),
+        SrcLineNumToReplace: regexp.MustCompile(fmt.Sprintf(
+                `\b%s/[^?]+\?s=\d+:\d+#L\d+\b`,
+                regexp.QuoteMeta(PackageSourceCodeBrowsableRoot))),
+        SEqualsToRemove:      regexp.MustCompile(`\?s=\d+:\d+#L`),
+        LineNoToModify:       regexp.MustCompile(`\d+$`),
+        LicenseURLToReplace:  regexp.MustCompile(`\bhttps://golang\.org/LICENSE\b`),
+        LicenseNameToReplace: regexp.MustCompile(`\bBSD license\b`),
+}
+
+// FilterFileContent modifies godoc output to point at github and github pages
+// for in package content, and golang.org for anything external to that.
+func FilterFileContent(contents string) string <span class="cov8" title="1">{
+        if http.DetectContentType([]byte(contents))[0:5] != "text/" </span><span class="cov0" title="0">{
+                // Only modify text files:
+                return contents
+        }</span>
+        <span class="cov8" title="1">contents = Patterns.HostnameToReplace.ReplaceAllString(
+                contents,
+                `https://golang.org/`)
+        contents = Patterns.LibPathToReplace.ReplaceAllString(
+                contents,
+                GHPagesURL+"/"+DirToFilter+"/lib/")
+        contents = Patterns.PkgPathToReplace.ReplaceAllString(
+                contents,
+                GHPagesURL+"/"+DirToFilter+"/pkg/"+PackageURI+"/")
+        contents = Patterns.SrcPathToReplace.ReplaceAllString(
+                contents,
+                PackageSourceCodeBrowsableRoot+"/")
+        contents = Patterns.SrcLineNumToReplace.ReplaceAllStringFunc(
+                contents,
+                func(inStr string) string </span><span class="cov0" title="0">{
+                        outStr := Patterns.SEqualsToRemove.ReplaceAllString(inStr, "#L")
+                        outStr = Patterns.LineNoToModify.ReplaceAllStringFunc(
+                                outStr,
+                                func(lineNumStr string) string </span><span class="cov0" title="0">{
+                                        line, err := strconv.Atoi(lineNumStr)
+                                        if err != nil </span><span class="cov0" title="0">{
+                                                panic(fmt.Sprintf(
+                                                        "This should be impossible: %s",
+                                                        err.Error()))</span>
+                                        }
+                                        <span class="cov0" title="0">return fmt.Sprintf("%d", line+10)</span>
+                                })
+                        <span class="cov0" title="0">return outStr</span>
+                })
+        <span class="cov8" title="1">contents = Patterns.LicenseURLToReplace.ReplaceAllString(
+                contents,
+                PackageSourceCodeBrowsableRoot+"/LICENSE")
+        contents = Patterns.LicenseNameToReplace.ReplaceAllString(contents, LicenseName)
+        return contents</span>
+}
+</pre>
+		
+		<pre class="file" id="file1" style="display: none">// Package codechallenge is a stub to call into the main body of the program.
 // Having this in a separate main package allows us to test proper use of public
 // and private methods, variables and types. It also allows us to properly
 // document the public methods with godoc.
@@ -140,7 +302,59 @@ func main() <span class="cov8" title="1">{
 }</span>
 </pre>
 		
-		<pre class="file" id="file1" style="display: none">package codechallenge
+		<pre class="file" id="file2" style="display: none">// Package codechallenge is a stub to call into the main body of the program.
+// Having this in a separate main package allows us to test proper use of public
+// and private methods, variables and types. It also allows us to properly
+// document the public methods with godoc.
+package main
+
+import (
+        "crypto/rand"
+        "github.com/smartedge/codechallenge"
+        "io/ioutil"
+        "os"
+)
+
+// RealEntryPoint is how main() is loosely bound to codechallenge.RealMain()
+var RealEntryPoint func(*codechallenge.Dependencies) = codechallenge.RealMain
+
+// main() calls RealEntryPoint (which defaults to codechallenge.RealMain())
+// which is RealMain() is called in production, but at testing time, the
+// test harness replaces RealEntryPoint with a stub, so both the production
+// Dependencies structure, and production RealMain() can be validated
+// independantly
+func main() <span class="cov8" title="1">{
+        RealEntryPoint(&amp;codechallenge.Dependencies{
+                Os: codechallenge.OsDependencies{
+                        Args:      os.Args,
+                        Stdin:     os.Stdin,
+                        Stdout:    os.Stdout,
+                        Stderr:    os.Stderr,
+                        Exit:      os.Exit,
+                        Getenv:    os.Getenv,
+                        Setenv:    os.Setenv,
+                        MkdirAll:  os.MkdirAll,
+                        RemoveAll: os.RemoveAll,
+                        Stat:      os.Stat,
+                        Chown:     os.Chown,
+                        Getuid:    os.Getuid,
+                },
+                Crypto: codechallenge.CryptoDependencies{
+                        Rand: codechallenge.CryptoRandDependencies{
+                                Reader: rand.Reader,
+                        },
+                },
+                Io: codechallenge.IoDependencies{
+                        Ioutil: codechallenge.IoIoutilDependencies{
+                                WriteFile: ioutil.WriteFile,
+                                ReadFile:  ioutil.ReadFile,
+                        },
+                },
+        })
+}</span>
+</pre>
+		
+		<pre class="file" id="file3" style="display: none">package codechallenge
 
 import (
         "crypto"
@@ -558,7 +772,7 @@ func DecodeAndLoadKey(d *Dependencies, filename string) (PEMEncoded, X509Encoded
 }
 </pre>
 		
-		<pre class="file" id="file2" style="display: none">// Package codechallenge implements a tool to sign a short text message,
+		<pre class="file" id="file4" style="display: none">// Package codechallenge implements a tool to sign a short text message,
 // creating a key-pair if necessary
 package codechallenge
 
@@ -621,7 +835,9 @@ func RealMain(d *Dependencies) <span class="cov8" title="1">{
 
 // InjestMessage reads all data from dataSource, removing any trailing
 // whitespace. Returns an error if the content is longer than 250 characters.
-// Input is assumed to be UTF-8. Invalid UTF-8 will also produce an error.
+// Input is allowed to be ASCII, Binary or UTF-8: ASCII and Binary data have a
+// 250 byte limit, while UTF-8 has a 250 character limit with up to 4 bytes per
+// character. ASCII and UTF-8 inputs are both trimmed of trailing whitespace.
 func InjestMessage(dataSource io.Reader, format ContentFormat) (string, error) <span class="cov8" title="1">{
         buff, err := ioutil.ReadAll(dataSource)
         if err != nil </span><span class="cov0" title="0">{
@@ -659,7 +875,7 @@ func InjestMessage(dataSource io.Reader, format ContentFormat) (string, error) <
 }
 </pre>
 		
-		<pre class="file" id="file3" style="display: none">package codechallenge
+		<pre class="file" id="file5" style="display: none">package codechallenge
 
 import (
         "crypto/x509"
@@ -805,7 +1021,7 @@ func ParseArgs(d *Dependencies) (*RunConfig, error) <span class="cov8" title="1"
 }
 </pre>
 		
-		<pre class="file" id="file4" style="display: none">package codechallenge
+		<pre class="file" id="file6" style="display: none">package codechallenge
 
 import (
         "encoding/json"
@@ -842,7 +1058,7 @@ func GenerateResponse(d *Dependencies, message string, sig BinarySignature, pubK
 }
 </pre>
 		
-		<pre class="file" id="file5" style="display: none">package testtools
+		<pre class="file" id="file7" style="display: none">package testtools
 
 import (
         "errors"
@@ -936,7 +1152,7 @@ func (sfm *conformToJSONSchemaFileMatcher) NegatedFailureMessage(actual interfac
 }
 </pre>
 		
-		<pre class="file" id="file6" style="display: none">package testtools
+		<pre class="file" id="file8" style="display: none">package testtools
 
 import (
         "fmt"
@@ -991,7 +1207,7 @@ func (es *ErrorSpec) String() string <span class="cov8" title="1">{
 }
 </pre>
 		
-		<pre class="file" id="file7" style="display: none">package mocks
+		<pre class="file" id="file9" style="display: none">package mocks
 
 import (
         "bytes"
@@ -1210,7 +1426,7 @@ func (mdb *MockDepsBundle) InvokeCallInMockedEnv(wrapped func() error) (outErr e
 }
 </pre>
 		
-		<pre class="file" id="file8" style="display: none">package mocks
+		<pre class="file" id="file10" style="display: none">package mocks
 
 // OsExitHarness provides an easy mechanism for simulating an os.Exit in a mock.
 type OsExitHarness struct {
@@ -1251,7 +1467,7 @@ func (emh *OsExitHarness) GetExitStatus() int <span class="cov8" title="1">{
 }</span>
 </pre>
 		
-		<pre class="file" id="file9" style="display: none">package testtools
+		<pre class="file" id="file11" style="display: none">package testtools
 
 import (
         "errors"
@@ -1400,7 +1616,7 @@ func (rsm *RegexpStringMatcher) String() string <span class="cov0" title="0">{
 }</span>
 </pre>
 		
-		<pre class="file" id="file10" style="display: none">package codechallenge
+		<pre class="file" id="file12" style="display: none">package codechallenge
 
 import (
         "fmt"
