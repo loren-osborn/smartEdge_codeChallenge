@@ -23,6 +23,7 @@ type MockDepsBundle struct {
 	exitHarness *OsExitHarness
 	argList     []string
 	homeDirPath string
+	prevCwd     string
 	MapPathIn   func(string) (string, error)
 	MapPathOut  func(string) (string, error)
 }
@@ -38,20 +39,6 @@ func NewDefaultMockDeps(stdinContent string, cmdLnArgs []string, homeDir string,
 	osExitHarness := NewOsExitMockHarness()
 	return &MockDepsBundle{
 		Deps: &deps.Dependencies{
-			Os: deps.OsDependencies{
-				Args:      cmdLnArgs,
-				Stdin:     bytes.NewBufferString(stdinContent),
-				Stdout:    fakeStdout,
-				Stderr:    fakeStderr,
-				Exit:      osExitHarness.GetMock(),
-				Getenv:    os.Getenv,
-				Setenv:    os.Setenv,
-				MkdirAll:  nil,
-				RemoveAll: nil,
-				Stat:      nil,
-				Chown:     nil,
-				Getuid:    os.Getuid,
-			},
 			Crypto: deps.CryptoDependencies{
 				Rand: deps.CryptoRandDependencies{
 					Reader: mathRand.New(mathRand.NewSource(0x0123456789abcdef)),
@@ -59,26 +46,33 @@ func NewDefaultMockDeps(stdinContent string, cmdLnArgs []string, homeDir string,
 			},
 			Io: deps.IoDependencies{
 				Ioutil: deps.IoIoutilDependencies{
-					WriteFile: nil,
 					ReadFile:  nil,
+					WriteFile: nil,
+				},
+			},
+			Os: deps.OsDependencies{
+				Args:      cmdLnArgs,
+				Chdir:     nil,
+				Chown:     nil,
+				Exit:      osExitHarness.GetMock(),
+				Getenv:    os.Getenv,
+				Getuid:    os.Getuid,
+				Getwd:     nil,
+				MkdirAll:  nil,
+				RemoveAll: nil,
+				Setenv:    os.Setenv,
+				Stat:      nil,
+				Stderr:    fakeStderr,
+				Stdin:     bytes.NewBufferString(stdinContent),
+				Stdout:    fakeStdout,
+			},
+			Path: deps.PathDependencies{
+				FilePath: deps.PathFilePathDependencies{
+					Walk: nil,
 				},
 			},
 		},
 		NativeDeps: &deps.Dependencies{
-			Os: deps.OsDependencies{
-				Args:      os.Args,
-				Stdin:     os.Stdin,
-				Stdout:    os.Stdout,
-				Stderr:    os.Stderr,
-				Exit:      os.Exit,
-				Getenv:    os.Getenv,
-				Setenv:    os.Setenv,
-				MkdirAll:  os.MkdirAll,
-				RemoveAll: os.RemoveAll,
-				Stat:      os.Stat,
-				Chown:     os.Chown,
-				Getuid:    os.Getuid,
-			},
 			Crypto: deps.CryptoDependencies{
 				Rand: deps.CryptoRandDependencies{
 					Reader: cryptoRand.Reader,
@@ -86,8 +80,29 @@ func NewDefaultMockDeps(stdinContent string, cmdLnArgs []string, homeDir string,
 			},
 			Io: deps.IoDependencies{
 				Ioutil: deps.IoIoutilDependencies{
-					WriteFile: ioutil.WriteFile,
 					ReadFile:  ioutil.ReadFile,
+					WriteFile: ioutil.WriteFile,
+				},
+			},
+			Os: deps.OsDependencies{
+				Args:      os.Args,
+				Chdir:     os.Chdir,
+				Chown:     os.Chown,
+				Exit:      os.Exit,
+				Getenv:    os.Getenv,
+				Getuid:    os.Getuid,
+				Getwd:     os.Getwd,
+				MkdirAll:  os.MkdirAll,
+				RemoveAll: os.RemoveAll,
+				Setenv:    os.Setenv,
+				Stat:      os.Stat,
+				Stderr:    os.Stderr,
+				Stdin:     os.Stdin,
+				Stdout:    os.Stdout,
+			},
+			Path: deps.PathDependencies{
+				FilePath: deps.PathFilePathDependencies{
+					Walk: filepath.Walk,
 				},
 			},
 		},
@@ -96,6 +111,9 @@ func NewDefaultMockDeps(stdinContent string, cmdLnArgs []string, homeDir string,
 		exitHarness: osExitHarness,
 		argList:     cmdLnArgs,
 		homeDirPath: homeDir,
+		prevCwd:     "",
+		MapPathIn:   nil,
+		MapPathOut:  nil,
 	}
 }
 
@@ -145,8 +163,16 @@ func (mdb *MockDepsBundle) InvokeCallInMockedEnv(wrapped func() error) (outErr e
 	}
 
 	// Setup fake filesystem
+	mdb.prevCwd, outErr = os.Getwd()
+	if outErr != nil {
+		return
+	}
 	fakeRootPath := filepath.Join(os.TempDir(), "tmpfs", fmt.Sprintf("sm_codechallenge_test_%d", os.Getpid()))
 	outErr = mdb.NativeDeps.Os.MkdirAll(filepath.Join(fakeRootPath, mdb.homeDirPath), 0755)
+	if outErr != nil {
+		return
+	}
+	outErr = mdb.NativeDeps.Os.Chdir(filepath.Join(fakeRootPath, mdb.homeDirPath))
 	if outErr != nil {
 		return
 	}
@@ -160,6 +186,45 @@ func (mdb *MockDepsBundle) InvokeCallInMockedEnv(wrapped func() error) (outErr e
 			return "", fmt.Errorf("File %#v not inside fake root %#v when trying to map it outside", cleanPath, cleanFakeRoot)
 		}
 		return cleanPath[len(cleanFakeRoot)-1:], nil
+	}
+	mdb.Deps.Io.Ioutil.ReadFile = func(path string) ([]byte, error) {
+		realPath, err := mdb.MapPathIn(path)
+		if err != nil {
+			return nil, err
+		}
+		return mdb.NativeDeps.Io.Ioutil.ReadFile(realPath)
+	}
+	mdb.Deps.Io.Ioutil.WriteFile = func(path string, data []byte, perm os.FileMode) error {
+		realPath, err := mdb.MapPathIn(path)
+		if err != nil {
+			return err
+		}
+		return mdb.NativeDeps.Io.Ioutil.WriteFile(realPath, data, perm)
+	}
+	mdb.Deps.Os.Chdir = func(dir string) error {
+		realDir, err := mdb.MapPathIn(dir)
+		if err != nil {
+			return err
+		}
+		return mdb.NativeDeps.Os.Chdir(realDir)
+	}
+	mdb.Deps.Os.Chown = func(path string, uid, gid int) error {
+		realPath, err := mdb.MapPathIn(path)
+		if err != nil {
+			return err
+		}
+		return mdb.NativeDeps.Os.Chown(realPath, uid, gid)
+	}
+	mdb.Deps.Os.Getwd = func() (string, error) {
+		realDir, err := mdb.NativeDeps.Os.Getwd()
+		if err != nil {
+			return "", err
+		}
+		dir, err := mdb.MapPathOut(realDir)
+		if err != nil {
+			return "", err
+		}
+		return dir, nil
 	}
 	mdb.Deps.Os.MkdirAll = func(path string, perm os.FileMode) error {
 		realPath, err := mdb.MapPathIn(path)
@@ -182,33 +247,30 @@ func (mdb *MockDepsBundle) InvokeCallInMockedEnv(wrapped func() error) (outErr e
 		}
 		return mdb.NativeDeps.Os.Stat(realPath)
 	}
-	mdb.Deps.Os.Chown = func(path string, uid, gid int) error {
-		realPath, err := mdb.MapPathIn(path)
+	mdb.Deps.Path.FilePath.Walk = func(root string, walkFn filepath.WalkFunc) error {
+		realRoot, err := mdb.MapPathIn(root)
 		if err != nil {
 			return err
 		}
-		return mdb.NativeDeps.Os.Chown(realPath, uid, gid)
-	}
-	mdb.Deps.Io.Ioutil.WriteFile = func(path string, data []byte, perm os.FileMode) error {
-		realPath, err := mdb.MapPathIn(path)
-		if err != nil {
-			return err
-		}
-		return mdb.NativeDeps.Io.Ioutil.WriteFile(realPath, data, perm)
-	}
-	mdb.Deps.Io.Ioutil.ReadFile = func(path string) ([]byte, error) {
-		realPath, err := mdb.MapPathIn(path)
-		if err != nil {
-			return nil, err
-		}
-		return mdb.NativeDeps.Io.Ioutil.ReadFile(realPath)
+		realWalkFunc := filepath.WalkFunc(func(realPath string, info os.FileInfo, err error) error {
+			path, err := mdb.MapPathOut(realPath)
+			if err != nil {
+				return err
+			}
+			return walkFn(path, info, err)
+		})
+		return mdb.NativeDeps.Path.FilePath.Walk(realRoot, realWalkFunc)
 	}
 
 	// Teardown fake filesystem
 	defer func() {
-		removeAllErr := mdb.NativeDeps.Os.RemoveAll(fakeRootPath)
+		newErr := mdb.NativeDeps.Os.Chdir(mdb.prevCwd)
 		if outErr == nil {
-			outErr = removeAllErr
+			outErr = newErr
+		}
+		newErr = mdb.NativeDeps.Os.RemoveAll(fakeRootPath)
+		if outErr == nil {
+			outErr = newErr
 		}
 	}()
 

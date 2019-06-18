@@ -1,7 +1,9 @@
 package main
 
 import (
+	"crypto/rand"
 	"fmt"
+	"github.com/smartedge/codechallenge/deps"
 	"io/ioutil"
 	"net/http"
 	"os"
@@ -39,19 +41,63 @@ const (
 	LicenseName = "MIT License"
 )
 
-// main traverses filesystem, transforming all files encountered.
+// RealEntryPoint is how main() is loosely bound to RealMain()
+var RealEntryPoint func(*deps.Dependencies) = RealMain
+
+// main() calls RealEntryPoint, which defaults to RealMain() in production. At
+// testing time, the test harness replaces RealEntryPoint with a stub, so both
+// the production Dependencies structure, and production RealMain() can be
+// validated independantly.
 func main() {
-	cwd, err := os.Getwd()
+	RealEntryPoint(&deps.Dependencies{
+		Crypto: deps.CryptoDependencies{
+			Rand: deps.CryptoRandDependencies{
+				Reader: rand.Reader,
+			},
+		},
+		Io: deps.IoDependencies{
+			Ioutil: deps.IoIoutilDependencies{
+				ReadFile:  ioutil.ReadFile,
+				WriteFile: ioutil.WriteFile,
+			},
+		},
+		Os: deps.OsDependencies{
+			Args:      os.Args,
+			Chdir:     os.Chdir,
+			Chown:     os.Chown,
+			Exit:      os.Exit,
+			Getenv:    os.Getenv,
+			Getuid:    os.Getuid,
+			Getwd:     os.Getwd,
+			MkdirAll:  os.MkdirAll,
+			RemoveAll: os.RemoveAll,
+			Setenv:    os.Setenv,
+			Stat:      os.Stat,
+			Stderr:    os.Stderr,
+			Stdin:     os.Stdin,
+			Stdout:    os.Stdout,
+		},
+		Path: deps.PathDependencies{
+			FilePath: deps.PathFilePathDependencies{
+				Walk: filepath.Walk,
+			},
+		},
+	})
+}
+
+// RealMain traverses filesystem, transforming all files encountered.
+func RealMain(d *deps.Dependencies) {
+	cwd, err := d.Os.Getwd()
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "error fetching CWD: %v\n", err)
-		os.Exit(1)
+		fmt.Fprintf(d.Os.Stderr, "error fetching CWD: %v\n", err)
+		d.Os.Exit(1)
 	}
 	rootPath := filepath.Join(cwd, DirToFilter)
-	err = filepath.Walk(
+	err = d.Path.FilePath.Walk(
 		rootPath,
 		func(path string, info os.FileInfo, err error) error {
 			if err != nil {
-				fmt.Fprintf(os.Stderr, "Failure accessing a path %q: %v\n", path, err)
+				fmt.Fprintf(d.Os.Stderr, "Failure accessing a path %q: %v\n", path, err)
 				return err
 			}
 			if info.IsDir() {
@@ -59,7 +105,7 @@ func main() {
 			}
 			origBuf, err := ioutil.ReadFile(path)
 			if err != nil {
-				fmt.Fprintf(os.Stderr, "Error reading file %q: %v\n", path, err)
+				fmt.Fprintf(d.Os.Stderr, "Error reading file %q: %v\n", path, err)
 				return err
 			}
 			origStr := string(origBuf)
@@ -67,7 +113,7 @@ func main() {
 			if filteredStr != origStr {
 				err = ioutil.WriteFile(path, []byte(filteredStr), info.Mode())
 				if err != nil {
-					fmt.Fprintf(os.Stderr, "Error writing file %q: %v\n", path, err)
+					fmt.Fprintf(d.Os.Stderr, "Error writing file %q: %v\n", path, err)
 					return err
 				}
 				fmt.Printf("modified file: %q\n", path)
@@ -75,8 +121,8 @@ func main() {
 			return nil
 		})
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "error walking the path %q: %v\n", rootPath, err)
-		os.Exit(2)
+		fmt.Fprintf(d.Os.Stderr, "error walking the path %q: %v\n", rootPath, err)
+		d.Os.Exit(2)
 	}
 }
 
