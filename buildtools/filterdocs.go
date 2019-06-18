@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"github.com/smartedge/codechallenge/deps"
-	"io/ioutil"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -72,7 +71,7 @@ func RealMain(d *deps.Dependencies) {
 			if info.IsDir() {
 				return nil
 			}
-			origBuf, err := ioutil.ReadFile(path)
+			origBuf, err := d.Io.Ioutil.ReadFile(path)
 			if err != nil {
 				fmt.Fprintf(d.Os.Stderr, "Error reading file %q: %v\n", path, err)
 				return err
@@ -80,7 +79,7 @@ func RealMain(d *deps.Dependencies) {
 			origStr := string(origBuf)
 			filteredStr := ContentFilterFunction(origStr)
 			if filteredStr != origStr {
-				err = ioutil.WriteFile(path, []byte(filteredStr), info.Mode())
+				err = d.Io.Ioutil.WriteFile(path, []byte(filteredStr), info.Mode())
 				if err != nil {
 					fmt.Fprintf(d.Os.Stderr, "Error writing file %q: %v\n", path, err)
 					return err
