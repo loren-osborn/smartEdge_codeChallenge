@@ -117,6 +117,7 @@ These are areas where I would improve this project given more time:
     * ~~Move `dependencies.go` and `keys.go` into `deps` and `crypt` sub-packes to aid organizational
         clarity of documentation. `keys.go` should be broken into 4 files: 1 for each of the 2 plugins, 1 for buffer types, and one for everything else.~~
 * ~~Automate godoc link translation.~~
+* ~~Finish filesystem mocking.~~
 * Testing:
     * Bring the project to 100% test coverage: Both for production code and testtools code.
     * Add BDD tests for "bullet point" features (and feature details) for feature tracability.

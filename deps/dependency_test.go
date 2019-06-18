@@ -64,6 +64,11 @@ func TestDependencies(t *testing.T) {
 	} else if !eq {
 		t.Error("deps.Defaults.Os.MkdirAll should evaluate to os.MkdirAll")
 	}
+	if eq, actualErr := testtools.AreFuncsEqual(os.Open, deps.Defaults.Os.Open); actualErr != nil {
+		t.Error(actualErr.Error())
+	} else if !eq {
+		t.Error("deps.Defaults.Os.Open should evaluate to os.Open")
+	}
 	if eq, actualErr := testtools.AreFuncsEqual(os.RemoveAll, deps.Defaults.Os.RemoveAll); actualErr != nil {
 		t.Error(actualErr.Error())
 	} else if !eq {

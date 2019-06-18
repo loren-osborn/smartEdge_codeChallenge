@@ -32,13 +32,14 @@ type IoDependencies struct {
 // OsDependencies contains all external dependencies from the os package.
 type OsDependencies struct {
 	Args      []string
-	Chdir     func(string) error // unused. For Getwd()
+	Chdir     func(string) error // Used only by testtools.
 	Chown     func(string, int, int) error
 	Exit      func(int)
 	Getenv    func(string) string
 	Getuid    func() int
 	Getwd     func() (string, error) // Used only by buildtools.
 	MkdirAll  func(string, os.FileMode) error
+	Open      func(string) (*os.File, error) // Used only by testtools.
 	RemoveAll func(string) error
 	Setenv    func(string, string) error
 	Stat      func(string) (os.FileInfo, error)
@@ -89,6 +90,7 @@ var Defaults = &Dependencies{
 		Getuid:    os.Getuid,
 		Getwd:     os.Getwd,
 		MkdirAll:  os.MkdirAll,
+		Open:      os.Open,
 		RemoveAll: os.RemoveAll,
 		Setenv:    os.Setenv,
 		Stat:      os.Stat,
