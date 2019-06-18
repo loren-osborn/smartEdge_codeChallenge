@@ -2,12 +2,10 @@ package mocks
 
 import (
 	"bytes"
-	cryptoRand "crypto/rand"
 	"errors"
 	"flag"
 	"fmt"
 	"github.com/smartedge/codechallenge/deps"
-	"io/ioutil"
 	mathRand "math/rand"
 	"os"
 	"path/filepath"
@@ -37,6 +35,7 @@ func NewDefaultMockDeps(stdinContent string, cmdLnArgs []string, homeDir string,
 	fakeStdout := &bytes.Buffer{}
 	fakeStderr := &bytes.Buffer{}
 	osExitHarness := NewOsExitMockHarness()
+	CopyOfDefaultDeps := *deps.Defaults
 	return &MockDepsBundle{
 		Deps: &deps.Dependencies{
 			Crypto: deps.CryptoDependencies{
@@ -72,40 +71,7 @@ func NewDefaultMockDeps(stdinContent string, cmdLnArgs []string, homeDir string,
 				},
 			},
 		},
-		NativeDeps: &deps.Dependencies{
-			Crypto: deps.CryptoDependencies{
-				Rand: deps.CryptoRandDependencies{
-					Reader: cryptoRand.Reader,
-				},
-			},
-			Io: deps.IoDependencies{
-				Ioutil: deps.IoIoutilDependencies{
-					ReadFile:  ioutil.ReadFile,
-					WriteFile: ioutil.WriteFile,
-				},
-			},
-			Os: deps.OsDependencies{
-				Args:      os.Args,
-				Chdir:     os.Chdir,
-				Chown:     os.Chown,
-				Exit:      os.Exit,
-				Getenv:    os.Getenv,
-				Getuid:    os.Getuid,
-				Getwd:     os.Getwd,
-				MkdirAll:  os.MkdirAll,
-				RemoveAll: os.RemoveAll,
-				Setenv:    os.Setenv,
-				Stat:      os.Stat,
-				Stderr:    os.Stderr,
-				Stdin:     os.Stdin,
-				Stdout:    os.Stdout,
-			},
-			Path: deps.PathDependencies{
-				FilePath: deps.PathFilePathDependencies{
-					Walk: filepath.Walk,
-				},
-			},
-		},
+		NativeDeps:  &CopyOfDefaultDeps,
 		OutBuf:      fakeStdout,
 		ErrBuf:      fakeStderr,
 		exitHarness: osExitHarness,

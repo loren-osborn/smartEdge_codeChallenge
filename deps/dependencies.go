@@ -1,7 +1,9 @@
 package deps
 
 import (
+	"crypto/rand"
 	"io"
+	"io/ioutil"
 	"os"
 	"path/filepath"
 )
@@ -16,7 +18,7 @@ type CryptoDependencies struct {
 	Rand CryptoRandDependencies
 }
 
-// IoIoutilDependencies contains all external dependencies from the io/ioutils package.
+// IoIoutilDependencies contains all external dependencies from the io/ioutil package.
 type IoIoutilDependencies struct {
 	ReadFile  func(string) ([]byte, error)
 	WriteFile func(string, []byte, os.FileMode) error
@@ -63,4 +65,40 @@ type Dependencies struct {
 	Io     IoDependencies
 	Os     OsDependencies
 	Path   PathDependencies // Used only by buildtools.
+}
+
+// Defaults is the default set of injected dependencies
+var Defaults = &Dependencies{
+	Crypto: CryptoDependencies{
+		Rand: CryptoRandDependencies{
+			Reader: rand.Reader,
+		},
+	},
+	Io: IoDependencies{
+		Ioutil: IoIoutilDependencies{
+			ReadFile:  ioutil.ReadFile,
+			WriteFile: ioutil.WriteFile,
+		},
+	},
+	Os: OsDependencies{
+		Args:      os.Args,
+		Chdir:     os.Chdir,
+		Chown:     os.Chown,
+		Exit:      os.Exit,
+		Getenv:    os.Getenv,
+		Getuid:    os.Getuid,
+		Getwd:     os.Getwd,
+		MkdirAll:  os.MkdirAll,
+		RemoveAll: os.RemoveAll,
+		Setenv:    os.Setenv,
+		Stat:      os.Stat,
+		Stderr:    os.Stderr,
+		Stdin:     os.Stdin,
+		Stdout:    os.Stdout,
+	},
+	Path: PathDependencies{
+		FilePath: PathFilePathDependencies{
+			Walk: filepath.Walk,
+		},
+	},
 }
