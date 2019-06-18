@@ -15,7 +15,7 @@ ALL_SOURCE_FILES       := $(shell   \
 PROD_SOURCE_FILES       = $(filter-out %_test.go,$(filter %.go, $(ALL_SOURCE_FILES)))
 TEST_SOURCE_FILES       = $(filter %_test.go,$(ALL_SOURCE_FILES)) $(filter-out %.go, $(ALL_SOURCE_FILES))
 PROD_SOURCE_FILES       = $(filter-out %_test.go,$(filter %.go, $(ALL_SOURCE_FILES)))
-GENERATED_FILES         = event_timestamps coverage.out coverage.html godoc .smartEdge
+GENERATED_FILES         = event_timestamps coverage.out coverage.html godoc .smartEdge codechallenge
 # Putting "production_container_image" in seperate PRECIOUS_IMAGE_TAGS, as it
 # is a final output, and may be in use elsewhere on the system:
 DISCARDABLE_IMAGE_TAGS  = golang_base_image tester_image demo_image
