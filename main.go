@@ -6,6 +6,9 @@ import (
 	"errors"
 	"flag"
 	"fmt"
+	"github.com/smartedge/codechallenge/crypt"
+	"github.com/smartedge/codechallenge/deps"
+	"github.com/smartedge/codechallenge/misc"
 	"io"
 	"io/ioutil"
 	"strings"
@@ -15,7 +18,7 @@ import (
 
 // HandleError displays an error message with Usage information to Stderr,
 // and exits with an error code.
-func HandleError(d *Dependencies, err error, exitStatus int) {
+func HandleError(d *deps.Dependencies, err error, exitStatus int) {
 	fmt.Fprintln(d.Os.Stderr, err.Error())
 	flag.CommandLine.Usage()
 	d.Os.Exit(exitStatus)
@@ -24,7 +27,7 @@ func HandleError(d *Dependencies, err error, exitStatus int) {
 // RealMain is the program entry-point with all dependencies injected. This
 // allows us to test respecting public vs private methods by moving it outside
 // the "main" package.
-func RealMain(d *Dependencies) {
+func RealMain(d *deps.Dependencies) {
 	config, err := ParseArgs(d)
 	if err != nil {
 		HandleError(d, err, 1)
@@ -38,7 +41,7 @@ func RealMain(d *Dependencies) {
 	if err != nil {
 		HandleError(d, err, 2)
 	}
-	cryptStuff, err := GetCryptoTooling(d, &config.PubKeySettings)
+	cryptStuff, err := crypt.GetCryptoTooling(d, &config.PubKeySettings)
 	if err != nil {
 		HandleError(d, err, 3)
 	}
@@ -95,7 +98,7 @@ func InjestMessage(dataSource io.Reader, format ContentFormat) (string, error) {
 		if !utf8.ValidString(msg) {
 			return "", fmt.Errorf("Input contains invalid UTF-8 character(s):\n%#v", msg)
 		}
-		msg = TrimRightUTF8Func(msg, unicode.IsSpace)
+		msg = misc.TrimRightUTF8Func(msg, unicode.IsSpace)
 		charCount := utf8.RuneCountInString(msg)
 		if charCount > 250 {
 			return "", fmt.Errorf("Input contains more than 250 UTF-8 characters:\n%#v", msg)

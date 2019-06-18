@@ -1,4 +1,4 @@
-package codechallenge
+package crypt
 
 import (
 	"crypto"
@@ -13,11 +13,21 @@ import (
 	"encoding/pem"
 	"errors"
 	"fmt"
+	"github.com/smartedge/codechallenge/deps"
+	"github.com/smartedge/codechallenge/misc"
 	"io"
 	"math/big"
 	"os"
 	"strings"
 )
+
+// PkiSettings are the public key settings as specified on the command line.
+type PkiSettings struct {
+	Algorithm      x509.PublicKeyAlgorithm
+	RSAKeyBits     int
+	PrivateKeyPath string
+	PublicKeyPath  string
+}
 
 // KeyType indicates if the key is public or private
 type KeyType int
@@ -175,7 +185,7 @@ func (p *RSAPlugin) GetAlgorithmName() string {
 
 // CryptoTooling home to all crypto tool state.
 type CryptoTooling struct {
-	D         *Dependencies
+	D         *deps.Dependencies
 	Settings  *PkiSettings
 	AlgPlugin AlgorithmPlugin
 	PubKey    PEMEncoded
@@ -185,9 +195,9 @@ type CryptoTooling struct {
 
 // GetCryptoTooling returns a home where all the keys, signing and
 // verification lives.
-func GetCryptoTooling(deps *Dependencies, keySettings *PkiSettings) (*CryptoTooling, error) {
+func GetCryptoTooling(d *deps.Dependencies, keySettings *PkiSettings) (*CryptoTooling, error) {
 	result := CryptoTooling{
-		D:        deps,
+		D:        d,
 		Settings: keySettings,
 	}
 	switch result.Settings.Algorithm {
@@ -206,10 +216,10 @@ func GetCryptoTooling(deps *Dependencies, keySettings *PkiSettings) (*CryptoTool
 // GetKeys retrieves the private key from the filesystem, generating keypair
 // if necessary.
 func (ct *CryptoTooling) GetKeys() error {
-	if FileExists(ct.D, ct.Settings.PrivateKeyPath) != FileExists(ct.D, ct.Settings.PublicKeyPath) {
+	if misc.FileExists(ct.D, ct.Settings.PrivateKeyPath) != misc.FileExists(ct.D, ct.Settings.PublicKeyPath) {
 		return fmt.Errorf("Files %s and %s must either both be present or missing", ct.Settings.PrivateKeyPath, ct.Settings.PublicKeyPath)
 	}
-	if !FileExists(ct.D, ct.Settings.PrivateKeyPath) {
+	if !misc.FileExists(ct.D, ct.Settings.PrivateKeyPath) {
 		x509PubKey, x509PrivKey, err := ct.AlgPlugin.GenKeyPair(ct.D.Crypto.Rand.Reader)
 		if err != nil {
 			return err
@@ -378,7 +388,7 @@ type ecdsaSignature struct {
 // EncodeAndSaveKey PEM encodes a x509 encoded key and writes it to
 // a file. Returns the PEM encoded string data.
 func EncodeAndSaveKey(
-	d *Dependencies,
+	d *deps.Dependencies,
 	keyBuf X509Encoded,
 	algorithm string,
 	kt KeyType,
@@ -393,7 +403,7 @@ func EncodeAndSaveKey(
 			dirPerm += 0005
 		}
 	}
-	err := WriteDirAndFile(d, filename, []byte(pemEncodedKey.String()), perm, dirPerm)
+	err := misc.WriteDirAndFile(d, filename, []byte(pemEncodedKey.String()), perm, dirPerm)
 	if err != nil {
 		return nil, err
 	}
@@ -402,7 +412,7 @@ func EncodeAndSaveKey(
 
 // DecodeAndLoadKey loads PEM encoded file and decodes it into a
 // x509 encoded key block. Returns PEM encoded data with key block.
-func DecodeAndLoadKey(d *Dependencies, filename string) (PEMEncoded, X509Encoded, error) {
+func DecodeAndLoadKey(d *deps.Dependencies, filename string) (PEMEncoded, X509Encoded, error) {
 	pemEncodedKey, err := d.Io.Ioutil.ReadFile(filename)
 	if err != nil {
 		return nil, nil, err

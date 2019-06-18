@@ -1,4 +1,4 @@
-package codechallenge
+package deps
 
 import (
 	"io"
@@ -49,6 +49,3 @@ type Dependencies struct {
 	Crypto CryptoDependencies
 	Io     IoDependencies
 }
-
-// d.Io.Ioutil.WriteFile
-// func WriteFile(filename string, data []byte, perm os.FileMode) error

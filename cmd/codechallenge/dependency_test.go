@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/smartedge/codechallenge"
+	"github.com/smartedge/codechallenge/deps"
 	"github.com/smartedge/codechallenge/testtools"
 	"os"
 	"testing"
@@ -11,8 +11,8 @@ import (
 // to the main code.
 func TestDependencies(t *testing.T) {
 	origRealEntryPoint := RealEntryPoint
-	depObjs := make([]*codechallenge.Dependencies, 0, 1)
-	RealEntryPoint = func(d *codechallenge.Dependencies) {
+	depObjs := make([]*deps.Dependencies, 0, 1)
+	RealEntryPoint = func(d *deps.Dependencies) {
 		// each call makes depObjs 1 item longer
 		depObjs = append(depObjs, d)
 	}

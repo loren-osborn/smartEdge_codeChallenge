@@ -1,7 +1,8 @@
-package codechallenge
+package misc
 
 import (
 	"fmt"
+	"github.com/smartedge/codechallenge/deps"
 	"os"
 	"path/filepath"
 	"strconv"
@@ -10,14 +11,14 @@ import (
 )
 
 // FileExists reports if a file exists.
-func FileExists(d *Dependencies, name string) bool {
+func FileExists(d *deps.Dependencies, name string) bool {
 	_, err := d.Os.Stat(name)
 	return !os.IsNotExist(err)
 }
 
 // WriteDirAndFile writes a file at once from a single data buffer. Similar to
 // io/ioutil.WriteFile() except ensures all parent directories exist first.
-func WriteDirAndFile(d *Dependencies, filename string, data []byte, filePerm os.FileMode, dirPerm os.FileMode) error {
+func WriteDirAndFile(d *deps.Dependencies, filename string, data []byte, filePerm os.FileMode, dirPerm os.FileMode) error {
 	// This is a hack to keep us from generating root-owned files from within
 	// docker.
 	//     * Only root can chown files

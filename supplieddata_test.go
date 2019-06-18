@@ -3,7 +3,7 @@ package codechallenge_test
 import (
 	"crypto/x509"
 	"fmt"
-	"github.com/smartedge/codechallenge"
+	"github.com/smartedge/codechallenge/crypt"
 	"testing"
 )
 
@@ -32,13 +32,13 @@ func TestValidationOfSampleData(t *testing.T) {
 		},
 	} {
 		t.Run(fmt.Sprintf("Subtest %d", i+1), func(tt *testing.T) {
-			settings := codechallenge.PkiSettings{
+			settings := crypt.PkiSettings{
 				Algorithm:      tc.Algorithm,
 				RSAKeyBits:     2048,
 				PrivateKeyPath: "",
 				PublicKeyPath:  "",
 			}
-			tooling, err := codechallenge.GetCryptoTooling(nil, &settings)
+			tooling, err := crypt.GetCryptoTooling(nil, &settings)
 			if err != nil {
 				tt.Errorf("Unexpected error calling codechallenge.GetCryptoTooling(): %s", err.Error())
 			}

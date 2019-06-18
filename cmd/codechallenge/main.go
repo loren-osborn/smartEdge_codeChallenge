@@ -7,12 +7,13 @@ package main
 import (
 	"crypto/rand"
 	"github.com/smartedge/codechallenge"
+	"github.com/smartedge/codechallenge/deps"
 	"io/ioutil"
 	"os"
 )
 
 // RealEntryPoint is how main() is loosely bound to codechallenge.RealMain()
-var RealEntryPoint func(*codechallenge.Dependencies) = codechallenge.RealMain
+var RealEntryPoint func(*deps.Dependencies) = codechallenge.RealMain
 
 // main() calls RealEntryPoint (which defaults to codechallenge.RealMain())
 // which is RealMain() is called in production, but at testing time, the
@@ -20,8 +21,8 @@ var RealEntryPoint func(*codechallenge.Dependencies) = codechallenge.RealMain
 // Dependencies structure, and production RealMain() can be validated
 // independantly
 func main() {
-	RealEntryPoint(&codechallenge.Dependencies{
-		Os: codechallenge.OsDependencies{
+	RealEntryPoint(&deps.Dependencies{
+		Os: deps.OsDependencies{
 			Args:      os.Args,
 			Stdin:     os.Stdin,
 			Stdout:    os.Stdout,
@@ -35,13 +36,13 @@ func main() {
 			Chown:     os.Chown,
 			Getuid:    os.Getuid,
 		},
-		Crypto: codechallenge.CryptoDependencies{
-			Rand: codechallenge.CryptoRandDependencies{
+		Crypto: deps.CryptoDependencies{
+			Rand: deps.CryptoRandDependencies{
 				Reader: rand.Reader,
 			},
 		},
-		Io: codechallenge.IoDependencies{
-			Ioutil: codechallenge.IoIoutilDependencies{
+		Io: deps.IoDependencies{
+			Ioutil: deps.IoIoutilDependencies{
 				WriteFile: ioutil.WriteFile,
 				ReadFile:  ioutil.ReadFile,
 			},

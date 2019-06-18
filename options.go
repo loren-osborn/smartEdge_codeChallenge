@@ -5,6 +5,8 @@ import (
 	"errors"
 	"flag"
 	"fmt"
+	"github.com/smartedge/codechallenge/crypt"
+	"github.com/smartedge/codechallenge/deps"
 	"os"
 	"path/filepath"
 	"strings"
@@ -50,29 +52,21 @@ const (
 	ReplaceAll = -1
 )
 
-// PkiSettings are the public key settings as specified on the command line.
-type PkiSettings struct {
-	Algorithm      x509.PublicKeyAlgorithm
-	RSAKeyBits     int
-	PrivateKeyPath string
-	PublicKeyPath  string
-}
-
 // RunConfig program's running config as specified on the command line.
 type RunConfig struct {
 	HelpMode       bool
 	Format         ContentFormat
-	PubKeySettings PkiSettings
+	PubKeySettings crypt.PkiSettings
 }
 
 // ParseArgs parses the runtime configuration from the command line arguemnts.
-func ParseArgs(d *Dependencies) (*RunConfig, error) {
+func ParseArgs(d *deps.Dependencies) (*RunConfig, error) {
 	defaultKeyDir := filepath.Join(d.Os.Getenv("HOME"), ".smartEdge")
 	flag.CommandLine.SetOutput(d.Os.Stderr)
 	result := RunConfig{
 		HelpMode: false, // default
 		Format:   UTF8,  // default
-		PubKeySettings: PkiSettings{
+		PubKeySettings: crypt.PkiSettings{
 			Algorithm:      x509.ECDSA, // default
 			RSAKeyBits:     2048,       //default
 			PrivateKeyPath: filepath.Join(defaultKeyDir, "id_{{algorithm}}.priv"),

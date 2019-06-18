@@ -3,6 +3,8 @@ package codechallenge
 import (
 	"encoding/json"
 	"errors"
+	"github.com/smartedge/codechallenge/crypt"
+	"github.com/smartedge/codechallenge/deps"
 )
 
 // SignedMessage the final response to be rendered to JSON.
@@ -14,7 +16,7 @@ type SignedMessage struct {
 
 // GenerateResponse takes the message, signature and public key and writes them
 // in JSON format to d.Os.Stdout
-func GenerateResponse(d *Dependencies, message string, sig BinarySignature, pubKey PEMEncoded) error {
+func GenerateResponse(d *deps.Dependencies, message string, sig crypt.BinarySignature, pubKey crypt.PEMEncoded) error {
 	response := SignedMessage{
 		Message:   message,
 		Signature: sig.Base64(),

@@ -5,7 +5,8 @@ import (
 	"errors"
 	"flag"
 	"fmt"
-	"github.com/smartedge/codechallenge"
+	"github.com/smartedge/codechallenge/deps"
+	"github.com/smartedge/codechallenge/misc"
 	"github.com/smartedge/codechallenge/testtools"
 	"github.com/smartedge/codechallenge/testtools/mocks"
 	"io"
@@ -55,11 +56,11 @@ func TestNewDefaultMockDepsNotNil(t *testing.T) {
 		if mockDepsBundle == nil {
 			t.Error("mockDepsBundle should never be nil.")
 		}
-		var deps *codechallenge.Dependencies = mockDepsBundle.Deps
-		if deps == nil {
+		var mockDeps *deps.Dependencies = mockDepsBundle.Deps
+		if mockDeps == nil {
 			t.Error("mockDepsBundle.Deps should never be nil.")
 		}
-		var nativeDeps *codechallenge.Dependencies = mockDepsBundle.NativeDeps
+		var nativeDeps *deps.Dependencies = mockDepsBundle.NativeDeps
 		if nativeDeps == nil {
 			t.Error("mockDepsBundle.NativeDeps should never be nil.")
 		}
@@ -255,7 +256,7 @@ func TestNewDefaultMockDepsFileSystem(t *testing.T) {
 	for _, tc := range mockEnvTestCases {
 		mockDepsBundle := mocks.NewDefaultMockDeps(
 			tc.fakeInContent, tc.fakeArgList, tc.homeDirPath, tc.fakeFileSystem)
-		if codechallenge.FileExists(mockDepsBundle.NativeDeps, anticipatedFakeRootPath) {
+		if misc.FileExists(mockDepsBundle.NativeDeps, anticipatedFakeRootPath) {
 			t.Errorf("Path %#v should not exist yet, but it does.", anticipatedFakeRootPath)
 		}
 		err := mockDepsBundle.InvokeCallInMockedEnv(func() error {
@@ -264,7 +265,7 @@ func TestNewDefaultMockDepsFileSystem(t *testing.T) {
 			}
 			anticipatedFakeHomePath := filepath.Join(anticipatedFakeRootPath, tc.homeDirPath)
 
-			if !codechallenge.FileExists(mockDepsBundle.NativeDeps, anticipatedFakeRootPath) {
+			if !misc.FileExists(mockDepsBundle.NativeDeps, anticipatedFakeRootPath) {
 				t.Errorf("Path %#v should exist inside mock but doesn't", anticipatedFakeHomePath)
 			}
 			return nil
@@ -275,7 +276,7 @@ func TestNewDefaultMockDepsFileSystem(t *testing.T) {
 		if os.Getenv("HOME") != realHomeDir {
 			t.Errorf("HOME path should be restored to %#v, but saw %#v instead", realHomeDir, os.Getenv("HOME"))
 		}
-		if codechallenge.FileExists(mockDepsBundle.NativeDeps, anticipatedFakeRootPath) {
+		if misc.FileExists(mockDepsBundle.NativeDeps, anticipatedFakeRootPath) {
 			t.Errorf("Path %#v should not exist anymore, but it still does.", anticipatedFakeRootPath)
 		}
 	}

@@ -6,7 +6,7 @@ import (
 	"errors"
 	"flag"
 	"fmt"
-	"github.com/smartedge/codechallenge"
+	"github.com/smartedge/codechallenge/deps"
 	"io/ioutil"
 	mathRand "math/rand"
 	"os"
@@ -16,8 +16,8 @@ import (
 // MockDepsBundle is a bundle of dependencies along with a mock environment it
 // talks to.
 type MockDepsBundle struct {
-	Deps        *codechallenge.Dependencies
-	NativeDeps  *codechallenge.Dependencies
+	Deps        *deps.Dependencies
+	NativeDeps  *deps.Dependencies
 	OutBuf      *bytes.Buffer
 	ErrBuf      *bytes.Buffer
 	exitHarness *OsExitHarness
@@ -28,7 +28,7 @@ type MockDepsBundle struct {
 }
 
 // NewDefaultMockDeps generates a mock environment, along with a
-// *codechallenge.Dependencies that operates in this mock environment.
+// *deps.Dependencies that operates in this mock environment.
 // Due to language constraints, it's turned out to be more practical to map
 // filesystem calls into a temporary filesystem directory rather than
 // simulating filesystem activity in memory.
@@ -37,8 +37,8 @@ func NewDefaultMockDeps(stdinContent string, cmdLnArgs []string, homeDir string,
 	fakeStderr := &bytes.Buffer{}
 	osExitHarness := NewOsExitMockHarness()
 	return &MockDepsBundle{
-		Deps: &codechallenge.Dependencies{
-			Os: codechallenge.OsDependencies{
+		Deps: &deps.Dependencies{
+			Os: deps.OsDependencies{
 				Args:      cmdLnArgs,
 				Stdin:     bytes.NewBufferString(stdinContent),
 				Stdout:    fakeStdout,
@@ -52,20 +52,20 @@ func NewDefaultMockDeps(stdinContent string, cmdLnArgs []string, homeDir string,
 				Chown:     nil,
 				Getuid:    os.Getuid,
 			},
-			Crypto: codechallenge.CryptoDependencies{
-				Rand: codechallenge.CryptoRandDependencies{
+			Crypto: deps.CryptoDependencies{
+				Rand: deps.CryptoRandDependencies{
 					Reader: mathRand.New(mathRand.NewSource(0x0123456789abcdef)),
 				},
 			},
-			Io: codechallenge.IoDependencies{
-				Ioutil: codechallenge.IoIoutilDependencies{
+			Io: deps.IoDependencies{
+				Ioutil: deps.IoIoutilDependencies{
 					WriteFile: nil,
 					ReadFile:  nil,
 				},
 			},
 		},
-		NativeDeps: &codechallenge.Dependencies{
-			Os: codechallenge.OsDependencies{
+		NativeDeps: &deps.Dependencies{
+			Os: deps.OsDependencies{
 				Args:      os.Args,
 				Stdin:     os.Stdin,
 				Stdout:    os.Stdout,
@@ -79,13 +79,13 @@ func NewDefaultMockDeps(stdinContent string, cmdLnArgs []string, homeDir string,
 				Chown:     os.Chown,
 				Getuid:    os.Getuid,
 			},
-			Crypto: codechallenge.CryptoDependencies{
-				Rand: codechallenge.CryptoRandDependencies{
+			Crypto: deps.CryptoDependencies{
+				Rand: deps.CryptoRandDependencies{
 					Reader: cryptoRand.Reader,
 				},
 			},
-			Io: codechallenge.IoDependencies{
-				Ioutil: codechallenge.IoIoutilDependencies{
+			Io: deps.IoDependencies{
+				Ioutil: deps.IoIoutilDependencies{
 					WriteFile: ioutil.WriteFile,
 					ReadFile:  ioutil.ReadFile,
 				},
