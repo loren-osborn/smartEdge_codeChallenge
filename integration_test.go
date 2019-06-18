@@ -10,22 +10,24 @@ import (
 )
 
 const (
-	UsageMessageBody = "\n  -ascii\n" +
-		"    \tThis specifies that the message is ASCII content\n" +
-		"  -binary\n" +
-		"    \tThis specifies that the message is raw binary content\n" +
-		"  -bits uint\n" +
-		"    \tBit length of the RSA key [default=2048]\n" +
-		"  -ecdsa\n" +
-		"    \tCauses the mesage to be signed with an ECDSA key-pair [default]\n" +
+	UsageMessageBody = "\n  Input format options:\n" +
+		"      -ascii\n" +
+		"        \tThis specifies that the message is ASCII content\n" +
+		"      -binary\n" +
+		"        \tThis specifies that the message is raw binary content\n" +
+		"      -utf8\n" +
+		"        \tThis specifies that the message is UTF-8 content [default]\n" +
+		"  Algorithm options:\n" +
+		"      -ecdsa\n" +
+		"        \tCauses the mesage to be signed with an ECDSA key-pair [default]\n" +
+		"      -rsa\n" +
+		"        \tCauses the mesage to be signed with an RSA key-pair\n" +
+		"      -bits uint\n" +
+		"        \tBit length of the RSA key [default=2048]\n" +
 		"  -private string\n" +
 		"    \tfilepath of the private key file. Defaults to ~/.smartEdge/id_rsa.priv for RSA and ~/.smartEdge/id_ecdsa.priv for ECDSA.\n" +
 		"  -public string\n" +
-		"    \tfilepath of the private key file. Defaults to ~/.smartEdge/id_rsa.pub for RSA and ~/.smartEdge/id_ecdsa.pub for ECDSA.\n" +
-		"  -rsa\n" +
-		"    \tCauses the mesage to be signed with an RSA key-pair\n" +
-		"  -utf8\n" +
-		"    \tThis specifies that the message is UTF-8 content [default]\n"
+		"    \tfilepath of the private key file. Defaults to ~/.smartEdge/id_rsa.pub for RSA and ~/.smartEdge/id_ecdsa.pub for ECDSA.\n"
 	// I had to slip in a space to have 250 characters end on a word boundry
 	DeclarationOfIndependanceFirst250Chars = "When in the Course of human " +
 		"events it becomes necessary for one people to dissolve the " +

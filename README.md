@@ -77,7 +77,6 @@ Usage of ./codechallenge.bin:
   -public string
     	filepath of the private key file. Defaults to ~/.smartEdge/id_rsa.pub for RSA and ~/.smartEdge/id_ecdsa.pub for ECDSA.
 ```
-(This is not the current tool output. I have modified it for clarity.)
 
 ### Guided Tour:
 This should help you find your way around the files in the repository:
@@ -111,7 +110,7 @@ This should help you find your way around the files in the repository:
 These are areas where I would improve this project given more time:
 * Easy wins (minimal effort changes)
     * ~~Move entrypoint stub into `cmd/codechallenge` to avoid silly Windows-esque `codechallenge.exe` filename.~~
-    * Make the "Usage" output match the output above.
+    * ~~Make the "Usage" output match the output above.~~
     * Add a exit-status 0  `-help` option
     * Move `dependencies.go` and `keys.go` into `deps` and `crypt` sub-packes to aid organizational
         clarity of documentation. `keys.go` should be broken into 4 files: 1 for each of the 2 plugins, 1 for buffer types, and one for everything else.

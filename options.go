@@ -5,8 +5,32 @@ import (
 	"errors"
 	"flag"
 	"fmt"
+	"os"
 	"path/filepath"
 	"strings"
+)
+
+// UsageMessage is the message displayed when there is an error. The current
+// implementation documents each flag twice. This should be consolidated later.
+const (
+	UsageMessage = "  Input format options:\n" +
+		"      -ascii\n" +
+		"        \tThis specifies that the message is ASCII content\n" +
+		"      -binary\n" +
+		"        \tThis specifies that the message is raw binary content\n" +
+		"      -utf8\n" +
+		"        \tThis specifies that the message is UTF-8 content [default]\n" +
+		"  Algorithm options:\n" +
+		"      -ecdsa\n" +
+		"        \tCauses the mesage to be signed with an ECDSA key-pair [default]\n" +
+		"      -rsa\n" +
+		"        \tCauses the mesage to be signed with an RSA key-pair\n" +
+		"      -bits uint\n" +
+		"        \tBit length of the RSA key [default=2048]\n" +
+		"  -private string\n" +
+		"    \tfilepath of the private key file. Defaults to ~/.smartEdge/id_rsa.priv for RSA and ~/.smartEdge/id_ecdsa.priv for ECDSA.\n" +
+		"  -public string\n" +
+		"    \tfilepath of the private key file. Defaults to ~/.smartEdge/id_rsa.pub for RSA and ~/.smartEdge/id_ecdsa.pub for ECDSA.\n"
 )
 
 // ContentFormat the data format of the message to be signed
@@ -82,6 +106,10 @@ func ParseArgs(d *Dependencies) (*RunConfig, error) {
 	overridePrivateKeyPath := flag.String("private", "", "filepath of the private key file. Defaults to ~/.smartEdge/id_rsa.priv for RSA and ~/.smartEdge/id_ecdsa.priv for ECDSA.")
 	overridePublicKeyPath := flag.String("public", "", "filepath of the private key file. Defaults to ~/.smartEdge/id_rsa.pub for RSA and ~/.smartEdge/id_ecdsa.pub for ECDSA.")
 	rsaKeyBits := flag.Uint("bits", 0, "Bit length of the RSA key [default=2048]")
+	flag.CommandLine.Usage = func() {
+		// Ignore errors
+		_, _ = fmt.Fprintf(flag.CommandLine.Output(), "Usage of %s:\n%s", os.Args[0], UsageMessage)
+	}
 	if err := flag.CommandLine.Parse(d.Os.Args[1:]); err != nil {
 		return nil, err
 	}
