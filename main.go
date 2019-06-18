@@ -29,6 +29,11 @@ func RealMain(d *Dependencies) {
 	if err != nil {
 		HandleError(d, err, 1)
 	}
+	if config.HelpMode {
+		flag.CommandLine.SetOutput(d.Os.Stdout)
+		flag.CommandLine.Usage()
+		d.Os.Exit(0)
+	}
 	message, err := InjestMessage(d.Os.Stdin, config.Format)
 	if err != nil {
 		HandleError(d, err, 2)

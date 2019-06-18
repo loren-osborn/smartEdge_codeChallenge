@@ -10,7 +10,9 @@ import (
 )
 
 const (
-	UsageMessageBody = "\n  Input format options:\n" +
+	UsageMessageBody = "\n  -help\n" +
+		"    \tdisplay this help message.\n" +
+		"  Input format options:\n" +
 		"      -ascii\n" +
 		"        \tThis specifies that the message is ASCII content\n" +
 		"      -binary\n" +

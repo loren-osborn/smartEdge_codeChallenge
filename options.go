@@ -13,7 +13,9 @@ import (
 // UsageMessage is the message displayed when there is an error. The current
 // implementation documents each flag twice. This should be consolidated later.
 const (
-	UsageMessage = "  Input format options:\n" +
+	UsageMessage = "  -help\n" +
+		"    \tdisplay this help message.\n" +
+		"  Input format options:\n" +
 		"      -ascii\n" +
 		"        \tThis specifies that the message is ASCII content\n" +
 		"      -binary\n" +
@@ -58,6 +60,7 @@ type PkiSettings struct {
 
 // RunConfig program's running config as specified on the command line.
 type RunConfig struct {
+	HelpMode       bool
 	Format         ContentFormat
 	PubKeySettings PkiSettings
 }
@@ -67,7 +70,8 @@ func ParseArgs(d *Dependencies) (*RunConfig, error) {
 	defaultKeyDir := filepath.Join(d.Os.Getenv("HOME"), ".smartEdge")
 	flag.CommandLine.SetOutput(d.Os.Stderr)
 	result := RunConfig{
-		Format: UTF8, // default
+		HelpMode: false, // default
+		Format:   UTF8,  // default
 		PubKeySettings: PkiSettings{
 			Algorithm:      x509.ECDSA, // default
 			RSAKeyBits:     2048,       //default
@@ -75,6 +79,7 @@ func ParseArgs(d *Dependencies) (*RunConfig, error) {
 			PublicKeyPath:  filepath.Join(defaultKeyDir, "id_{{algorithm}}.pub"),
 		},
 	}
+	helpMode := flag.Bool("help", false, "display this help message.")
 	type namedFlagValPair struct {
 		name    string
 		present *bool
@@ -113,10 +118,14 @@ func ParseArgs(d *Dependencies) (*RunConfig, error) {
 	if err := flag.CommandLine.Parse(d.Os.Args[1:]); err != nil {
 		return nil, err
 	}
+	result.HelpMode = *helpMode
 	mutuallyExclusiveFlagCount := 0
 	lastNamedOption := ""
 	for val, flagPair := range algorithmFlags {
 		if *(flagPair.present) {
+			if result.HelpMode {
+				return nil, fmt.Errorf("Option -help ignores all other options")
+			}
 			if mutuallyExclusiveFlagCount > 0 {
 				return nil, fmt.Errorf("Options -%s and -%s may not be used together", lastNamedOption, flagPair.name)
 			}
@@ -129,6 +138,9 @@ func ParseArgs(d *Dependencies) (*RunConfig, error) {
 	lastNamedOption = ""
 	for val, flagPair := range formatFlags {
 		if *(flagPair.present) {
+			if result.HelpMode {
+				return nil, fmt.Errorf("Option -help ignores all other options")
+			}
 			if mutuallyExclusiveFlagCount > 0 {
 				return nil, fmt.Errorf("Options -%s and -%s may not be used together", lastNamedOption, flagPair.name)
 			}
@@ -150,6 +162,9 @@ func ParseArgs(d *Dependencies) (*RunConfig, error) {
 		algorithmFlags[result.PubKeySettings.Algorithm].name,
 		ReplaceAll)
 	if *rsaKeyBits != 0 {
+		if result.HelpMode {
+			return nil, fmt.Errorf("Option -help ignores all other options")
+		}
 		if result.PubKeySettings.Algorithm == x509.RSA {
 			return nil, errors.New("Options -bits is only valid for RSA")
 		}
@@ -163,9 +178,15 @@ func ParseArgs(d *Dependencies) (*RunConfig, error) {
 
 	// Replace if we don't see the default value of empty string
 	if *overridePrivateKeyPath != "" {
+		if result.HelpMode {
+			return nil, fmt.Errorf("Option -help ignores all other options")
+		}
 		result.PubKeySettings.PrivateKeyPath = *overridePrivateKeyPath
 	}
 	if *overridePublicKeyPath != "" {
+		if result.HelpMode {
+			return nil, fmt.Errorf("Option -help ignores all other options")
+		}
 		result.PubKeySettings.PublicKeyPath = *overridePublicKeyPath
 	}
 	return &result, nil
