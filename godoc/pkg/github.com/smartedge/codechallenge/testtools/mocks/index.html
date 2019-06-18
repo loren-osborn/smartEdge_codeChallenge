@@ -209,7 +209,7 @@
 		
 			
 			
-			<h2 id="MockDepsBundle">type <a href="https://github.com/loren-osborn/smartEdge_codeChallenge/blob/master/testtools/mocks/deps.go#L18">MockDepsBundle</a>
+			<h2 id="MockDepsBundle">type <a href="https://github.com/loren-osborn/smartEdge_codeChallenge/blob/master/testtools/mocks/deps.go#L16">MockDepsBundle</a>
 				<a class="permalink" href="index.html#MockDepsBundle">&#xb6;</a>
 			</h2>
 			<p>
@@ -218,8 +218,8 @@ talks to.
 </p>
 
 			<pre>type MockDepsBundle struct {
-<span id="MockDepsBundle.Deps"></span>    Deps       *<a href="../../index.html">codechallenge</a>.<a href="../../index.html#Dependencies">Dependencies</a>
-<span id="MockDepsBundle.NativeDeps"></span>    NativeDeps *<a href="../../index.html">codechallenge</a>.<a href="../../index.html#Dependencies">Dependencies</a>
+<span id="MockDepsBundle.Deps"></span>    Deps       *<a href="../../deps/index.html">deps</a>.<a href="../../deps/index.html#Dependencies">Dependencies</a>
+<span id="MockDepsBundle.NativeDeps"></span>    NativeDeps *<a href="../../deps/index.html">deps</a>.<a href="../../deps/index.html#Dependencies">Dependencies</a>
 <span id="MockDepsBundle.OutBuf"></span>    OutBuf     *<a href="https://golang.org/pkg/bytes/">bytes</a>.<a href="https://golang.org/pkg/bytes/#Buffer">Buffer</a>
 <span id="MockDepsBundle.ErrBuf"></span>    ErrBuf     *<a href="https://golang.org/pkg/bytes/">bytes</a>.<a href="https://golang.org/pkg/bytes/#Buffer">Buffer</a>
 
@@ -238,13 +238,13 @@ talks to.
 
 			
 				
-				<h3 id="NewDefaultMockDeps">func <a href="https://github.com/loren-osborn/smartEdge_codeChallenge/blob/master/testtools/mocks/deps.go#L35">NewDefaultMockDeps</a>
+				<h3 id="NewDefaultMockDeps">func <a href="https://github.com/loren-osborn/smartEdge_codeChallenge/blob/master/testtools/mocks/deps.go#L34">NewDefaultMockDeps</a>
 					<a class="permalink" href="index.html#NewDefaultMockDeps">&#xb6;</a>
 				</h3>
 				<pre>func NewDefaultMockDeps(stdinContent <a href="https://golang.org/pkg/builtin/#string">string</a>, cmdLnArgs []<a href="https://golang.org/pkg/builtin/#string">string</a>, homeDir <a href="https://golang.org/pkg/builtin/#string">string</a>, _ *map[<a href="https://golang.org/pkg/builtin/#string">string</a>]*<a href="https://golang.org/pkg/builtin/#string">string</a>) *<a href="index.html#MockDepsBundle">MockDepsBundle</a></pre>
 				<p>
 NewDefaultMockDeps generates a mock environment, along with a
-*codechallenge.Dependencies that operates in this mock environment.
+*deps.Dependencies that operates in this mock environment.
 Due to language constraints, it&#39;s turned out to be more practical to map
 filesystem calls into a temporary filesystem directory rather than
 simulating filesystem activity in memory.
@@ -256,7 +256,7 @@ simulating filesystem activity in memory.
 
 			
 				
-				<h3 id="MockDepsBundle.GetExitStatus">func (*MockDepsBundle) <a href="https://github.com/loren-osborn/smartEdge_codeChallenge/blob/master/testtools/mocks/deps.go#L103">GetExitStatus</a>
+				<h3 id="MockDepsBundle.GetExitStatus">func (*MockDepsBundle) <a href="https://github.com/loren-osborn/smartEdge_codeChallenge/blob/master/testtools/mocks/deps.go#L87">GetExitStatus</a>
 					<a class="permalink" href="index.html#MockDepsBundle.GetExitStatus">&#xb6;</a>
 				</h3>
 				<pre>func (mdb *<a href="index.html#MockDepsBundle">MockDepsBundle</a>) GetExitStatus() <a href="https://golang.org/pkg/builtin/#int">int</a></pre>
@@ -269,7 +269,7 @@ GetExitStatus returns the value that was passed to mock of os.Exit() or 0 if non
 				
 			
 				
-				<h3 id="MockDepsBundle.InvokeCallInMockedEnv">func (*MockDepsBundle) <a href="https://github.com/loren-osborn/smartEdge_codeChallenge/blob/master/testtools/mocks/deps.go#L109">InvokeCallInMockedEnv</a>
+				<h3 id="MockDepsBundle.InvokeCallInMockedEnv">func (*MockDepsBundle) <a href="https://github.com/loren-osborn/smartEdge_codeChallenge/blob/master/testtools/mocks/deps.go#L93">InvokeCallInMockedEnv</a>
 					<a class="permalink" href="index.html#MockDepsBundle.InvokeCallInMockedEnv">&#xb6;</a>
 				</h3>
 				<pre>func (mdb *<a href="index.html#MockDepsBundle">MockDepsBundle</a>) InvokeCallInMockedEnv(wrapped func() <a href="https://golang.org/pkg/builtin/#error">error</a>) (outErr <a href="https://golang.org/pkg/builtin/#error">error</a>)</pre>
