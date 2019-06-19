@@ -30,7 +30,7 @@ func WriteDirAndFile(d *deps.Dependencies, filename string, data []byte, filePer
 	if (d.Os.Getuid() == 0) && (d.Os.Getenv("EXT_UID_GID") != "") && !FileExists(d, filename) {
 		idStrs := strings.Split(d.Os.Getenv("EXT_UID_GID"), ":")
 		if len(idStrs) != 2 {
-			return fmt.Errorf("Environment variable EXT_UID_GID must have 2 integer ids seperated by colons. We found %d", len(idStrs))
+			return fmt.Errorf("Environment variable EXT_UID_GID must have 2 integer ids separated by colons. We found %d", len(idStrs))
 		}
 		ids := make([]int, len(idStrs))
 		idLabels := []string{"user", "group"}

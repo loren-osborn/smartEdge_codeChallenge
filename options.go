@@ -59,7 +59,7 @@ type RunConfig struct {
 	PubKeySettings crypt.PkiSettings
 }
 
-// ParseArgs parses the runtime configuration from the command line arguemnts.
+// ParseArgs parses the runtime configuration from the command line arguments.
 func ParseArgs(d *deps.Dependencies) (*RunConfig, error) {
 	defaultKeyDir := filepath.Join(d.Os.Getenv("HOME"), ".smartEdge")
 	flag.CommandLine.SetOutput(d.Os.Stderr)

@@ -176,7 +176,7 @@ func TestErrorSpecEnsureMatches(t *testing.T) {
 		}
 		return subtestName, subtestFunc
 	}
-	// 4 usefull error types: nested, so 16 test cases
+	// 4 useful error types: nested, so 16 test cases
 	errorValSpecs := []struct {
 		errVal error
 		spec   *testtools.ErrorSpec

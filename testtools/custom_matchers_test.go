@@ -63,7 +63,12 @@ func TestSchemaConformance(t *testing.T) {
 			JSONValidationSchemaURL, expectedNegatedFailureMsg, actualNegatedFailureMsg)
 	}
 	expectedFailureMsg := fmt.Sprintf(
-		"Expected\n\t\"{}\"\nto conform to the JSON schema in %s but failed because:\n\t- (root): message is required\n\t- (root): signature is required\n\t- (root): pubkey is required",
+		"Expected\n"+
+			"\t\"{}\"\n"+
+			"to conform to the JSON schema in %s but failed because:\n"+
+			"\t- (root): message is required\n"+
+			"\t- (root): signature is required\n"+
+			"\t- (root): pubkey is required",
 		JSONValidationSchemaURL)
 	actualFailureMsg := matcher.FailureMessage("{}")
 	if actualFailureMsg != expectedFailureMsg {

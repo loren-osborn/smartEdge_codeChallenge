@@ -324,7 +324,7 @@ func TestNewDefaultMockDepsRogueHomeDir(t *testing.T) {
 		t.Error(matchErr.Error())
 	}
 	if !argCodeRan {
-		t.Error("Error should have occured after closure code ran")
+		t.Error("Error should have occurred after closure code ran")
 	}
 	if len(setenvCallLog) != 2 {
 		t.Errorf("mockDepsBundle.NativeDeps.Os.Setenv should have been called twice, but call log shows:\n%#v", setenvCallLog)
@@ -376,7 +376,7 @@ func TestNewDefaultMockDepsRogueFileIO(t *testing.T) {
 		t.Error(matchErr.Error())
 	}
 	if !argCodeRan {
-		t.Error("Error should have occured after closure code ran")
+		t.Error("Error should have occurred after closure code ran")
 	}
 	if len(removeAllCallLog) != 1 {
 		t.Errorf("mockDepsBundle.NativeDeps.Os.Setenv should have been called once, but call log shows:\n%#v", removeAllCallLog)

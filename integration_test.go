@@ -32,7 +32,7 @@ const (
 		"    \tfilepath of the private key file. Defaults to ~/.smartEdge/id_rsa.priv for RSA and ~/.smartEdge/id_ecdsa.priv for ECDSA.\n" +
 		"  -public string\n" +
 		"    \tfilepath of the private key file. Defaults to ~/.smartEdge/id_rsa.pub for RSA and ~/.smartEdge/id_ecdsa.pub for ECDSA.\n"
-	// I had to slip in a space to have 250 characters end on a word boundry
+	// I had to slip in a space to have 250 characters end on a word boundary
 	DeclarationOfIndependanceFirst250Chars = "When in the Course of human " +
 		"events it becomes necessary for one people to dissolve the " +
 		"political bands which have connected them with another and to " +

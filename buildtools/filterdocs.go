@@ -45,7 +45,7 @@ var RealEntryPoint func(*deps.Dependencies) = RealMain
 // main() calls RealEntryPoint, which defaults to RealMain() in production. At
 // testing time, the test harness replaces RealEntryPoint with a stub, so both
 // the production Dependencies structure, and production RealMain() can be
-// validated independantly.
+// validated independently.
 func main() {
 	RealEntryPoint(deps.Defaults)
 }
