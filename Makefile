@@ -32,24 +32,24 @@ default: event_timestamps/production_container_image demo
 
 .PHONY: clean purge
 
-event_timestamps/production_container_image: event_timestamps Makefile \
+event_timestamps/production_container_image: event_timestamps/created Makefile \
 	Dockerfile $(PROD_SOURCE_FILES) test
 	docker build -t production_container_image .
 	touch $@
 
-event_timestamps/golang_base_image: Makefile Dockerfile event_timestamps
+event_timestamps/golang_base_image: Makefile Dockerfile event_timestamps/created
 	docker build --target golang_base -t golang_base_image .
 	touch $@
 
 event_timestamps/demo_image: Makefile Dockerfile.demo event_timestamps/golang_base_image \
-	event_timestamps $(PROD_SOURCE_FILES)
+	event_timestamps/created $(PROD_SOURCE_FILES)
 	docker build -f Dockerfile.demo -t demo_image .
 	touch $@
 
 # Source files are pulled in as a volume, so the tester_image isn't dependant
 # on them
 event_timestamps/tester_image: event_timestamps/golang_base_image Makefile \
-	Dockerfile.test event_timestamps
+	Dockerfile.test event_timestamps/created
 	docker build -f Dockerfile.test -t tester_image .
 	touch $@
 
@@ -112,7 +112,7 @@ demo: event_timestamps/demo_image
 		demo_image:latest )
 	@echo
 
-build_local: event_timestamps Makefile $(PROD_SOURCE_FILES) test
+build_local: event_timestamps/created Makefile $(PROD_SOURCE_FILES) test
 	@sh -c \
 		'if [ "$$(pwd)" != "$$GOPATH/src/$(PROJECT_URI)"  ] ; then \
 			>&2 echo "To build this project locally, you must check it out" \
@@ -121,19 +121,21 @@ build_local: event_timestamps Makefile $(PROD_SOURCE_FILES) test
 		fi'
 	go build -o codechallenge $(PROJECT_URI)/cmd/codechallenge
 
-event_timestamps: Makefile
+event_timestamps/created: Makefile
 	@$(strip bash -c \
-		'if [ -d event_timestamps ] ; then       \
-			>&2 echo touch event_timestamps ;    \
-			         touch event_timestamps ;    \
-		else                                     \
-			>&2 echo mkdir -p event_timestamps ; \
-			         mkdir -p event_timestamps ; \
-		fi')
-	@$(strip bash -c \
-		'if ! [ -f .git/hooks/pre-push ] ; then                   \
+		'if ! [ -d event_timestamps ] ; then                      \
+			>&2 echo mkdir -p event_timestamps ;                  \
+			         mkdir -p event_timestamps ;                  \
+		fi ;                                                      \
+		>&2 echo touch event_timestamps/created ;                 \
+		         touch event_timestamps/created ;                 \
+		if ! [ -f .git/hooks/pre-push ] ; then                    \
 			>&2 echo cp buildtools/pre-push .git/hooks/pre-push ; \
 			         cp buildtools/pre-push .git/hooks/pre-push ; \
+		fi ;                                                      \
+		if ! [ -x .git/hooks/pre-push ] ; then                    \
+			>&2 echo chmod 755 .git/hooks/pre-push ;              \
+			         chmod 755 .git/hooks/pre-push ;              \
 		fi')
 
 clean:
