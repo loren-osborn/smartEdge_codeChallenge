@@ -54,7 +54,7 @@
 			<div id="nav">
 				<select id="files">
 				
-				<option value="file0">github.com/smartedge/codechallenge/buildtools/filterdocs.go (20.0%)</option>
+				<option value="file0">github.com/smartedge/codechallenge/buildtools/filterdocs.go (22.2%)</option>
 				
 				<option value="file1">github.com/smartedge/codechallenge/cmd/codechallenge/main.go (100.0%)</option>
 				
@@ -78,11 +78,11 @@
 				
 				<option value="file11">github.com/smartedge/codechallenge/testtools/errorspec.go (100.0%)</option>
 				
-				<option value="file12">github.com/smartedge/codechallenge/testtools/mocks/deps.go (53.2%)</option>
+				<option value="file12">github.com/smartedge/codechallenge/testtools/mocks/deps.go (65.8%)</option>
 				
 				<option value="file13">github.com/smartedge/codechallenge/testtools/mocks/os_exit.go (100.0%)</option>
 				
-				<option value="file14">github.com/smartedge/codechallenge/testtools/utils.go (89.3%)</option>
+				<option value="file14">github.com/smartedge/codechallenge/testtools/utils.go (42.4%)</option>
 				
 				</select>
 			</div>
@@ -101,7 +101,6 @@
 import (
         "fmt"
         "github.com/smartedge/codechallenge/deps"
-        "io/ioutil"
         "net/http"
         "os"
         "path/filepath"
@@ -145,7 +144,7 @@ var RealEntryPoint func(*deps.Dependencies) = RealMain
 // testing time, the test harness replaces RealEntryPoint with a stub, so both
 // the production Dependencies structure, and production RealMain() can be
 // validated independantly.
-func main() <span class="cov0" title="0">{
+func main() <span class="cov8" title="1">{
         RealEntryPoint(deps.Defaults)
 }</span>
 
@@ -170,7 +169,7 @@ func RealMain(d *deps.Dependencies) <span class="cov0" title="0">{
                         <span class="cov0" title="0">if info.IsDir() </span><span class="cov0" title="0">{
                                 return nil
                         }</span>
-                        <span class="cov0" title="0">origBuf, err := ioutil.ReadFile(path)
+                        <span class="cov0" title="0">origBuf, err := d.Io.Ioutil.ReadFile(path)
                         if err != nil </span><span class="cov0" title="0">{
                                 fmt.Fprintf(d.Os.Stderr, "Error reading file %q: %v\n", path, err)
                                 return err
@@ -178,7 +177,7 @@ func RealMain(d *deps.Dependencies) <span class="cov0" title="0">{
                         <span class="cov0" title="0">origStr := string(origBuf)
                         filteredStr := ContentFilterFunction(origStr)
                         if filteredStr != origStr </span><span class="cov0" title="0">{
-                                err = ioutil.WriteFile(path, []byte(filteredStr), info.Mode())
+                                err = d.Io.Ioutil.WriteFile(path, []byte(filteredStr), info.Mode())
                                 if err != nil </span><span class="cov0" title="0">{
                                         fmt.Fprintf(d.Os.Stderr, "Error writing file %q: %v\n", path, err)
                                         return err
@@ -1340,6 +1339,11 @@ import (
         "path/filepath"
 )
 
+// AllItems tells os.*File.ReadDir to read all items from directory
+const (
+        AllItems = -1
+)
+
 // MockDepsBundle is a bundle of dependencies along with a mock environment it
 // talks to.
 type MockDepsBundle struct {
@@ -1353,6 +1357,8 @@ type MockDepsBundle struct {
         prevCwd     string
         MapPathIn   func(string) (string, error)
         MapPathOut  func(string) (string, error)
+        hiddenFiles *map[string]*string
+        Files       *map[string]*string
 }
 
 // NewDefaultMockDeps generates a mock environment, along with a
@@ -1360,12 +1366,20 @@ type MockDepsBundle struct {
 // Due to language constraints, it's turned out to be more practical to map
 // filesystem calls into a temporary filesystem directory rather than
 // simulating filesystem activity in memory.
-func NewDefaultMockDeps(stdinContent string, cmdLnArgs []string, homeDir string, _ *map[string]*string) *MockDepsBundle <span class="cov8" title="1">{
+func NewDefaultMockDeps(stdinContent string, cmdLnArgs []string, homeDir string, files *map[string]*string) *MockDepsBundle <span class="cov8" title="1">{
         fakeStdout := &amp;bytes.Buffer{}
         fakeStderr := &amp;bytes.Buffer{}
         osExitHarness := NewOsExitMockHarness()
         CopyOfDefaultDeps := *deps.Defaults
-        return &amp;MockDepsBundle{
+        if files == nil || *files == nil </span><span class="cov0" title="0">{
+                localMap := make(map[string]*string, 1)
+                if files == nil </span><span class="cov0" title="0">{
+                        files = &amp;localMap
+                }</span> else<span class="cov0" title="0"> {
+                        *files = localMap
+                }</span>
+        }
+        <span class="cov8" title="1">return &amp;MockDepsBundle{
                 Deps: &amp;deps.Dependencies{
                         Crypto: deps.CryptoDependencies{
                                 Rand: deps.CryptoRandDependencies{
@@ -1387,6 +1401,7 @@ func NewDefaultMockDeps(stdinContent string, cmdLnArgs []string, homeDir string,
                                 Getuid:    os.Getuid,
                                 Getwd:     nil,
                                 MkdirAll:  nil,
+                                Open:      nil,
                                 RemoveAll: nil,
                                 Setenv:    os.Setenv,
                                 Stat:      nil,
@@ -1409,8 +1424,10 @@ func NewDefaultMockDeps(stdinContent string, cmdLnArgs []string, homeDir string,
                 prevCwd:     "",
                 MapPathIn:   nil,
                 MapPathOut:  nil,
-        }
-}</span>
+                hiddenFiles: files,
+                Files:       files,
+        }</span>
+}
 
 // GetExitStatus returns the value that was passed to mock of os.Exit() or 0 if none.
 func (mdb *MockDepsBundle) GetExitStatus() int <span class="cov8" title="1">{
@@ -1471,16 +1488,20 @@ func (mdb *MockDepsBundle) InvokeCallInMockedEnv(wrapped func() error) (outErr e
         if outErr != nil </span><span class="cov0" title="0">{
                 return
         }</span>
-        <span class="cov8" title="1">mdb.MapPathIn = func(path string) (string, error) </span><span class="cov0" title="0">{
+        <span class="cov8" title="1">mdb.MapPathIn = func(path string) (string, error) </span><span class="cov8" title="1">{
                 return filepath.Join(fakeRootPath, path), nil
         }</span>
-        <span class="cov8" title="1">mdb.MapPathOut = func(path string) (string, error) </span><span class="cov0" title="0">{
-                cleanFakeRoot := filepath.Clean(fakeRootPath) + "/"
+        <span class="cov8" title="1">mdb.MapPathOut = func(path string) (string, error) </span><span class="cov8" title="1">{
+                cleanFakeRoot := filepath.Clean(fakeRootPath)
                 cleanPath := filepath.Clean(path)
-                if cleanPath[0:len(cleanFakeRoot)] != cleanFakeRoot </span><span class="cov0" title="0">{
+                if cleanFakeRoot == cleanPath </span><span class="cov8" title="1">{
+                        return "/", nil
+                }</span>
+                <span class="cov8" title="1">cleanFakeRoot = fmt.Sprintf("%s/", cleanFakeRoot)
+                if (len(cleanPath) &lt; len(cleanFakeRoot)) || (cleanPath[0:len(cleanFakeRoot)] != cleanFakeRoot) </span><span class="cov0" title="0">{
                         return "", fmt.Errorf("File %#v not inside fake root %#v when trying to map it outside", cleanPath, cleanFakeRoot)
                 }</span>
-                <span class="cov0" title="0">return cleanPath[len(cleanFakeRoot)-1:], nil</span>
+                <span class="cov8" title="1">return cleanPath[len(cleanFakeRoot)-1:], nil</span>
         }
         <span class="cov8" title="1">mdb.Deps.Io.Ioutil.ReadFile = func(path string) ([]byte, error) </span><span class="cov0" title="0">{
                 realPath, err := mdb.MapPathIn(path)
@@ -1521,12 +1542,19 @@ func (mdb *MockDepsBundle) InvokeCallInMockedEnv(wrapped func() error) (outErr e
                 }</span>
                 <span class="cov0" title="0">return dir, nil</span>
         }
-        <span class="cov8" title="1">mdb.Deps.Os.MkdirAll = func(path string, perm os.FileMode) error </span><span class="cov0" title="0">{
+        <span class="cov8" title="1">mdb.Deps.Os.MkdirAll = func(path string, perm os.FileMode) error </span><span class="cov8" title="1">{
                 realPath, err := mdb.MapPathIn(path)
                 if err != nil </span><span class="cov0" title="0">{
                         return err
                 }</span>
-                <span class="cov0" title="0">return mdb.NativeDeps.Os.MkdirAll(realPath, perm)</span>
+                <span class="cov8" title="1">return mdb.NativeDeps.Os.MkdirAll(realPath, perm)</span>
+        }
+        <span class="cov8" title="1">mdb.Deps.Os.Open = func(path string) (*os.File, error) </span><span class="cov8" title="1">{
+                realPath, err := mdb.MapPathIn(path)
+                if err != nil </span><span class="cov0" title="0">{
+                        return nil, err
+                }</span>
+                <span class="cov8" title="1">return mdb.NativeDeps.Os.Open(realPath)</span>
         }
         <span class="cov8" title="1">mdb.Deps.Os.RemoveAll = func(path string) error </span><span class="cov0" title="0">{
                 realPath, err := mdb.MapPathIn(path)
@@ -1542,24 +1570,79 @@ func (mdb *MockDepsBundle) InvokeCallInMockedEnv(wrapped func() error) (outErr e
                 }</span>
                 <span class="cov0" title="0">return mdb.NativeDeps.Os.Stat(realPath)</span>
         }
-        <span class="cov8" title="1">mdb.Deps.Path.FilePath.Walk = func(root string, walkFn filepath.WalkFunc) error </span><span class="cov0" title="0">{
+        <span class="cov8" title="1">mdb.Deps.Path.FilePath.Walk = func(root string, walkFn filepath.WalkFunc) error </span><span class="cov8" title="1">{
                 realRoot, err := mdb.MapPathIn(root)
                 if err != nil </span><span class="cov0" title="0">{
                         return err
                 }</span>
-                <span class="cov0" title="0">realWalkFunc := filepath.WalkFunc(func(realPath string, info os.FileInfo, err error) error </span><span class="cov0" title="0">{
+                <span class="cov8" title="1">realWalkFunc := filepath.WalkFunc(func(realPath string, info os.FileInfo, err error) error </span><span class="cov8" title="1">{
                         path, err := mdb.MapPathOut(realPath)
                         if err != nil </span><span class="cov0" title="0">{
                                 return err
                         }</span>
-                        <span class="cov0" title="0">return walkFn(path, info, err)</span>
+                        <span class="cov8" title="1">return walkFn(path, info, err)</span>
                 })
-                <span class="cov0" title="0">return mdb.NativeDeps.Path.FilePath.Walk(realRoot, realWalkFunc)</span>
+                <span class="cov8" title="1">return mdb.NativeDeps.Path.FilePath.Walk(realRoot, realWalkFunc)</span>
+        }
+        // Populate fake file system
+        <span class="cov8" title="1">mdb.hiddenFiles = mdb.Files
+        // Not kept in sync with mock environment. Set to nil to prevent access.
+        mdb.Files = nil
+        for path, content := range *mdb.hiddenFiles </span><span class="cov8" title="1">{
+                if content == nil </span><span class="cov8" title="1">{
+                        err := mdb.Deps.Os.MkdirAll(path, 0755)
+                        if err != nil </span><span class="cov0" title="0">{
+                                return err
+                        }</span>
+                } else<span class="cov0" title="0"> {
+                        err := mdb.Deps.Io.Ioutil.WriteFile(path, []byte(*content), 0644)
+                        if err != nil </span><span class="cov0" title="0">{
+                                return err
+                        }</span>
+                }
         }
 
         // Teardown fake filesystem
         <span class="cov8" title="1">defer func() </span><span class="cov8" title="1">{
-                newErr := mdb.NativeDeps.Os.Chdir(mdb.prevCwd)
+                // Restore nil file map to restore visability
+                mdb.Files = mdb.hiddenFiles
+                *mdb.Files = make(map[string]*string)
+                newErr := mdb.Deps.Path.FilePath.Walk("/", func(path string, info os.FileInfo, err error) error </span><span class="cov8" title="1">{
+                        if err != nil </span><span class="cov0" title="0">{
+                                return err
+                        }</span>
+                        <span class="cov8" title="1">if info.IsDir() </span><span class="cov8" title="1">{
+                                dirFileHandle, err := mdb.Deps.Os.Open(path)
+                                if err != nil </span><span class="cov0" title="0">{
+                                        return err
+                                }</span>
+                                <span class="cov8" title="1">dirFileNames, err := dirFileHandle.Readdirnames(AllItems)
+                                if err != nil </span><span class="cov0" title="0">{
+                                        return err
+                                }</span>
+                                <span class="cov8" title="1">childCount := 0
+                                for _, name := range dirFileNames </span><span class="cov8" title="1">{
+                                        if (name != ".") &amp;&amp; (name != "..") </span><span class="cov8" title="1">{
+                                                childCount++
+                                        }</span>
+                                }
+                                <span class="cov8" title="1">if childCount == 0 </span><span class="cov8" title="1">{
+                                        (*mdb.Files)[path] = nil
+                                }</span>
+                                <span class="cov8" title="1">return nil</span>
+                        }
+                        <span class="cov0" title="0">fileBuf, err := mdb.Deps.Io.Ioutil.ReadFile(path)
+                        if err != nil </span><span class="cov0" title="0">{
+                                return err
+                        }</span>
+                        <span class="cov0" title="0">content := string(fileBuf)
+                        (*mdb.Files)[path] = &amp;content
+                        return nil</span>
+                })
+                <span class="cov8" title="1">if outErr == nil </span><span class="cov8" title="1">{
+                        outErr = newErr
+                }</span>
+                <span class="cov8" title="1">newErr = mdb.NativeDeps.Os.Chdir(mdb.prevCwd)
                 if outErr == nil </span><span class="cov8" title="1">{
                         outErr = newErr
                 }</span>
@@ -1618,10 +1701,25 @@ func (emh *OsExitHarness) GetExitStatus() int <span class="cov8" title="1">{
 		<pre class="file" id="file14" style="display: none">package testtools
 
 import (
+        "crypto/ecdsa"
+        "crypto/rsa"
+        "crypto/x509"
+        "encoding/json"
         "errors"
         "fmt"
+        "github.com/smartedge/codechallenge"
+        "github.com/smartedge/codechallenge/crypt"
+        "github.com/smartedge/codechallenge/deps"
+        "github.com/xeipuuv/gojsonschema"
+        "path/filepath"
         "reflect"
         "regexp"
+        "strings"
+)
+
+// JSONValidationSchemaPath the path in the project to the valid response schema.
+const (
+        JSONValidationSchemaPath = "testdata/valid_output_schema.json"
 )
 
 // AreFuncsEqual returns true only if a and b are both functions, and
@@ -1718,7 +1816,7 @@ func WrapFuncCallWithCounter(f func()) (func(), *int) <span class="cov8" title="
 
 // StringMatcher is an interface for comparing strings.
 type StringMatcher interface {
-        MatchString(string) bool
+        MatchString(string) error
         String() string
 }
 
@@ -1733,9 +1831,12 @@ func NewStringStringMatcher(s string) *StringStringMatcher <span class="cov0" ti
 }</span>
 
 // MatchString returns whether the strings are equal
-func (ssm *StringStringMatcher) MatchString(s string) bool <span class="cov0" title="0">{
-        return ssm.str == s
-}</span>
+func (ssm *StringStringMatcher) MatchString(s string) error <span class="cov0" title="0">{
+        if ssm.str == s </span><span class="cov0" title="0">{
+                return nil
+        }</span>
+        <span class="cov0" title="0">return fmt.Errorf("Didn't equal string %s", ssm.String())</span>
+}
 
 // String returns a printable representation of the string
 func (ssm *StringStringMatcher) String() string <span class="cov0" title="0">{
@@ -1753,15 +1854,182 @@ func NewRegexpStringMatcher(pattern string) *RegexpStringMatcher <span class="co
         return &amp;RegexpStringMatcher{re: regexp.MustCompile(pattern)}
 }</span>
 
-// MatchString returns whether the strings are equal
-func (rsm *RegexpStringMatcher) MatchString(s string) bool <span class="cov0" title="0">{
-        return rsm.re.MatchString(s)
-}</span>
+// MatchString returns whether the strings match the pattern.
+func (rsm *RegexpStringMatcher) MatchString(s string) error <span class="cov0" title="0">{
+        if rsm.re.MatchString(s) </span><span class="cov0" title="0">{
+                return nil
+        }</span>
+        <span class="cov0" title="0">return fmt.Errorf("Didn't match pattern %s", rsm.String())</span>
+}
 
-// MatchString returns a printable representation of the regular expression
+// String returns a printable representation of the regular expression
 func (rsm *RegexpStringMatcher) String() string <span class="cov0" title="0">{
         return fmt.Sprintf("regexp.Regexp(%#v)", rsm.re.String())
 }</span>
+
+// GenericStringMatcher is generic matcher for a string validation function.
+type GenericStringMatcher func(string) error
+
+// MatchString returns whether the strings match.
+func (gsm GenericStringMatcher) MatchString(s string) error <span class="cov0" title="0">{
+        return gsm(s)
+}</span>
+
+// String returns a generic printable representation
+func (gsm GenericStringMatcher) String() string <span class="cov0" title="0">{
+        return "validation function"
+}</span>
+
+// GetResponseMatcherForMessageAndPubKey returns a string matcher for a valid
+// response with a specific message and public key
+func GetResponseMatcherForMessageAndPubKey(d *deps.Dependencies, msg string, pubKey string) GenericStringMatcher <span class="cov0" title="0">{
+        return GenericStringMatcher(func(r string) error </span><span class="cov0" title="0">{
+                expectedAlg, err := GetPEMPublicKeyAlgorithm(pubKey)
+                if err != nil </span><span class="cov0" title="0">{
+                        return fmt.Errorf("Invalid key to match: %s", err.Error())
+                }</span>
+                <span class="cov0" title="0">resp, alg, err := ValidateResponse(d, r)
+                if err != nil </span><span class="cov0" title="0">{
+                        return err
+                }</span>
+                <span class="cov0" title="0">if resp.Message != msg </span><span class="cov0" title="0">{
+                        return fmt.Errorf("signed message was %#v when %#v was expected", resp.Message, msg)
+                }</span>
+                <span class="cov0" title="0">if alg != expectedAlg </span><span class="cov0" title="0">{
+                        return fmt.Errorf("signed with %s when %s expected", alg.String(), expectedAlg.String())
+                }</span>
+                <span class="cov0" title="0">if resp.Pubkey != pubKey </span><span class="cov0" title="0">{
+                        return fmt.Errorf("unexpected key generated by fixed pseudo-random entropy:\n%s", resp.Pubkey)
+                }</span>
+                <span class="cov0" title="0">return nil</span>
+        })
+}
+
+// GetResponseMatcherForMessageAndAlgorithm returns a string matcher for a valid
+// response with a specific message and algorithm
+func GetResponseMatcherForMessageAndAlgorithm(d *deps.Dependencies, msg string, algorithm x509.PublicKeyAlgorithm) GenericStringMatcher <span class="cov0" title="0">{
+        return GenericStringMatcher(func(r string) error </span><span class="cov0" title="0">{
+                resp, alg, err := ValidateResponse(d, r)
+                if err != nil </span><span class="cov0" title="0">{
+                        return err
+                }</span>
+                <span class="cov0" title="0">if resp.Message != msg </span><span class="cov0" title="0">{
+                        return fmt.Errorf("signed message was %#v when %#v was expected", resp.Message, msg)
+                }</span>
+                <span class="cov0" title="0">if alg != algorithm </span><span class="cov0" title="0">{
+                        return fmt.Errorf("signed with %s when %s expected", alg.String(), algorithm.String())
+                }</span>
+                <span class="cov0" title="0">return nil</span>
+        })
+}
+
+// GetPEMPublicKeyAlgorithm determines the PKI algorithm from a given public
+// key string. (When the production code supports verification, this will be
+// moved to a methods of the X509Encoded and PEMEncoded types)
+func GetPEMPublicKeyAlgorithm(PEMPublicKey string) (x509.PublicKeyAlgorithm, error) <span class="cov0" title="0">{
+        keyType := x509.UnknownPublicKeyAlgorithm
+        pubKeyPEM := crypt.NewPEMBufferFromString(PEMPublicKey)
+        pubKeyX509, err := pubKeyPEM.DecodeToX509()
+        if err != nil </span><span class="cov0" title="0">{
+                return keyType, err
+        }</span>
+        <span class="cov0" title="0">untypedPubKey, err := pubKeyX509.AsGenericPublicKey()
+        if err != nil </span><span class="cov0" title="0">{
+                return keyType, err
+        }</span>
+        <span class="cov0" title="0">switch untypedPubKey.(type) </span>{
+        case *ecdsa.PublicKey:<span class="cov0" title="0">
+                keyType = x509.ECDSA</span>
+        case *rsa.PublicKey:<span class="cov0" title="0">
+                keyType = x509.RSA</span>
+        default:<span class="cov0" title="0">
+                return keyType, fmt.Errorf("Public key did not conform to recognized algorithm:\n%s", PEMPublicKey)</span>
+        }
+        <span class="cov0" title="0">return keyType, nil</span>
+}
+
+// GetURLFromProjectPath converts a project path to a file:/// URL.
+func GetURLFromProjectPath(d *deps.Dependencies, projPath string) (string, error) <span class="cov8" title="1">{
+        projectRoot, err := GetProjectPath(d)
+        if err != nil </span><span class="cov0" title="0">{
+                return "", err
+        }</span>
+        <span class="cov8" title="1">return fmt.Sprintf("file://%s/%s", projectRoot, projPath), nil</span>
+}
+
+// ValidateJSONSchema validates that a string containing JSON conforms to
+// the specified schema.
+func ValidateJSONSchema(d *deps.Dependencies, responseStr string, schemaPath string) error <span class="cov0" title="0">{
+        JSONValidationSchemaURL, err := GetURLFromProjectPath(d, schemaPath)
+        if err != nil </span><span class="cov0" title="0">{
+                return err
+        }</span>
+        <span class="cov0" title="0">schemaLoader := gojsonschema.NewReferenceLoader(JSONValidationSchemaURL)
+        docLoader := gojsonschema.NewStringLoader(responseStr)
+        matchedSchema, err := gojsonschema.Validate(schemaLoader, docLoader)
+        if (err == nil) &amp;&amp; !(matchedSchema.Valid()) </span><span class="cov0" title="0">{
+                errMsgBuilder := &amp;strings.Builder{}
+                for _, desc := range matchedSchema.Errors() </span><span class="cov0" title="0">{
+                        fmt.Fprintf(errMsgBuilder, "\n- %s", desc)
+                }</span>
+                <span class="cov0" title="0">return fmt.Errorf("Response didn't conform to JSON schema in %s%s", JSONValidationSchemaURL, errMsgBuilder.String())</span>
+        }
+        <span class="cov0" title="0">return err</span>
+}
+
+// ValidateResponse validates that the string provided conforms to the
+// schema in the spec, has a valid PEM format public key, a valid base64
+// signature, and that the signature was produced by signing the message with
+// the private key (corresponding to the included public key). It returns the
+// parsed JSON response, the signing algorithm and any errors encountered.
+func ValidateResponse(d *deps.Dependencies, responseStr string) (*codechallenge.SignedMessage, x509.PublicKeyAlgorithm, error) <span class="cov0" title="0">{
+        keyType := x509.UnknownPublicKeyAlgorithm
+        if err := ValidateJSONSchema(d, responseStr, JSONValidationSchemaPath); err != nil </span><span class="cov0" title="0">{
+                return nil, keyType, err
+        }</span>
+        <span class="cov0" title="0">response := codechallenge.SignedMessage{}
+        if err := json.Unmarshal([]byte(responseStr), &amp;response); err != nil </span><span class="cov0" title="0">{
+                return nil, keyType, err
+        }</span>
+        <span class="cov0" title="0">keyType, err := GetPEMPublicKeyAlgorithm(response.Pubkey)
+        if err != nil </span><span class="cov0" title="0">{
+                return &amp;response, keyType, err
+        }</span>
+        <span class="cov0" title="0">settings := &amp;crypt.PkiSettings{
+                Algorithm:      keyType,
+                RSAKeyBits:     2048,
+                PrivateKeyPath: "",
+                PublicKeyPath:  "",
+        }
+        tooling, err := crypt.GetCryptoTooling(nil, settings)
+        if err != nil </span><span class="cov0" title="0">{
+                return &amp;response, keyType, err
+        }</span>
+        <span class="cov0" title="0">matched, err := tooling.VerifySignedMessage(response.Message, response.Signature, response.Pubkey)
+        if (err == nil) &amp;&amp; !matched </span><span class="cov0" title="0">{
+                return &amp;response, keyType, fmt.Errorf("Code signature invalid for message: %#v", response.Message)
+        }</span>
+        <span class="cov0" title="0">return &amp;response, keyType, err</span>
+}
+
+// GetSourceFilename returns the filename of the caller's source code.
+func GetSourceFilename(d *deps.Dependencies) (string, error) <span class="cov8" title="1">{
+        // From https://stackoverflow.com/questions/47218715/is-it-possible-to-get-filename-where-code-is-called-in-golang
+        _, file, _, ok := d.Runtime.Caller(1)
+        if !ok </span><span class="cov0" title="0">{
+                return "", errors.New("unable to get source code filename")
+        }</span>
+        <span class="cov8" title="1">return filepath.Clean(file), nil</span>
+}
+
+// GetProjectPath returns the root path of the project (at compile time.)
+func GetProjectPath(d *deps.Dependencies) (string, error) <span class="cov8" title="1">{
+        file, err := GetSourceFilename(d)
+        if err != nil </span><span class="cov0" title="0">{
+                return "", err
+        }</span>
+        <span class="cov8" title="1">return filepath.Clean(filepath.Dir(filepath.Dir(file))), nil</span>
+}
 </pre>
 		
 		</div>

@@ -113,6 +113,8 @@
 			<div id="manual-nav">
 			<dl>
 			
+				<dd><a href="index.html#pkg-constants">Constants</a></dd>
+			
 			
 			
 				
@@ -126,6 +128,24 @@
 			
 				
 				<dd><a href="index.html#ConformToJSONSchemaFile">func ConformToJSONSchemaFile(schemaURL string) types.GomegaMatcher</a></dd>
+			
+				
+				<dd><a href="index.html#GetPEMPublicKeyAlgorithm">func GetPEMPublicKeyAlgorithm(PEMPublicKey string) (x509.PublicKeyAlgorithm, error)</a></dd>
+			
+				
+				<dd><a href="index.html#GetProjectPath">func GetProjectPath(d *deps.Dependencies) (string, error)</a></dd>
+			
+				
+				<dd><a href="index.html#GetSourceFilename">func GetSourceFilename(d *deps.Dependencies) (string, error)</a></dd>
+			
+				
+				<dd><a href="index.html#GetURLFromProjectPath">func GetURLFromProjectPath(d *deps.Dependencies, projPath string) (string, error)</a></dd>
+			
+				
+				<dd><a href="index.html#ValidateJSONSchema">func ValidateJSONSchema(d *deps.Dependencies, responseStr string, schemaPath string) error</a></dd>
+			
+				
+				<dd><a href="index.html#ValidateResponse">func ValidateResponse(d *deps.Dependencies, responseStr string) (*codechallenge.SignedMessage, x509.PublicKeyAlgorithm, error)</a></dd>
 			
 				
 				<dd><a href="index.html#WrapFuncCallWithCounter">func WrapFuncCallWithCounter(f func()) (func(), *int)</a></dd>
@@ -146,6 +166,23 @@
 				
 			
 				
+				<dd><a href="index.html#GenericStringMatcher">type GenericStringMatcher</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="index.html#GetResponseMatcherForMessageAndAlgorithm">func GetResponseMatcherForMessageAndAlgorithm(d *deps.Dependencies, msg string, algorithm x509.PublicKeyAlgorithm) GenericStringMatcher</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="index.html#GetResponseMatcherForMessageAndPubKey">func GetResponseMatcherForMessageAndPubKey(d *deps.Dependencies, msg string, pubKey string) GenericStringMatcher</a></dd>
+				
+				
+					
+					<dd>&nbsp; &nbsp; <a href="index.html#GenericStringMatcher.MatchString">func (gsm GenericStringMatcher) MatchString(s string) error</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="index.html#GenericStringMatcher.String">func (gsm GenericStringMatcher) String() string</a></dd>
+				
+			
+				
 				<dd><a href="index.html#RegexpStringMatcher">type RegexpStringMatcher</a></dd>
 				
 					
@@ -153,7 +190,7 @@
 				
 				
 					
-					<dd>&nbsp; &nbsp; <a href="index.html#RegexpStringMatcher.MatchString">func (rsm *RegexpStringMatcher) MatchString(s string) bool</a></dd>
+					<dd>&nbsp; &nbsp; <a href="index.html#RegexpStringMatcher.MatchString">func (rsm *RegexpStringMatcher) MatchString(s string) error</a></dd>
 				
 					
 					<dd>&nbsp; &nbsp; <a href="index.html#RegexpStringMatcher.String">func (rsm *RegexpStringMatcher) String() string</a></dd>
@@ -172,7 +209,7 @@
 				
 				
 					
-					<dd>&nbsp; &nbsp; <a href="index.html#StringStringMatcher.MatchString">func (ssm *StringStringMatcher) MatchString(s string) bool</a></dd>
+					<dd>&nbsp; &nbsp; <a href="index.html#StringStringMatcher.MatchString">func (ssm *StringStringMatcher) MatchString(s string) error</a></dd>
 				
 					
 					<dd>&nbsp; &nbsp; <a href="index.html#StringStringMatcher.String">func (ssm *StringStringMatcher) String() string</a></dd>
@@ -239,11 +276,22 @@
 		</div> <!-- #pkg-callgraph -->
 
 		
+			<h2 id="pkg-constants">Constants</h2>
+			
+				<p>
+JSONValidationSchemaPath the path in the project to the valid response schema.
+</p>
+
+				<pre>const (
+    <span id="JSONValidationSchemaPath">JSONValidationSchemaPath</span> = &#34;testdata/valid_output_schema.json&#34;
+)</pre>
+			
+		
 		
 		
 			
 			
-			<h2 id="AreFuncsEqual">func <a href="https://github.com/loren-osborn/smartEdge_codeChallenge/blob/master/testtools/utils.go#L14">AreFuncsEqual</a>
+			<h2 id="AreFuncsEqual">func <a href="https://github.com/loren-osborn/smartEdge_codeChallenge/blob/master/testtools/utils.go#L29">AreFuncsEqual</a>
 				<a class="permalink" href="index.html#AreFuncsEqual">&#xb6;</a>
 			</h2>
 			<pre>func AreFuncsEqual(a interface{}, b interface{}) (<a href="https://golang.org/pkg/builtin/#bool">bool</a>, <a href="https://golang.org/pkg/builtin/#error">error</a>)</pre>
@@ -260,7 +308,7 @@ arguments are nil,
 		
 			
 			
-			<h2 id="AreStringSlicesEqual">func <a href="https://github.com/loren-osborn/smartEdge_codeChallenge/blob/master/testtools/utils.go#L64">AreStringSlicesEqual</a>
+			<h2 id="AreStringSlicesEqual">func <a href="https://github.com/loren-osborn/smartEdge_codeChallenge/blob/master/testtools/utils.go#L79">AreStringSlicesEqual</a>
 				<a class="permalink" href="index.html#AreStringSlicesEqual">&#xb6;</a>
 			</h2>
 			<pre>func AreStringSlicesEqual(a []<a href="https://golang.org/pkg/builtin/#string">string</a>, b []<a href="https://golang.org/pkg/builtin/#string">string</a>) <a href="https://golang.org/pkg/builtin/#bool">bool</a></pre>
@@ -275,7 +323,7 @@ distinguishes nil-ness, but not capacity
 		
 			
 			
-			<h2 id="CloneStringSlice">func <a href="https://github.com/loren-osborn/smartEdge_codeChallenge/blob/master/testtools/utils.go#L80">CloneStringSlice</a>
+			<h2 id="CloneStringSlice">func <a href="https://github.com/loren-osborn/smartEdge_codeChallenge/blob/master/testtools/utils.go#L95">CloneStringSlice</a>
 				<a class="permalink" href="index.html#CloneStringSlice">&#xb6;</a>
 			</h2>
 			<pre>func CloneStringSlice(inSlice []<a href="https://golang.org/pkg/builtin/#string">string</a>) []<a href="https://golang.org/pkg/builtin/#string">string</a></pre>
@@ -304,7 +352,98 @@ blob against a JSON schema
 		
 			
 			
-			<h2 id="WrapFuncCallWithCounter">func <a href="https://github.com/loren-osborn/smartEdge_codeChallenge/blob/master/testtools/utils.go#L93">WrapFuncCallWithCounter</a>
+			<h2 id="GetPEMPublicKeyAlgorithm">func <a href="https://github.com/loren-osborn/smartEdge_codeChallenge/blob/master/testtools/utils.go#L229">GetPEMPublicKeyAlgorithm</a>
+				<a class="permalink" href="index.html#GetPEMPublicKeyAlgorithm">&#xb6;</a>
+			</h2>
+			<pre>func GetPEMPublicKeyAlgorithm(PEMPublicKey <a href="https://golang.org/pkg/builtin/#string">string</a>) (<a href="https://golang.org/pkg/crypto/x509/">x509</a>.<a href="https://golang.org/pkg/crypto/x509/#PublicKeyAlgorithm">PublicKeyAlgorithm</a>, <a href="https://golang.org/pkg/builtin/#error">error</a>)</pre>
+			<p>
+GetPEMPublicKeyAlgorithm determines the PKI algorithm from a given public
+key string. (When the production code supports verification, this will be
+moved to a methods of the X509Encoded and PEMEncoded types)
+</p>
+
+			
+			
+
+		
+			
+			
+			<h2 id="GetProjectPath">func <a href="https://github.com/loren-osborn/smartEdge_codeChallenge/blob/master/testtools/utils.go#L326">GetProjectPath</a>
+				<a class="permalink" href="index.html#GetProjectPath">&#xb6;</a>
+			</h2>
+			<pre>func GetProjectPath(d *<a href="../deps/index.html">deps</a>.<a href="../deps/index.html#Dependencies">Dependencies</a>) (<a href="https://golang.org/pkg/builtin/#string">string</a>, <a href="https://golang.org/pkg/builtin/#error">error</a>)</pre>
+			<p>
+GetProjectPath returns the root path of the project (at compile time.)
+</p>
+
+			
+			
+
+		
+			
+			
+			<h2 id="GetSourceFilename">func <a href="https://github.com/loren-osborn/smartEdge_codeChallenge/blob/master/testtools/utils.go#L316">GetSourceFilename</a>
+				<a class="permalink" href="index.html#GetSourceFilename">&#xb6;</a>
+			</h2>
+			<pre>func GetSourceFilename(d *<a href="../deps/index.html">deps</a>.<a href="../deps/index.html#Dependencies">Dependencies</a>) (<a href="https://golang.org/pkg/builtin/#string">string</a>, <a href="https://golang.org/pkg/builtin/#error">error</a>)</pre>
+			<p>
+GetSourceFilename returns the filename of the caller&#39;s source code.
+</p>
+
+			
+			
+
+		
+			
+			
+			<h2 id="GetURLFromProjectPath">func <a href="https://github.com/loren-osborn/smartEdge_codeChallenge/blob/master/testtools/utils.go#L252">GetURLFromProjectPath</a>
+				<a class="permalink" href="index.html#GetURLFromProjectPath">&#xb6;</a>
+			</h2>
+			<pre>func GetURLFromProjectPath(d *<a href="../deps/index.html">deps</a>.<a href="../deps/index.html#Dependencies">Dependencies</a>, projPath <a href="https://golang.org/pkg/builtin/#string">string</a>) (<a href="https://golang.org/pkg/builtin/#string">string</a>, <a href="https://golang.org/pkg/builtin/#error">error</a>)</pre>
+			<p>
+GetURLFromProjectPath converts a project path to a file:/// URL.
+</p>
+
+			
+			
+
+		
+			
+			
+			<h2 id="ValidateJSONSchema">func <a href="https://github.com/loren-osborn/smartEdge_codeChallenge/blob/master/testtools/utils.go#L262">ValidateJSONSchema</a>
+				<a class="permalink" href="index.html#ValidateJSONSchema">&#xb6;</a>
+			</h2>
+			<pre>func ValidateJSONSchema(d *<a href="../deps/index.html">deps</a>.<a href="../deps/index.html#Dependencies">Dependencies</a>, responseStr <a href="https://golang.org/pkg/builtin/#string">string</a>, schemaPath <a href="https://golang.org/pkg/builtin/#string">string</a>) <a href="https://golang.org/pkg/builtin/#error">error</a></pre>
+			<p>
+ValidateJSONSchema validates that a string containing JSON conforms to
+the specified schema.
+</p>
+
+			
+			
+
+		
+			
+			
+			<h2 id="ValidateResponse">func <a href="https://github.com/loren-osborn/smartEdge_codeChallenge/blob/master/testtools/utils.go#L285">ValidateResponse</a>
+				<a class="permalink" href="index.html#ValidateResponse">&#xb6;</a>
+			</h2>
+			<pre>func ValidateResponse(d *<a href="../deps/index.html">deps</a>.<a href="../deps/index.html#Dependencies">Dependencies</a>, responseStr <a href="https://golang.org/pkg/builtin/#string">string</a>) (*<a href="../index.html">codechallenge</a>.<a href="../index.html#SignedMessage">SignedMessage</a>, <a href="https://golang.org/pkg/crypto/x509/">x509</a>.<a href="https://golang.org/pkg/crypto/x509/#PublicKeyAlgorithm">PublicKeyAlgorithm</a>, <a href="https://golang.org/pkg/builtin/#error">error</a>)</pre>
+			<p>
+ValidateResponse validates that the string provided conforms to the
+schema in the spec, has a valid PEM format public key, a valid base64
+signature, and that the signature was produced by signing the message with
+the private key (corresponding to the included public key). It returns the
+parsed JSON response, the signing algorithm and any errors encountered.
+</p>
+
+			
+			
+
+		
+			
+			
+			<h2 id="WrapFuncCallWithCounter">func <a href="https://github.com/loren-osborn/smartEdge_codeChallenge/blob/master/testtools/utils.go#L108">WrapFuncCallWithCounter</a>
 				<a class="permalink" href="index.html#WrapFuncCallWithCounter">&#xb6;</a>
 			</h2>
 			<pre>func WrapFuncCallWithCounter(f func()) (func(), *<a href="https://golang.org/pkg/builtin/#int">int</a>)</pre>
@@ -384,7 +523,82 @@ String returns string representation of es.
 		
 			
 			
-			<h2 id="RegexpStringMatcher">type <a href="https://github.com/loren-osborn/smartEdge_codeChallenge/blob/master/testtools/utils.go#L130">RegexpStringMatcher</a>
+			<h2 id="GenericStringMatcher">type <a href="https://github.com/loren-osborn/smartEdge_codeChallenge/blob/master/testtools/utils.go#L171">GenericStringMatcher</a>
+				<a class="permalink" href="index.html#GenericStringMatcher">&#xb6;</a>
+			</h2>
+			<p>
+GenericStringMatcher is generic matcher for a string validation function.
+</p>
+
+			<pre>type GenericStringMatcher func(<a href="https://golang.org/pkg/builtin/#string">string</a>) <a href="https://golang.org/pkg/builtin/#error">error</a></pre>
+
+			
+
+			
+
+			
+			
+			
+
+			
+				
+				<h3 id="GetResponseMatcherForMessageAndAlgorithm">func <a href="https://github.com/loren-osborn/smartEdge_codeChallenge/blob/master/testtools/utils.go#L210">GetResponseMatcherForMessageAndAlgorithm</a>
+					<a class="permalink" href="index.html#GetResponseMatcherForMessageAndAlgorithm">&#xb6;</a>
+				</h3>
+				<pre>func GetResponseMatcherForMessageAndAlgorithm(d *<a href="../deps/index.html">deps</a>.<a href="../deps/index.html#Dependencies">Dependencies</a>, msg <a href="https://golang.org/pkg/builtin/#string">string</a>, algorithm <a href="https://golang.org/pkg/crypto/x509/">x509</a>.<a href="https://golang.org/pkg/crypto/x509/#PublicKeyAlgorithm">PublicKeyAlgorithm</a>) <a href="index.html#GenericStringMatcher">GenericStringMatcher</a></pre>
+				<p>
+GetResponseMatcherForMessageAndAlgorithm returns a string matcher for a valid
+response with a specific message and algorithm
+</p>
+
+				
+				
+			
+				
+				<h3 id="GetResponseMatcherForMessageAndPubKey">func <a href="https://github.com/loren-osborn/smartEdge_codeChallenge/blob/master/testtools/utils.go#L185">GetResponseMatcherForMessageAndPubKey</a>
+					<a class="permalink" href="index.html#GetResponseMatcherForMessageAndPubKey">&#xb6;</a>
+				</h3>
+				<pre>func GetResponseMatcherForMessageAndPubKey(d *<a href="../deps/index.html">deps</a>.<a href="../deps/index.html#Dependencies">Dependencies</a>, msg <a href="https://golang.org/pkg/builtin/#string">string</a>, pubKey <a href="https://golang.org/pkg/builtin/#string">string</a>) <a href="index.html#GenericStringMatcher">GenericStringMatcher</a></pre>
+				<p>
+GetResponseMatcherForMessageAndPubKey returns a string matcher for a valid
+response with a specific message and public key
+</p>
+
+				
+				
+			
+
+			
+				
+				<h3 id="GenericStringMatcher.MatchString">func (GenericStringMatcher) <a href="https://github.com/loren-osborn/smartEdge_codeChallenge/blob/master/testtools/utils.go#L174">MatchString</a>
+					<a class="permalink" href="index.html#GenericStringMatcher.MatchString">&#xb6;</a>
+				</h3>
+				<pre>func (gsm <a href="index.html#GenericStringMatcher">GenericStringMatcher</a>) MatchString(s <a href="https://golang.org/pkg/builtin/#string">string</a>) <a href="https://golang.org/pkg/builtin/#error">error</a></pre>
+				<p>
+MatchString returns whether the strings match.
+</p>
+
+				
+				
+				
+			
+				
+				<h3 id="GenericStringMatcher.String">func (GenericStringMatcher) <a href="https://github.com/loren-osborn/smartEdge_codeChallenge/blob/master/testtools/utils.go#L179">String</a>
+					<a class="permalink" href="index.html#GenericStringMatcher.String">&#xb6;</a>
+				</h3>
+				<pre>func (gsm <a href="index.html#GenericStringMatcher">GenericStringMatcher</a>) String() <a href="https://golang.org/pkg/builtin/#string">string</a></pre>
+				<p>
+String returns a generic printable representation
+</p>
+
+				
+				
+				
+			
+		
+			
+			
+			<h2 id="RegexpStringMatcher">type <a href="https://github.com/loren-osborn/smartEdge_codeChallenge/blob/master/testtools/utils.go#L148">RegexpStringMatcher</a>
 				<a class="permalink" href="index.html#RegexpStringMatcher">&#xb6;</a>
 			</h2>
 			<p>
@@ -406,7 +620,7 @@ String() result.
 
 			
 				
-				<h3 id="NewRegexpStringMatcher">func <a href="https://github.com/loren-osborn/smartEdge_codeChallenge/blob/master/testtools/utils.go#L135">NewRegexpStringMatcher</a>
+				<h3 id="NewRegexpStringMatcher">func <a href="https://github.com/loren-osborn/smartEdge_codeChallenge/blob/master/testtools/utils.go#L153">NewRegexpStringMatcher</a>
 					<a class="permalink" href="index.html#NewRegexpStringMatcher">&#xb6;</a>
 				</h3>
 				<pre>func NewRegexpStringMatcher(pattern <a href="https://golang.org/pkg/builtin/#string">string</a>) *<a href="index.html#RegexpStringMatcher">RegexpStringMatcher</a></pre>
@@ -420,12 +634,12 @@ NewRegexpStringMatcher returns a RegexpStringMatcher from the pattern.
 
 			
 				
-				<h3 id="RegexpStringMatcher.MatchString">func (*RegexpStringMatcher) <a href="https://github.com/loren-osborn/smartEdge_codeChallenge/blob/master/testtools/utils.go#L140">MatchString</a>
+				<h3 id="RegexpStringMatcher.MatchString">func (*RegexpStringMatcher) <a href="https://github.com/loren-osborn/smartEdge_codeChallenge/blob/master/testtools/utils.go#L158">MatchString</a>
 					<a class="permalink" href="index.html#RegexpStringMatcher.MatchString">&#xb6;</a>
 				</h3>
-				<pre>func (rsm *<a href="index.html#RegexpStringMatcher">RegexpStringMatcher</a>) MatchString(s <a href="https://golang.org/pkg/builtin/#string">string</a>) <a href="https://golang.org/pkg/builtin/#bool">bool</a></pre>
+				<pre>func (rsm *<a href="index.html#RegexpStringMatcher">RegexpStringMatcher</a>) MatchString(s <a href="https://golang.org/pkg/builtin/#string">string</a>) <a href="https://golang.org/pkg/builtin/#error">error</a></pre>
 				<p>
-MatchString returns whether the strings are equal
+MatchString returns whether the strings match the pattern.
 </p>
 
 				
@@ -433,12 +647,12 @@ MatchString returns whether the strings are equal
 				
 			
 				
-				<h3 id="RegexpStringMatcher.String">func (*RegexpStringMatcher) <a href="https://github.com/loren-osborn/smartEdge_codeChallenge/blob/master/testtools/utils.go#L145">String</a>
+				<h3 id="RegexpStringMatcher.String">func (*RegexpStringMatcher) <a href="https://github.com/loren-osborn/smartEdge_codeChallenge/blob/master/testtools/utils.go#L166">String</a>
 					<a class="permalink" href="index.html#RegexpStringMatcher.String">&#xb6;</a>
 				</h3>
 				<pre>func (rsm *<a href="index.html#RegexpStringMatcher">RegexpStringMatcher</a>) String() <a href="https://golang.org/pkg/builtin/#string">string</a></pre>
 				<p>
-MatchString returns a printable representation of the regular expression
+String returns a printable representation of the regular expression
 </p>
 
 				
@@ -448,7 +662,7 @@ MatchString returns a printable representation of the regular expression
 		
 			
 			
-			<h2 id="StringMatcher">type <a href="https://github.com/loren-osborn/smartEdge_codeChallenge/blob/master/testtools/utils.go#L103">StringMatcher</a>
+			<h2 id="StringMatcher">type <a href="https://github.com/loren-osborn/smartEdge_codeChallenge/blob/master/testtools/utils.go#L118">StringMatcher</a>
 				<a class="permalink" href="index.html#StringMatcher">&#xb6;</a>
 			</h2>
 			<p>
@@ -456,7 +670,7 @@ StringMatcher is an interface for comparing strings.
 </p>
 
 			<pre>type StringMatcher interface {
-    MatchString(<a href="https://golang.org/pkg/builtin/#string">string</a>) <a href="https://golang.org/pkg/builtin/#bool">bool</a>
+    MatchString(<a href="https://golang.org/pkg/builtin/#string">string</a>) <a href="https://golang.org/pkg/builtin/#error">error</a>
     String() <a href="https://golang.org/pkg/builtin/#string">string</a>
 }</pre>
 
@@ -474,7 +688,7 @@ StringMatcher is an interface for comparing strings.
 		
 			
 			
-			<h2 id="StringStringMatcher">type <a href="https://github.com/loren-osborn/smartEdge_codeChallenge/blob/master/testtools/utils.go#L109">StringStringMatcher</a>
+			<h2 id="StringStringMatcher">type <a href="https://github.com/loren-osborn/smartEdge_codeChallenge/blob/master/testtools/utils.go#L124">StringStringMatcher</a>
 				<a class="permalink" href="index.html#StringStringMatcher">&#xb6;</a>
 			</h2>
 			<p>
@@ -495,7 +709,7 @@ StringStringMatcher returns StringMatcher only matching itself.
 
 			
 				
-				<h3 id="NewStringStringMatcher">func <a href="https://github.com/loren-osborn/smartEdge_codeChallenge/blob/master/testtools/utils.go#L114">NewStringStringMatcher</a>
+				<h3 id="NewStringStringMatcher">func <a href="https://github.com/loren-osborn/smartEdge_codeChallenge/blob/master/testtools/utils.go#L129">NewStringStringMatcher</a>
 					<a class="permalink" href="index.html#NewStringStringMatcher">&#xb6;</a>
 				</h3>
 				<pre>func NewStringStringMatcher(s <a href="https://golang.org/pkg/builtin/#string">string</a>) *<a href="index.html#StringStringMatcher">StringStringMatcher</a></pre>
@@ -509,10 +723,10 @@ NewStringStringMatcher returns a new StringStringMatcher from the string s.
 
 			
 				
-				<h3 id="StringStringMatcher.MatchString">func (*StringStringMatcher) <a href="https://github.com/loren-osborn/smartEdge_codeChallenge/blob/master/testtools/utils.go#L119">MatchString</a>
+				<h3 id="StringStringMatcher.MatchString">func (*StringStringMatcher) <a href="https://github.com/loren-osborn/smartEdge_codeChallenge/blob/master/testtools/utils.go#L134">MatchString</a>
 					<a class="permalink" href="index.html#StringStringMatcher.MatchString">&#xb6;</a>
 				</h3>
-				<pre>func (ssm *<a href="index.html#StringStringMatcher">StringStringMatcher</a>) MatchString(s <a href="https://golang.org/pkg/builtin/#string">string</a>) <a href="https://golang.org/pkg/builtin/#bool">bool</a></pre>
+				<pre>func (ssm *<a href="index.html#StringStringMatcher">StringStringMatcher</a>) MatchString(s <a href="https://golang.org/pkg/builtin/#string">string</a>) <a href="https://golang.org/pkg/builtin/#error">error</a></pre>
 				<p>
 MatchString returns whether the strings are equal
 </p>
@@ -522,7 +736,7 @@ MatchString returns whether the strings are equal
 				
 			
 				
-				<h3 id="StringStringMatcher.String">func (*StringStringMatcher) <a href="https://github.com/loren-osborn/smartEdge_codeChallenge/blob/master/testtools/utils.go#L124">String</a>
+				<h3 id="StringStringMatcher.String">func (*StringStringMatcher) <a href="https://github.com/loren-osborn/smartEdge_codeChallenge/blob/master/testtools/utils.go#L142">String</a>
 					<a class="permalink" href="index.html#StringStringMatcher.String">&#xb6;</a>
 				</h3>
 				<pre>func (ssm *<a href="index.html#StringStringMatcher">StringStringMatcher</a>) String() <a href="https://golang.org/pkg/builtin/#string">string</a></pre>

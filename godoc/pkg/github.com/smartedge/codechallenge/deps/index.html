@@ -156,6 +156,11 @@
 				
 				
 			
+				
+				<dd><a href="index.html#RuntimeDependencies">type RuntimeDependencies</a></dd>
+				
+				
+			
 			
 			</dl>
 			</div><!-- #manual-nav -->
@@ -241,6 +246,7 @@ Defaults is the default set of injected dependencies
         <a href="index.html#OsDependencies.Getuid">Getuid</a>:    <a href="https://golang.org/pkg/os/">os</a>.<a href="https://golang.org/pkg/os/#Getuid">Getuid</a>,
         <a href="index.html#OsDependencies.Getwd">Getwd</a>:     <a href="https://golang.org/pkg/os/">os</a>.<a href="https://golang.org/pkg/os/#Getwd">Getwd</a>,
         <a href="index.html#OsDependencies.MkdirAll">MkdirAll</a>:  <a href="https://golang.org/pkg/os/">os</a>.<a href="https://golang.org/pkg/os/#MkdirAll">MkdirAll</a>,
+        <a href="index.html#OsDependencies.Open">Open</a>:      <a href="https://golang.org/pkg/os/">os</a>.<a href="https://golang.org/pkg/os/#Open">Open</a>,
         <a href="index.html#OsDependencies.RemoveAll">RemoveAll</a>: <a href="https://golang.org/pkg/os/">os</a>.<a href="https://golang.org/pkg/os/#RemoveAll">RemoveAll</a>,
         <a href="index.html#OsDependencies.Setenv">Setenv</a>:    <a href="https://golang.org/pkg/os/">os</a>.<a href="https://golang.org/pkg/os/#Setenv">Setenv</a>,
         <a href="index.html#OsDependencies.Stat">Stat</a>:      <a href="https://golang.org/pkg/os/">os</a>.<a href="https://golang.org/pkg/os/#Stat">Stat</a>,
@@ -253,6 +259,9 @@ Defaults is the default set of injected dependencies
             <a href="index.html#PathFilePathDependencies.Walk">Walk</a>: <a href="https://golang.org/pkg/path/filepath/">filepath</a>.<a href="https://golang.org/pkg/path/filepath/#Walk">Walk</a>,
         },
     },
+    <a href="index.html#Dependencies.Runtime">Runtime</a>: <a href="index.html#RuntimeDependencies">RuntimeDependencies</a>{
+        <a href="index.html#RuntimeDependencies.Caller">Caller</a>: <a href="https://golang.org/pkg/runtime/">runtime</a>.<a href="https://golang.org/pkg/runtime/#Caller">Caller</a>,
+    },
 }</pre>
 			
 		
@@ -260,7 +269,7 @@ Defaults is the default set of injected dependencies
 		
 			
 			
-			<h2 id="CryptoDependencies">type <a href="https://github.com/loren-osborn/smartEdge_codeChallenge/blob/master/deps/dependencies.go#L17">CryptoDependencies</a>
+			<h2 id="CryptoDependencies">type <a href="https://github.com/loren-osborn/smartEdge_codeChallenge/blob/master/deps/dependencies.go#L18">CryptoDependencies</a>
 				<a class="permalink" href="index.html#CryptoDependencies">&#xb6;</a>
 			</h2>
 			<p>
@@ -285,7 +294,7 @@ CryptoDependencies contains all external dependencies from the crypto package.
 		
 			
 			
-			<h2 id="CryptoRandDependencies">type <a href="https://github.com/loren-osborn/smartEdge_codeChallenge/blob/master/deps/dependencies.go#L12">CryptoRandDependencies</a>
+			<h2 id="CryptoRandDependencies">type <a href="https://github.com/loren-osborn/smartEdge_codeChallenge/blob/master/deps/dependencies.go#L13">CryptoRandDependencies</a>
 				<a class="permalink" href="index.html#CryptoRandDependencies">&#xb6;</a>
 			</h2>
 			<p>
@@ -310,7 +319,7 @@ CryptoRandDependencies contains all external dependencies from the crypto/rand p
 		
 			
 			
-			<h2 id="Dependencies">type <a href="https://github.com/loren-osborn/smartEdge_codeChallenge/blob/master/deps/dependencies.go#L63">Dependencies</a>
+			<h2 id="Dependencies">type <a href="https://github.com/loren-osborn/smartEdge_codeChallenge/blob/master/deps/dependencies.go#L71">Dependencies</a>
 				<a class="permalink" href="index.html#Dependencies">&#xb6;</a>
 			</h2>
 			<p>
@@ -319,10 +328,11 @@ into RealMain(). Used only by buildtools.
 </p>
 
 			<pre>type Dependencies struct {
-<span id="Dependencies.Crypto"></span>    Crypto <a href="index.html#CryptoDependencies">CryptoDependencies</a>
-<span id="Dependencies.Io"></span>    Io     <a href="index.html#IoDependencies">IoDependencies</a>
-<span id="Dependencies.Os"></span>    Os     <a href="index.html#OsDependencies">OsDependencies</a>
-<span id="Dependencies.Path"></span>    Path   <a href="index.html#PathDependencies">PathDependencies</a> <span class="comment">// Used only by buildtools.</span>
+<span id="Dependencies.Crypto"></span>    Crypto  <a href="index.html#CryptoDependencies">CryptoDependencies</a>
+<span id="Dependencies.Io"></span>    Io      <a href="index.html#IoDependencies">IoDependencies</a>
+<span id="Dependencies.Os"></span>    Os      <a href="index.html#OsDependencies">OsDependencies</a>
+<span id="Dependencies.Path"></span>    Path    <a href="index.html#PathDependencies">PathDependencies</a>    <span class="comment">// Used only by buildtools.</span>
+<span id="Dependencies.Runtime"></span>    Runtime <a href="index.html#RuntimeDependencies">RuntimeDependencies</a> <span class="comment">// Used only by testtools.</span>
 }</pre>
 
 			
@@ -339,7 +349,7 @@ into RealMain(). Used only by buildtools.
 		
 			
 			
-			<h2 id="IoDependencies">type <a href="https://github.com/loren-osborn/smartEdge_codeChallenge/blob/master/deps/dependencies.go#L28">IoDependencies</a>
+			<h2 id="IoDependencies">type <a href="https://github.com/loren-osborn/smartEdge_codeChallenge/blob/master/deps/dependencies.go#L29">IoDependencies</a>
 				<a class="permalink" href="index.html#IoDependencies">&#xb6;</a>
 			</h2>
 			<p>
@@ -364,7 +374,7 @@ IoDependencies contains all external dependencies from the io package.
 		
 			
 			
-			<h2 id="IoIoutilDependencies">type <a href="https://github.com/loren-osborn/smartEdge_codeChallenge/blob/master/deps/dependencies.go#L22">IoIoutilDependencies</a>
+			<h2 id="IoIoutilDependencies">type <a href="https://github.com/loren-osborn/smartEdge_codeChallenge/blob/master/deps/dependencies.go#L23">IoIoutilDependencies</a>
 				<a class="permalink" href="index.html#IoIoutilDependencies">&#xb6;</a>
 			</h2>
 			<p>
@@ -390,7 +400,7 @@ IoIoutilDependencies contains all external dependencies from the io/ioutil packa
 		
 			
 			
-			<h2 id="OsDependencies">type <a href="https://github.com/loren-osborn/smartEdge_codeChallenge/blob/master/deps/dependencies.go#L33">OsDependencies</a>
+			<h2 id="OsDependencies">type <a href="https://github.com/loren-osborn/smartEdge_codeChallenge/blob/master/deps/dependencies.go#L34">OsDependencies</a>
 				<a class="permalink" href="index.html#OsDependencies">&#xb6;</a>
 			</h2>
 			<p>
@@ -399,13 +409,14 @@ OsDependencies contains all external dependencies from the os package.
 
 			<pre>type OsDependencies struct {
 <span id="OsDependencies.Args"></span>    Args      []<a href="https://golang.org/pkg/builtin/#string">string</a>
-<span id="OsDependencies.Chdir"></span>    Chdir     func(<a href="https://golang.org/pkg/builtin/#string">string</a>) <a href="https://golang.org/pkg/builtin/#error">error</a> <span class="comment">// unused. For Getwd()</span>
+<span id="OsDependencies.Chdir"></span>    Chdir     func(<a href="https://golang.org/pkg/builtin/#string">string</a>) <a href="https://golang.org/pkg/builtin/#error">error</a> <span class="comment">// Used only by testtools.</span>
 <span id="OsDependencies.Chown"></span>    Chown     func(<a href="https://golang.org/pkg/builtin/#string">string</a>, <a href="https://golang.org/pkg/builtin/#int">int</a>, <a href="https://golang.org/pkg/builtin/#int">int</a>) <a href="https://golang.org/pkg/builtin/#error">error</a>
 <span id="OsDependencies.Exit"></span>    Exit      func(<a href="https://golang.org/pkg/builtin/#int">int</a>)
 <span id="OsDependencies.Getenv"></span>    Getenv    func(<a href="https://golang.org/pkg/builtin/#string">string</a>) <a href="https://golang.org/pkg/builtin/#string">string</a>
 <span id="OsDependencies.Getuid"></span>    Getuid    func() <a href="https://golang.org/pkg/builtin/#int">int</a>
 <span id="OsDependencies.Getwd"></span>    Getwd     func() (<a href="https://golang.org/pkg/builtin/#string">string</a>, <a href="https://golang.org/pkg/builtin/#error">error</a>) <span class="comment">// Used only by buildtools.</span>
 <span id="OsDependencies.MkdirAll"></span>    MkdirAll  func(<a href="https://golang.org/pkg/builtin/#string">string</a>, <a href="https://golang.org/pkg/os/">os</a>.<a href="https://golang.org/pkg/os/#FileMode">FileMode</a>) <a href="https://golang.org/pkg/builtin/#error">error</a>
+<span id="OsDependencies.Open"></span>    Open      func(<a href="https://golang.org/pkg/builtin/#string">string</a>) (*<a href="https://golang.org/pkg/os/">os</a>.<a href="https://golang.org/pkg/os/#File">File</a>, <a href="https://golang.org/pkg/builtin/#error">error</a>) <span class="comment">// Used only by testtools.</span>
 <span id="OsDependencies.RemoveAll"></span>    RemoveAll func(<a href="https://golang.org/pkg/builtin/#string">string</a>) <a href="https://golang.org/pkg/builtin/#error">error</a>
 <span id="OsDependencies.Setenv"></span>    Setenv    func(<a href="https://golang.org/pkg/builtin/#string">string</a>, <a href="https://golang.org/pkg/builtin/#string">string</a>) <a href="https://golang.org/pkg/builtin/#error">error</a>
 <span id="OsDependencies.Stat"></span>    Stat      func(<a href="https://golang.org/pkg/builtin/#string">string</a>) (<a href="https://golang.org/pkg/os/">os</a>.<a href="https://golang.org/pkg/os/#FileInfo">FileInfo</a>, <a href="https://golang.org/pkg/builtin/#error">error</a>)
@@ -428,7 +439,7 @@ OsDependencies contains all external dependencies from the os package.
 		
 			
 			
-			<h2 id="PathDependencies">type <a href="https://github.com/loren-osborn/smartEdge_codeChallenge/blob/master/deps/dependencies.go#L57">PathDependencies</a>
+			<h2 id="PathDependencies">type <a href="https://github.com/loren-osborn/smartEdge_codeChallenge/blob/master/deps/dependencies.go#L59">PathDependencies</a>
 				<a class="permalink" href="index.html#PathDependencies">&#xb6;</a>
 			</h2>
 			<p>
@@ -454,7 +465,7 @@ Used only by buildtools.
 		
 			
 			
-			<h2 id="PathFilePathDependencies">type <a href="https://github.com/loren-osborn/smartEdge_codeChallenge/blob/master/deps/dependencies.go#L51">PathFilePathDependencies</a>
+			<h2 id="PathFilePathDependencies">type <a href="https://github.com/loren-osborn/smartEdge_codeChallenge/blob/master/deps/dependencies.go#L53">PathFilePathDependencies</a>
 				<a class="permalink" href="index.html#PathFilePathDependencies">&#xb6;</a>
 			</h2>
 			<p>
@@ -463,6 +474,32 @@ PathFilePathDependencies contains all external dependencies from the path/filepa
 
 			<pre>type PathFilePathDependencies struct {
 <span id="PathFilePathDependencies.Walk"></span>    Walk func(<a href="https://golang.org/pkg/builtin/#string">string</a>, <a href="https://golang.org/pkg/path/filepath/">filepath</a>.<a href="https://golang.org/pkg/path/filepath/#WalkFunc">WalkFunc</a>) <a href="https://golang.org/pkg/builtin/#error">error</a>
+}</pre>
+
+			
+
+			
+
+			
+			
+			
+
+			
+
+			
+		
+			
+			
+			<h2 id="RuntimeDependencies">type <a href="https://github.com/loren-osborn/smartEdge_codeChallenge/blob/master/deps/dependencies.go#L65">RuntimeDependencies</a>
+				<a class="permalink" href="index.html#RuntimeDependencies">&#xb6;</a>
+			</h2>
+			<p>
+RuntimeDependencies contains all external dependencies from the runtime
+package. Used only by testtools.
+</p>
+
+			<pre>type RuntimeDependencies struct {
+<span id="RuntimeDependencies.Caller"></span>    Caller func(<a href="https://golang.org/pkg/builtin/#int">int</a>) (<a href="https://golang.org/pkg/builtin/#uintptr">uintptr</a>, <a href="https://golang.org/pkg/builtin/#string">string</a>, <a href="https://golang.org/pkg/builtin/#int">int</a>, <a href="https://golang.org/pkg/builtin/#bool">bool</a>)
 }</pre>
 
 			
