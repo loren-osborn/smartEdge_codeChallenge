@@ -238,6 +238,7 @@ talks to.
 
 <span id="MockDepsBundle.MapPathIn"></span>    MapPathIn  func(<a href="https://golang.org/pkg/builtin/#string">string</a>) (<a href="https://golang.org/pkg/builtin/#string">string</a>, <a href="https://golang.org/pkg/builtin/#error">error</a>)
 <span id="MockDepsBundle.MapPathOut"></span>    MapPathOut func(<a href="https://golang.org/pkg/builtin/#string">string</a>) (<a href="https://golang.org/pkg/builtin/#string">string</a>, <a href="https://golang.org/pkg/builtin/#error">error</a>)
+<span id="MockDepsBundle.FakeFSRoot"></span>    FakeFSRoot <a href="https://golang.org/pkg/builtin/#string">string</a>
 
 <span id="MockDepsBundle.Files"></span>    Files *map[<a href="https://golang.org/pkg/builtin/#string">string</a>]*<a href="https://golang.org/pkg/builtin/#string">string</a>
     <span class="comment">// contains filtered or unexported fields</span>
@@ -253,7 +254,7 @@ talks to.
 
 			
 				
-				<h3 id="NewDefaultMockDeps">func <a href="https://github.com/loren-osborn/smartEdge_codeChallenge/blob/master/testtools/mocks/deps.go#L41">NewDefaultMockDeps</a>
+				<h3 id="NewDefaultMockDeps">func <a href="https://github.com/loren-osborn/smartEdge_codeChallenge/blob/master/testtools/mocks/deps.go#L42">NewDefaultMockDeps</a>
 					<a class="permalink" href="index.html#NewDefaultMockDeps">&#xb6;</a>
 				</h3>
 				<pre>func NewDefaultMockDeps(stdinContent <a href="https://golang.org/pkg/builtin/#string">string</a>, cmdLnArgs []<a href="https://golang.org/pkg/builtin/#string">string</a>, homeDir <a href="https://golang.org/pkg/builtin/#string">string</a>, files *map[<a href="https://golang.org/pkg/builtin/#string">string</a>]*<a href="https://golang.org/pkg/builtin/#string">string</a>) *<a href="index.html#MockDepsBundle">MockDepsBundle</a></pre>
@@ -271,7 +272,7 @@ simulating filesystem activity in memory.
 
 			
 				
-				<h3 id="MockDepsBundle.GetExitStatus">func (*MockDepsBundle) <a href="https://github.com/loren-osborn/smartEdge_codeChallenge/blob/master/testtools/mocks/deps.go#L105">GetExitStatus</a>
+				<h3 id="MockDepsBundle.GetExitStatus">func (*MockDepsBundle) <a href="https://github.com/loren-osborn/smartEdge_codeChallenge/blob/master/testtools/mocks/deps.go#L106">GetExitStatus</a>
 					<a class="permalink" href="index.html#MockDepsBundle.GetExitStatus">&#xb6;</a>
 				</h3>
 				<pre>func (mdb *<a href="index.html#MockDepsBundle">MockDepsBundle</a>) GetExitStatus() <a href="https://golang.org/pkg/builtin/#int">int</a></pre>
@@ -284,7 +285,7 @@ GetExitStatus returns the value that was passed to mock of os.Exit() or 0 if non
 				
 			
 				
-				<h3 id="MockDepsBundle.InvokeCallInMockedEnv">func (*MockDepsBundle) <a href="https://github.com/loren-osborn/smartEdge_codeChallenge/blob/master/testtools/mocks/deps.go#L111">InvokeCallInMockedEnv</a>
+				<h3 id="MockDepsBundle.InvokeCallInMockedEnv">func (*MockDepsBundle) <a href="https://github.com/loren-osborn/smartEdge_codeChallenge/blob/master/testtools/mocks/deps.go#L112">InvokeCallInMockedEnv</a>
 					<a class="permalink" href="index.html#MockDepsBundle.InvokeCallInMockedEnv">&#xb6;</a>
 				</h3>
 				<pre>func (mdb *<a href="index.html#MockDepsBundle">MockDepsBundle</a>) InvokeCallInMockedEnv(wrapped func() <a href="https://golang.org/pkg/builtin/#error">error</a>) (outErr <a href="https://golang.org/pkg/builtin/#error">error</a>)</pre>

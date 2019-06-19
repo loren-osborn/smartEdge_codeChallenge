@@ -54,7 +54,7 @@
 			<div id="nav">
 				<select id="files">
 				
-				<option value="file0">github.com/smartedge/codechallenge/buildtools/filterdocs.go (22.2%)</option>
+				<option value="file0">github.com/smartedge/codechallenge/buildtools/filterdocs.go (77.8%)</option>
 				
 				<option value="file1">github.com/smartedge/codechallenge/cmd/codechallenge/main.go (100.0%)</option>
 				
@@ -78,11 +78,11 @@
 				
 				<option value="file11">github.com/smartedge/codechallenge/testtools/errorspec.go (100.0%)</option>
 				
-				<option value="file12">github.com/smartedge/codechallenge/testtools/mocks/deps.go (65.8%)</option>
+				<option value="file12">github.com/smartedge/codechallenge/testtools/mocks/deps.go (57.3%)</option>
 				
 				<option value="file13">github.com/smartedge/codechallenge/testtools/mocks/os_exit.go (100.0%)</option>
 				
-				<option value="file14">github.com/smartedge/codechallenge/testtools/utils.go (42.4%)</option>
+				<option value="file14">github.com/smartedge/codechallenge/testtools/utils.go (36.9%)</option>
 				
 				</select>
 			</div>
@@ -143,7 +143,7 @@ var RealEntryPoint func(*deps.Dependencies) = RealMain
 // main() calls RealEntryPoint, which defaults to RealMain() in production. At
 // testing time, the test harness replaces RealEntryPoint with a stub, so both
 // the production Dependencies structure, and production RealMain() can be
-// validated independantly.
+// validated independently.
 func main() <span class="cov8" title="1">{
         RealEntryPoint(deps.Defaults)
 }</span>
@@ -152,41 +152,41 @@ func main() <span class="cov8" title="1">{
 var ContentFilterFunction = FilterFileContent
 
 // RealMain traverses filesystem, transforming all files encountered.
-func RealMain(d *deps.Dependencies) <span class="cov0" title="0">{
+func RealMain(d *deps.Dependencies) <span class="cov8" title="1">{
         cwd, err := d.Os.Getwd()
-        if err != nil </span><span class="cov0" title="0">{
+        if err != nil </span><span class="cov8" title="1">{
                 fmt.Fprintf(d.Os.Stderr, "error fetching CWD: %v\n", err)
                 d.Os.Exit(1)
         }</span>
-        <span class="cov0" title="0">rootPath := filepath.Join(cwd, DirToFilter)
+        <span class="cov8" title="1">rootPath := filepath.Join(cwd, DirToFilter)
         err = d.Path.FilePath.Walk(
                 rootPath,
-                func(path string, info os.FileInfo, err error) error </span><span class="cov0" title="0">{
-                        if err != nil </span><span class="cov0" title="0">{
+                func(path string, info os.FileInfo, err error) error </span><span class="cov8" title="1">{
+                        if err != nil </span><span class="cov8" title="1">{
                                 fmt.Fprintf(d.Os.Stderr, "Failure accessing a path %q: %v\n", path, err)
                                 return err
                         }</span>
-                        <span class="cov0" title="0">if info.IsDir() </span><span class="cov0" title="0">{
+                        <span class="cov8" title="1">if info.IsDir() </span><span class="cov8" title="1">{
                                 return nil
                         }</span>
-                        <span class="cov0" title="0">origBuf, err := d.Io.Ioutil.ReadFile(path)
-                        if err != nil </span><span class="cov0" title="0">{
+                        <span class="cov8" title="1">origBuf, err := d.Io.Ioutil.ReadFile(path)
+                        if err != nil </span><span class="cov8" title="1">{
                                 fmt.Fprintf(d.Os.Stderr, "Error reading file %q: %v\n", path, err)
                                 return err
                         }</span>
-                        <span class="cov0" title="0">origStr := string(origBuf)
+                        <span class="cov8" title="1">origStr := string(origBuf)
                         filteredStr := ContentFilterFunction(origStr)
-                        if filteredStr != origStr </span><span class="cov0" title="0">{
+                        if filteredStr != origStr </span><span class="cov8" title="1">{
                                 err = d.Io.Ioutil.WriteFile(path, []byte(filteredStr), info.Mode())
                                 if err != nil </span><span class="cov0" title="0">{
                                         fmt.Fprintf(d.Os.Stderr, "Error writing file %q: %v\n", path, err)
                                         return err
                                 }</span>
-                                <span class="cov0" title="0">fmt.Printf("modified file: %q\n", path)</span>
+                                <span class="cov8" title="1">fmt.Fprintf(d.Os.Stdout, "modified file: %q\n", path)</span>
                         }
-                        <span class="cov0" title="0">return nil</span>
+                        <span class="cov8" title="1">return nil</span>
                 })
-        <span class="cov0" title="0">if err != nil </span><span class="cov0" title="0">{
+        <span class="cov8" title="1">if err != nil </span><span class="cov8" title="1">{
                 fmt.Fprintf(d.Os.Stderr, "error walking the path %q: %v\n", rootPath, err)
                 d.Os.Exit(2)
         }</span>
@@ -285,7 +285,7 @@ var RealEntryPoint func(*deps.Dependencies) = codechallenge.RealMain
 // main() calls RealEntryPoint, which defaults to codechallenge.RealMain() in
 // production. At testing time, the test harness replaces RealEntryPoint with a
 // stub, so both the production Dependencies structure, and production
-// RealMain() can be validated independantly.
+// RealMain() can be validated independently.
 func main() <span class="cov8" title="1">{
         RealEntryPoint(deps.Defaults)
 }</span>
@@ -896,7 +896,7 @@ func WriteDirAndFile(d *deps.Dependencies, filename string, data []byte, filePer
         <span class="cov0" title="0">if (d.Os.Getuid() == 0) &amp;&amp; (d.Os.Getenv("EXT_UID_GID") != "") &amp;&amp; !FileExists(d, filename) </span><span class="cov0" title="0">{
                 idStrs := strings.Split(d.Os.Getenv("EXT_UID_GID"), ":")
                 if len(idStrs) != 2 </span><span class="cov0" title="0">{
-                        return fmt.Errorf("Environment variable EXT_UID_GID must have 2 integer ids seperated by colons. We found %d", len(idStrs))
+                        return fmt.Errorf("Environment variable EXT_UID_GID must have 2 integer ids separated by colons. We found %d", len(idStrs))
                 }</span>
                 <span class="cov0" title="0">ids := make([]int, len(idStrs))
                 idLabels := []string{"user", "group"}
@@ -1010,7 +1010,7 @@ type RunConfig struct {
         PubKeySettings crypt.PkiSettings
 }
 
-// ParseArgs parses the runtime configuration from the command line arguemnts.
+// ParseArgs parses the runtime configuration from the command line arguments.
 func ParseArgs(d *deps.Dependencies) (*RunConfig, error) <span class="cov8" title="1">{
         defaultKeyDir := filepath.Join(d.Os.Getenv("HOME"), ".smartEdge")
         flag.CommandLine.SetOutput(d.Os.Stderr)
@@ -1357,6 +1357,7 @@ type MockDepsBundle struct {
         prevCwd     string
         MapPathIn   func(string) (string, error)
         MapPathOut  func(string) (string, error)
+        FakeFSRoot  string
         hiddenFiles *map[string]*string
         Files       *map[string]*string
 }
@@ -1480,6 +1481,7 @@ func (mdb *MockDepsBundle) InvokeCallInMockedEnv(wrapped func() error) (outErr e
                 return
         }</span>
         <span class="cov8" title="1">fakeRootPath := filepath.Join(os.TempDir(), "tmpfs", fmt.Sprintf("sm_codechallenge_test_%d", os.Getpid()))
+        mdb.FakeFSRoot = fakeRootPath
         outErr = mdb.NativeDeps.Os.MkdirAll(filepath.Join(fakeRootPath, mdb.homeDirPath), 0755)
         if outErr != nil </span><span class="cov8" title="1">{
                 return
@@ -1542,19 +1544,19 @@ func (mdb *MockDepsBundle) InvokeCallInMockedEnv(wrapped func() error) (outErr e
                 }</span>
                 <span class="cov0" title="0">return dir, nil</span>
         }
-        <span class="cov8" title="1">mdb.Deps.Os.MkdirAll = func(path string, perm os.FileMode) error </span><span class="cov8" title="1">{
+        <span class="cov8" title="1">mdb.Deps.Os.MkdirAll = func(path string, perm os.FileMode) error </span><span class="cov0" title="0">{
                 realPath, err := mdb.MapPathIn(path)
                 if err != nil </span><span class="cov0" title="0">{
                         return err
                 }</span>
-                <span class="cov8" title="1">return mdb.NativeDeps.Os.MkdirAll(realPath, perm)</span>
+                <span class="cov0" title="0">return mdb.NativeDeps.Os.MkdirAll(realPath, perm)</span>
         }
-        <span class="cov8" title="1">mdb.Deps.Os.Open = func(path string) (*os.File, error) </span><span class="cov8" title="1">{
+        <span class="cov8" title="1">mdb.Deps.Os.Open = func(path string) (*os.File, error) </span><span class="cov0" title="0">{
                 realPath, err := mdb.MapPathIn(path)
                 if err != nil </span><span class="cov0" title="0">{
                         return nil, err
                 }</span>
-                <span class="cov8" title="1">return mdb.NativeDeps.Os.Open(realPath)</span>
+                <span class="cov0" title="0">return mdb.NativeDeps.Os.Open(realPath)</span>
         }
         <span class="cov8" title="1">mdb.Deps.Os.RemoveAll = func(path string) error </span><span class="cov0" title="0">{
                 realPath, err := mdb.MapPathIn(path)
@@ -1570,32 +1572,40 @@ func (mdb *MockDepsBundle) InvokeCallInMockedEnv(wrapped func() error) (outErr e
                 }</span>
                 <span class="cov0" title="0">return mdb.NativeDeps.Os.Stat(realPath)</span>
         }
-        <span class="cov8" title="1">mdb.Deps.Path.FilePath.Walk = func(root string, walkFn filepath.WalkFunc) error </span><span class="cov8" title="1">{
+        <span class="cov8" title="1">mdb.Deps.Path.FilePath.Walk = func(root string, walkFn filepath.WalkFunc) error </span><span class="cov0" title="0">{
                 realRoot, err := mdb.MapPathIn(root)
                 if err != nil </span><span class="cov0" title="0">{
                         return err
                 }</span>
-                <span class="cov8" title="1">realWalkFunc := filepath.WalkFunc(func(realPath string, info os.FileInfo, err error) error </span><span class="cov8" title="1">{
+                <span class="cov0" title="0">realWalkFunc := filepath.WalkFunc(func(realPath string, info os.FileInfo, err error) error </span><span class="cov0" title="0">{
                         path, err := mdb.MapPathOut(realPath)
                         if err != nil </span><span class="cov0" title="0">{
                                 return err
                         }</span>
-                        <span class="cov8" title="1">return walkFn(path, info, err)</span>
+                        <span class="cov0" title="0">return walkFn(path, info, err)</span>
                 })
-                <span class="cov8" title="1">return mdb.NativeDeps.Path.FilePath.Walk(realRoot, realWalkFunc)</span>
+                <span class="cov0" title="0">return mdb.NativeDeps.Path.FilePath.Walk(realRoot, realWalkFunc)</span>
         }
         // Populate fake file system
         <span class="cov8" title="1">mdb.hiddenFiles = mdb.Files
         // Not kept in sync with mock environment. Set to nil to prevent access.
         mdb.Files = nil
         for path, content := range *mdb.hiddenFiles </span><span class="cov8" title="1">{
-                if content == nil </span><span class="cov8" title="1">{
-                        err := mdb.Deps.Os.MkdirAll(path, 0755)
+                realPath, err := mdb.MapPathIn(path)
+                if err != nil </span><span class="cov0" title="0">{
+                        return err
+                }</span>
+                <span class="cov8" title="1">if content == nil </span><span class="cov8" title="1">{
+                        err = mdb.NativeDeps.Os.MkdirAll(realPath, 0755)
                         if err != nil </span><span class="cov0" title="0">{
                                 return err
                         }</span>
                 } else<span class="cov0" title="0"> {
-                        err := mdb.Deps.Io.Ioutil.WriteFile(path, []byte(*content), 0644)
+                        err := mdb.NativeDeps.Os.MkdirAll(filepath.Dir(realPath), 0755)
+                        if err != nil </span><span class="cov0" title="0">{
+                                return err
+                        }</span>
+                        <span class="cov0" title="0">err = mdb.NativeDeps.Io.Ioutil.WriteFile(realPath, []byte(*content), 0644)
                         if err != nil </span><span class="cov0" title="0">{
                                 return err
                         }</span>
@@ -1607,12 +1617,16 @@ func (mdb *MockDepsBundle) InvokeCallInMockedEnv(wrapped func() error) (outErr e
                 // Restore nil file map to restore visability
                 mdb.Files = mdb.hiddenFiles
                 *mdb.Files = make(map[string]*string)
-                newErr := mdb.Deps.Path.FilePath.Walk("/", func(path string, info os.FileInfo, err error) error </span><span class="cov8" title="1">{
+                newErr := mdb.NativeDeps.Path.FilePath.Walk(fakeRootPath, func(realPath string, info os.FileInfo, err error) error </span><span class="cov8" title="1">{
+                        if err != nil </span><span class="cov0" title="0">{
+                                return err
+                        }</span>
+                        <span class="cov8" title="1">path, err := mdb.MapPathOut(realPath)
                         if err != nil </span><span class="cov0" title="0">{
                                 return err
                         }</span>
                         <span class="cov8" title="1">if info.IsDir() </span><span class="cov8" title="1">{
-                                dirFileHandle, err := mdb.Deps.Os.Open(path)
+                                dirFileHandle, err := mdb.NativeDeps.Os.Open(realPath)
                                 if err != nil </span><span class="cov0" title="0">{
                                         return err
                                 }</span>
@@ -1631,7 +1645,7 @@ func (mdb *MockDepsBundle) InvokeCallInMockedEnv(wrapped func() error) (outErr e
                                 }</span>
                                 <span class="cov8" title="1">return nil</span>
                         }
-                        <span class="cov0" title="0">fileBuf, err := mdb.Deps.Io.Ioutil.ReadFile(path)
+                        <span class="cov0" title="0">fileBuf, err := mdb.NativeDeps.Io.Ioutil.ReadFile(realPath)
                         if err != nil </span><span class="cov0" title="0">{
                                 return err
                         }</span>
@@ -1711,10 +1725,12 @@ import (
         "github.com/smartedge/codechallenge/crypt"
         "github.com/smartedge/codechallenge/deps"
         "github.com/xeipuuv/gojsonschema"
+        "os"
         "path/filepath"
         "reflect"
         "regexp"
         "strings"
+        "time"
 )
 
 // JSONValidationSchemaPath the path in the project to the valid response schema.
@@ -2030,6 +2046,75 @@ func GetProjectPath(d *deps.Dependencies) (string, error) <span class="cov8" tit
         }</span>
         <span class="cov8" title="1">return filepath.Clean(filepath.Dir(filepath.Dir(file))), nil</span>
 }
+
+// StringPtr returns a pointer to a newly allocated copy of the string.
+func StringPtr(s string) *string <span class="cov0" title="0">{
+        return &amp;s
+}</span>
+
+// AreFakeFileSystemsEqual does a deep comparison of two maps of strings to
+// string pointers (being used as fake filesystems.)
+func AreFakeFileSystemsEqual(a map[string]*string, b map[string]*string) bool <span class="cov0" title="0">{
+        if (a == nil) != (b == nil) </span><span class="cov0" title="0">{
+                return false
+        }</span>
+        <span class="cov0" title="0">for ak, avp := range a </span><span class="cov0" title="0">{
+                bvp, ok := b[ak]
+                if !ok || ((avp == nil) != (bvp == nil)) </span><span class="cov0" title="0">{
+                        return false
+                }</span>
+                <span class="cov0" title="0">if avp != nil </span><span class="cov0" title="0">{
+                        if *avp != *bvp </span><span class="cov0" title="0">{
+                                return false
+                        }</span>
+                }
+        }
+        <span class="cov0" title="0">for bk := range b </span><span class="cov0" title="0">{
+                _, ok := a[bk]
+                if !ok </span><span class="cov0" title="0">{
+                        return false
+                }</span>
+        }
+        <span class="cov0" title="0">return true</span>
+}
+
+// DummyFileInfo a mock for a os.FileInfo interface.
+type DummyFileInfo struct {
+        NameVal    string
+        SizeVal    int64
+        ModeVal    os.FileMode
+        ModTimeVal time.Time
+}
+
+// Name base name of the file
+func (dfi *DummyFileInfo) Name() string <span class="cov0" title="0">{
+        return dfi.NameVal
+}</span>
+
+// Size length in bytes for regular files; system-dependent for others
+func (dfi *DummyFileInfo) Size() int64 <span class="cov0" title="0">{
+        return dfi.SizeVal
+}</span>
+
+// Mode file mode bits
+func (dfi *DummyFileInfo) Mode() os.FileMode <span class="cov0" title="0">{
+        return dfi.ModeVal
+}</span>
+
+// ModTime modification time
+func (dfi *DummyFileInfo) ModTime() time.Time <span class="cov0" title="0">{
+        return dfi.ModTimeVal
+}</span>
+
+// IsDir abbreviation for Mode().IsDir()
+func (dfi *DummyFileInfo) IsDir() bool <span class="cov0" title="0">{
+        return dfi.Mode().IsDir()
+}</span>
+
+// Sys underlying data source (can return nil)
+func (dfi *DummyFileInfo) Sys() interface{} <span class="cov0" title="0">{
+        return nil
+}</span>
 </pre>
 		
 		</div>
