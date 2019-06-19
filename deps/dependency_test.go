@@ -7,6 +7,7 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
+	"runtime"
 	"testing"
 )
 
@@ -97,5 +98,10 @@ func TestDependencies(t *testing.T) {
 		t.Error(actualErr.Error())
 	} else if !eq {
 		t.Error("deps.Defaults.Path.FilePath.Walk should evaluate to filepath.Walk")
+	}
+	if eq, actualErr := testtools.AreFuncsEqual(runtime.Caller, deps.Defaults.Runtime.Caller); actualErr != nil {
+		t.Error(actualErr.Error())
+	} else if !eq {
+		t.Error("deps.Defaults.Runtime.Caller should evaluate to runtime.Caller")
 	}
 }

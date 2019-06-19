@@ -1,8 +1,10 @@
 package codechallenge_test
 
 import (
+	"crypto/x509"
 	"fmt"
 	"github.com/smartedge/codechallenge"
+	"github.com/smartedge/codechallenge/deps"
 	"github.com/smartedge/codechallenge/testtools"
 	"github.com/smartedge/codechallenge/testtools/mocks"
 	"regexp"
@@ -36,6 +38,12 @@ const (
 		"political bands which have connected them with another and to " +
 		"assume among the powers of the earth, the separate and equal " +
 		"station to which the Laws of Nature  and"
+	// These are both based on the known random math seed, but may be platform
+	// specific.
+	ExpectedInitialECDSAPublicKey = "-----BEGIN ECDSA PUBLIC KEY-----\n" +
+		"MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAE7WzVjtn9Gk+WHr5xbv8XMvooqU25\n" +
+		"BhgNjZ/vHZLBdVtCOjk4KxjS1UBfQm0c3TRxWBl3hj2AmnJbCrnGofMHBQ==\n" +
+		"-----END ECDSA PUBLIC KEY-----\n"
 )
 
 // TestCallingMainWithMocks verifies that calling RealMain with mocked
@@ -50,20 +58,26 @@ func TestCallingMainWithMocks(t *testing.T) {
 		stdErr    testtools.StringMatcher
 	}{
 		"Using all defaults: (basic test case)": {
-			homeDir:   "/home/foobar",
-			argList:   []string{"myProg"},
-			stdInput:  "Four score and seven years ago...",
-			status:    0,
-			stdOutput: testtools.NewStringStringMatcher("{\n\"message\": \"Four score and seven years ago...\",\n\"signature\": \"MEUCIQDkREv9Q5S3L/K5IVA6NZP9N+8b0ZDHQ8R85BmmMhih7QIgTYziTZFjjk5qg0/+c+hEtP+37yfZLNVereQdQgIhiEo=\",\n\"pubkey\": \"-----BEGIN ECDSA PUBLIC KEY-----\\nMFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAE7WzVjtn9Gk+WHr5xbv8XMvooqU25\\nBhgNjZ/vHZLBdVtCOjk4KxjS1UBfQm0c3TRxWBl3hj2AmnJbCrnGofMHBQ==\\n-----END ECDSA PUBLIC KEY-----\\n\"\n}"),
-			stdErr:    testtools.NewStringStringMatcher(""),
+			homeDir:  "/home/foobar",
+			argList:  []string{"myProg"},
+			stdInput: "Four score and seven years ago...",
+			status:   0,
+			stdOutput: testtools.GetResponseMatcherForMessageAndPubKey(
+				deps.Defaults,
+				"Four score and seven years ago...",
+				ExpectedInitialECDSAPublicKey),
+			stdErr: testtools.NewStringStringMatcher(""),
 		},
 		"Basic test of RSA message signing": {
-			homeDir:   "/home/anybody",
-			argList:   []string{"codechallenge", "-rsa"},
-			stdInput:  "Do Re Mi Fa So La Ti Do\n",
-			status:    0,
-			stdOutput: testtools.NewStringStringMatcher("{\n\"message\": \"Do Re Mi Fa So La Ti Do\",\n\"signature\": \"GdTgkUWpufwusew4mk19bbUpmAPvBcyTPRC+/f+wLIBY+/PqLFLgspDEw0cmM0wWfid6nb66XugoKJLRfzYl9DtMdS85DhHE4t5wW9KJnY5pe8qb3xlcS/l4KYnxOQd5yZByge17QlbopcJ3SgdZwsVj//uJTbLfWXuUjUvyNH0furSrUZpEWmjrNomcpVQXnNvyQNnZmoL1wA0Kpvko6tzfnG7fOKso1ivEcCrxgPDsQyJbwkzCtjD2sDhh55avwUJ1hRGvUyytxd4BSb/yZfHVsBWxRk25lnF+3z9hpVKhOMocU6fbrLigCJP+kMiujeEYiGJXOOpc7CF5U40dCg==\",\n\"pubkey\": \"-----BEGIN RSA PUBLIC KEY-----\\nMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAzCTTFKQBHfTN8jW6q8PT\\nHNZKWnRPxSt9kpgWmyqFaZnEUipgoKGAxSIsVrl2PJSm5OlgkVzx+MY+LWM64VKM\\nbRpUUGJR3zdMNhwZQX0hjOpLpVJvUwD78utVs8vijrU7sH48usFiaZQYjy4m4hQh\\n63/x4h3KVz7YqUnlRMzYJFT43+AwYzYuEpzWRxtW7IObJPtjtmYVoqva98fF6aj5\\nuHAsvaAgZGBalHXmCiPzKiGU/halzXSPvyJ2Cqz2aUqMHgwi/2Ip4z/mrfX+mUTa\\nS+LyBy7GgqJ5vbkGArMagJIc0eARF60r6Uf483xh17oniABdLJy4qlLf6PcEU+ut\\nEwIDAQAB\\n-----END RSA PUBLIC KEY-----\\n\"\n}"),
-			stdErr:    testtools.NewStringStringMatcher(""),
+			homeDir:  "/home/anybody",
+			argList:  []string{"codechallenge", "-rsa"},
+			stdInput: "Do Re Mi Fa So La Ti Do\n",
+			status:   0,
+			stdOutput: testtools.GetResponseMatcherForMessageAndAlgorithm(
+				deps.Defaults,
+				"Do Re Mi Fa So La Ti Do",
+				x509.RSA),
+			stdErr: testtools.NewStringStringMatcher(""),
 		},
 		"Testing contradictory signature flags": {
 			homeDir:   "/home/anybody",
@@ -82,12 +96,15 @@ func TestCallingMainWithMocks(t *testing.T) {
 			stdErr:    testtools.NewRegexpStringMatcher(fmt.Sprintf("^Options (-utf8 and -ascii|-ascii and -utf8) may not be used together%s$", regexp.QuoteMeta("\nUsage of codechallenge:"+UsageMessageBody))),
 		},
 		"Exactly 250 ascii characters": {
-			homeDir:   "/home/anybody",
-			argList:   []string{"codechallenge", "-ascii"},
-			stdInput:  DeclarationOfIndependanceFirst250Chars + "   \t\t\n\n \n",
-			status:    0,
-			stdOutput: testtools.NewStringStringMatcher("{\n\"message\": \"When in the Course of human events it becomes necessary for one people to dissolve the political bands which have connected them with another and to assume among the powers of the earth, the separate and equal station to which the Laws of Nature  and\",\n\"signature\": \"MEUCIE6GnortjDvsmR/8L11YqiofLjpyEAYocYKifDTiHkWTAiEAtx9ZsbWGZNMEw5n72PTs9McuXHti95djBSLY7uxZ27k=\",\n\"pubkey\": \"-----BEGIN ECDSA PUBLIC KEY-----\\nMFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAE7WzVjtn9Gk+WHr5xbv8XMvooqU25\\nBhgNjZ/vHZLBdVtCOjk4KxjS1UBfQm0c3TRxWBl3hj2AmnJbCrnGofMHBQ==\\n-----END ECDSA PUBLIC KEY-----\\n\"\n}"),
-			stdErr:    testtools.NewStringStringMatcher(""),
+			homeDir:  "/home/anybody",
+			argList:  []string{"codechallenge", "-ascii"},
+			stdInput: DeclarationOfIndependanceFirst250Chars + "   \t\t\n\n \n",
+			status:   0,
+			stdOutput: testtools.GetResponseMatcherForMessageAndPubKey(
+				deps.Defaults,
+				DeclarationOfIndependanceFirst250Chars,
+				ExpectedInitialECDSAPublicKey),
+			stdErr: testtools.NewStringStringMatcher(""),
 		},
 		"Exactly 250 ascii characters, plus a trailing newline, but not removed in banary mode": {
 			homeDir:   "/home/anybody",
@@ -98,12 +115,15 @@ func TestCallingMainWithMocks(t *testing.T) {
 			stdErr:    testtools.NewStringStringMatcher("Input contains more than 250 bytes (exactly 251):\n\"When in the Course of human events it becomes necessary for one people to dissolve the political bands which have connected them with another and to assume among the powers of the earth, the separate and equal station to which the Laws of Nature  and\\n\"\nUsage of codechallenge:" + UsageMessageBody),
 		},
 		"Exactly 250 ascii characters, works fine in banary mode without newline": {
-			homeDir:   "/home/anybody",
-			argList:   []string{"codechallenge", "-binary"},
-			stdInput:  DeclarationOfIndependanceFirst250Chars,
-			status:    0,
-			stdOutput: testtools.NewStringStringMatcher("{\n\"message\": \"When in the Course of human events it becomes necessary for one people to dissolve the political bands which have connected them with another and to assume among the powers of the earth, the separate and equal station to which the Laws of Nature  and\",\n\"signature\": \"MEUCIE6GnortjDvsmR/8L11YqiofLjpyEAYocYKifDTiHkWTAiEAtx9ZsbWGZNMEw5n72PTs9McuXHti95djBSLY7uxZ27k=\",\n\"pubkey\": \"-----BEGIN ECDSA PUBLIC KEY-----\\nMFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAE7WzVjtn9Gk+WHr5xbv8XMvooqU25\\nBhgNjZ/vHZLBdVtCOjk4KxjS1UBfQm0c3TRxWBl3hj2AmnJbCrnGofMHBQ==\\n-----END ECDSA PUBLIC KEY-----\\n\"\n}"),
-			stdErr:    testtools.NewStringStringMatcher(""),
+			homeDir:  "/home/anybody",
+			argList:  []string{"codechallenge", "-binary"},
+			stdInput: DeclarationOfIndependanceFirst250Chars,
+			status:   0,
+			stdOutput: testtools.GetResponseMatcherForMessageAndPubKey(
+				deps.Defaults,
+				DeclarationOfIndependanceFirst250Chars,
+				ExpectedInitialECDSAPublicKey),
+			stdErr: testtools.NewStringStringMatcher(""),
 		},
 	} {
 		t.Run(fmt.Sprintf("Subtest: %s", desc), func(tt *testing.T) {
@@ -118,11 +138,11 @@ func TestCallingMainWithMocks(t *testing.T) {
 			if exitStatus := mockDepsBundle.GetExitStatus(); exitStatus != tc.status {
 				tt.Errorf("RealMain() should have a normal exit status of %d. Got %#v instead.", tc.status, exitStatus)
 			}
-			if !tc.stdOutput.MatchString(mockDepsBundle.OutBuf.String()) {
-				tt.Errorf("We didn't see the expected output of:\n%s\nInstead we got:\n%#v.", tc.stdOutput.String(), mockDepsBundle.OutBuf.String())
+			if err := tc.stdOutput.MatchString(mockDepsBundle.OutBuf.String()); err != nil {
+				tt.Errorf("Standard Output:\n%#v didn't match:\n%s.", tc.stdOutput.String(), err.Error())
 			}
-			if !tc.stdErr.MatchString(mockDepsBundle.ErrBuf.String()) {
-				tt.Errorf("We didn't see the expected output of:\n%s\nInstead we got:\n%#v.", tc.stdErr.String(), mockDepsBundle.ErrBuf.String())
+			if err := tc.stdErr.MatchString(mockDepsBundle.ErrBuf.String()); err != nil {
+				tt.Errorf("Standard Error:\n%#v didn't match:\n%s.", tc.stdOutput.String(), err.Error())
 			}
 		})
 	}

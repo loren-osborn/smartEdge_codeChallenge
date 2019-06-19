@@ -1,7 +1,6 @@
 package main
 
 import (
-	"github.com/smartedge/codechallenge"
 	"github.com/smartedge/codechallenge/deps"
 	"github.com/smartedge/codechallenge/testtools"
 	"testing"
@@ -11,13 +10,13 @@ import (
 // to the main code.
 func TestEntryPoint(t *testing.T) {
 	t.Run(
-		"RealEntryPoint properly intialized to codechallenge.RealMain()",
+		"RealEntryPoint properly intialized to main.RealMain()",
 		func(tt *testing.T) {
 			if matches, err := testtools.AreFuncsEqual(
-				RealEntryPoint, codechallenge.RealMain); err != nil {
+				RealEntryPoint, RealMain); err != nil {
 				tt.Error(err.Error())
 			} else if !matches {
-				tt.Error("RealEntryPoint should default to codechallenge.RealMain()")
+				tt.Error("RealEntryPoint should default to main.RealMain()")
 			}
 		})
 	t.Run(

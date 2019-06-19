@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
+	"runtime"
 )
 
 // CryptoRandDependencies contains all external dependencies from the crypto/rand package.
@@ -59,13 +60,20 @@ type PathDependencies struct {
 	FilePath PathFilePathDependencies
 }
 
+// RuntimeDependencies contains all external dependencies from the runtime
+// package. Used only by testtools.
+type RuntimeDependencies struct {
+	Caller func(int) (uintptr, string, int, bool)
+}
+
 // Dependencies contains all external dependencies injected by main()
 // into RealMain(). Used only by buildtools.
 type Dependencies struct {
-	Crypto CryptoDependencies
-	Io     IoDependencies
-	Os     OsDependencies
-	Path   PathDependencies // Used only by buildtools.
+	Crypto  CryptoDependencies
+	Io      IoDependencies
+	Os      OsDependencies
+	Path    PathDependencies    // Used only by buildtools.
+	Runtime RuntimeDependencies // Used only by testtools.
 }
 
 // Defaults is the default set of injected dependencies
@@ -102,5 +110,8 @@ var Defaults = &Dependencies{
 		FilePath: PathFilePathDependencies{
 			Walk: filepath.Walk,
 		},
+	},
+	Runtime: RuntimeDependencies{
+		Caller: runtime.Caller,
 	},
 }

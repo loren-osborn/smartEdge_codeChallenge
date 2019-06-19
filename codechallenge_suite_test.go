@@ -14,8 +14,6 @@ func TestSmartEdgeCodingChallenge(t *testing.T) {
 	RunSpecs(t, "SmartEdge: CodingChallenge Suite")
 }
 
-var JsonValidationSchemaPath string = "testdata/valid_output_schema.json"
-
 var _ = Describe("Code Challenge Program", func() {
 	Describe("Invoking program", func() {
 		Context("With input longer than 250 characters", func() {
