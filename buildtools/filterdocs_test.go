@@ -1,7 +1,11 @@
 package main
 
 import (
+	"errors"
 	"fmt"
+	"github.com/smartedge/codechallenge/testtools"
+	"github.com/smartedge/codechallenge/testtools/mocks"
+	"path/filepath"
 	"regexp"
 	"strings"
 	"testing"
@@ -36,6 +40,104 @@ func GetRepetitions(from, to string) map[string]TranslationStringPair {
 			From: strings.Repeat(from, 5),
 			To:   strings.Repeat(to, 5),
 		},
+	}
+}
+
+// TestWalker traversal of the godoc filesystem.
+func TestWalker(t *testing.T) {
+	for desc, tc := range map[string]struct {
+		homeDir   string
+		beforeFs  map[string]*string
+		setup     func(mdb *mocks.MockDepsBundle) error
+		status    int
+		stdOutput testtools.StringMatcher
+		stdErr    testtools.StringMatcher
+		afterFs   map[string]*string
+	}{
+		"Simplest test case": {
+			homeDir: "/home/foobar",
+			beforeFs: map[string]*string{
+				"/home/foobar/godoc/fred":   testtools.StringPtr("abc 123"),
+				"/home/foobar/godoc/george": testtools.StringPtr(CSSOrigWithLibPath),
+			},
+			setup: func(mdb *mocks.MockDepsBundle) error {
+				return nil
+			},
+			status:    0,
+			stdOutput: testtools.NewStringStringMatcher("modified file: \"/home/foobar/godoc/george\"\n"),
+			stdErr:    testtools.NewStringStringMatcher(""),
+			afterFs: map[string]*string{
+				"/home/foobar/godoc/fred":   testtools.StringPtr("abc 123"),
+				"/home/foobar/godoc/george": testtools.StringPtr(CSSTranslatedWithLibPath),
+			},
+		},
+		"Bad Getwd()": {
+			homeDir:  "/home/foobar",
+			beforeFs: map[string]*string{},
+			setup: func(mdb *mocks.MockDepsBundle) error {
+				mdb.Deps.Os.Getwd = func() (string, error) {
+					return "", errors.New("this is a test")
+				}
+				return nil
+			},
+			status:    1,
+			stdOutput: testtools.NewStringStringMatcher(""),
+			stdErr:    testtools.NewStringStringMatcher("error fetching CWD: this is a test\n"),
+			afterFs: map[string]*string{
+				"/home/foobar": nil,
+			},
+		},
+		"Bad Walk()": {
+			homeDir:  "/home/foobar",
+			beforeFs: map[string]*string{},
+			setup: func(mdb *mocks.MockDepsBundle) error {
+				mdb.Deps.Path.FilePath.Walk = func(root string, walkFn filepath.WalkFunc) error {
+					err1 := walkFn(filepath.Join(root, "foo"), nil, errors.New("this is another test"))
+					err2 := walkFn(filepath.Join(root, "bar"), &testtools.DummyFileInfo{}, nil)
+					return fmt.Errorf("err1: %#v\nerr2: %#v", err1.Error(), err2.Error())
+				}
+				return nil
+			},
+			status:    2,
+			stdOutput: testtools.NewStringStringMatcher(""),
+			stdErr: testtools.NewStringStringMatcher("Failure accessing a path \"/home/foobar/godoc/foo\": this is another test\n" +
+				"Error reading file \"/home/foobar/godoc/bar\": open {{FakeFSRoot}}/home/foobar/godoc/bar: no such file or directory\n" +
+				"error walking the path \"/home/foobar/godoc\": err1: \"this is another test\"\n" +
+				"err2: \"open {{FakeFSRoot}}/home/foobar/godoc/bar: no such file or directory\"\n"),
+			afterFs: map[string]*string{
+				"/home/foobar": nil,
+			},
+		},
+	} {
+		t.Run(fmt.Sprintf("Subtest: %s", desc), func(tt *testing.T) {
+			mockDepsBundle := mocks.NewDefaultMockDeps("", []string{"filterdocs"}, tc.homeDir, &tc.beforeFs)
+			err := mockDepsBundle.InvokeCallInMockedEnv(func() error {
+				innerErr := tc.setup(mockDepsBundle)
+				if innerErr != nil {
+					return innerErr
+				}
+				RealMain(mockDepsBundle.Deps)
+				return nil
+			})
+			if err != nil {
+				tt.Errorf("Unexpected error calling mockDepsBundle.InvokeCallInMockedEnv(): %s", err.Error())
+			}
+			fakeRootPathFixer := strings.NewReplacer(mockDepsBundle.FakeFSRoot, "{{FakeFSRoot}}")
+			if exitStatus := mockDepsBundle.GetExitStatus(); exitStatus != tc.status {
+				tt.Errorf("RealMain() should have a exit status of %d. Got %#v instead.", tc.status, exitStatus)
+			}
+			if err := tc.stdOutput.MatchString(fakeRootPathFixer.Replace(mockDepsBundle.OutBuf.String())); err != nil {
+				tt.Errorf("Standard Output:\n%#v didn't match:\n%s.", fakeRootPathFixer.Replace(mockDepsBundle.OutBuf.String()), err.Error())
+			}
+			if err := tc.stdErr.MatchString(fakeRootPathFixer.Replace(mockDepsBundle.ErrBuf.String())); err != nil {
+				tt.Errorf("Standard Error:\n%#v didn't match:\n%s.", fakeRootPathFixer.Replace(mockDepsBundle.ErrBuf.String()), err.Error())
+			}
+			if mockDepsBundle.Files == nil {
+				tt.Error("mockDepsBundle.Files is unexpectedly nil")
+			} else if !testtools.AreFakeFileSystemsEqual(tc.afterFs, *mockDepsBundle.Files) {
+				tt.Errorf("Filesystem doesn't look as expected: we expected:\n%#v\nbut we got:\n%#v", tc.afterFs, mockDepsBundle.Files)
+			}
+		})
 	}
 }
 

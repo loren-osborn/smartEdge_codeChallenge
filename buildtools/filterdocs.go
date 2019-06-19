@@ -84,7 +84,7 @@ func RealMain(d *deps.Dependencies) {
 					fmt.Fprintf(d.Os.Stderr, "Error writing file %q: %v\n", path, err)
 					return err
 				}
-				fmt.Printf("modified file: %q\n", path)
+				fmt.Fprintf(d.Os.Stdout, "modified file: %q\n", path)
 			}
 			return nil
 		})

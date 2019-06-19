@@ -139,10 +139,10 @@ func TestCallingMainWithMocks(t *testing.T) {
 				tt.Errorf("RealMain() should have a normal exit status of %d. Got %#v instead.", tc.status, exitStatus)
 			}
 			if err := tc.stdOutput.MatchString(mockDepsBundle.OutBuf.String()); err != nil {
-				tt.Errorf("Standard Output:\n%#v didn't match:\n%s.", tc.stdOutput.String(), err.Error())
+				tt.Errorf("Standard Output:\n%#v didn't match:\n%s.", mockDepsBundle.OutBuf.String(), err.Error())
 			}
 			if err := tc.stdErr.MatchString(mockDepsBundle.ErrBuf.String()); err != nil {
-				tt.Errorf("Standard Error:\n%#v didn't match:\n%s.", tc.stdOutput.String(), err.Error())
+				tt.Errorf("Standard Error:\n%#v didn't match:\n%s.", mockDepsBundle.ErrBuf.String(), err.Error())
 			}
 		})
 	}

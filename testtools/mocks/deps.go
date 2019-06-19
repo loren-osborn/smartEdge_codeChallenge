@@ -29,6 +29,7 @@ type MockDepsBundle struct {
 	prevCwd     string
 	MapPathIn   func(string) (string, error)
 	MapPathOut  func(string) (string, error)
+	FakeFSRoot  string
 	hiddenFiles *map[string]*string
 	Files       *map[string]*string
 }
@@ -152,6 +153,7 @@ func (mdb *MockDepsBundle) InvokeCallInMockedEnv(wrapped func() error) (outErr e
 		return
 	}
 	fakeRootPath := filepath.Join(os.TempDir(), "tmpfs", fmt.Sprintf("sm_codechallenge_test_%d", os.Getpid()))
+	mdb.FakeFSRoot = fakeRootPath
 	outErr = mdb.NativeDeps.Os.MkdirAll(filepath.Join(fakeRootPath, mdb.homeDirPath), 0755)
 	if outErr != nil {
 		return
@@ -261,13 +263,21 @@ func (mdb *MockDepsBundle) InvokeCallInMockedEnv(wrapped func() error) (outErr e
 	// Not kept in sync with mock environment. Set to nil to prevent access.
 	mdb.Files = nil
 	for path, content := range *mdb.hiddenFiles {
+		realPath, err := mdb.MapPathIn(path)
+		if err != nil {
+			return err
+		}
 		if content == nil {
-			err := mdb.Deps.Os.MkdirAll(path, 0755)
+			err = mdb.NativeDeps.Os.MkdirAll(realPath, 0755)
 			if err != nil {
 				return err
 			}
 		} else {
-			err := mdb.Deps.Io.Ioutil.WriteFile(path, []byte(*content), 0644)
+			err := mdb.NativeDeps.Os.MkdirAll(filepath.Dir(realPath), 0755)
+			if err != nil {
+				return err
+			}
+			err = mdb.NativeDeps.Io.Ioutil.WriteFile(realPath, []byte(*content), 0644)
 			if err != nil {
 				return err
 			}
@@ -279,12 +289,16 @@ func (mdb *MockDepsBundle) InvokeCallInMockedEnv(wrapped func() error) (outErr e
 		// Restore nil file map to restore visability
 		mdb.Files = mdb.hiddenFiles
 		*mdb.Files = make(map[string]*string)
-		newErr := mdb.Deps.Path.FilePath.Walk("/", func(path string, info os.FileInfo, err error) error {
+		newErr := mdb.NativeDeps.Path.FilePath.Walk(fakeRootPath, func(realPath string, info os.FileInfo, err error) error {
+			if err != nil {
+				return err
+			}
+			path, err := mdb.MapPathOut(realPath)
 			if err != nil {
 				return err
 			}
 			if info.IsDir() {
-				dirFileHandle, err := mdb.Deps.Os.Open(path)
+				dirFileHandle, err := mdb.NativeDeps.Os.Open(realPath)
 				if err != nil {
 					return err
 				}
@@ -303,7 +317,7 @@ func (mdb *MockDepsBundle) InvokeCallInMockedEnv(wrapped func() error) (outErr e
 				}
 				return nil
 			}
-			fileBuf, err := mdb.Deps.Io.Ioutil.ReadFile(path)
+			fileBuf, err := mdb.NativeDeps.Io.Ioutil.ReadFile(realPath)
 			if err != nil {
 				return err
 			}

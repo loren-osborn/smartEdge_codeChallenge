@@ -11,10 +11,12 @@ import (
 	"github.com/smartedge/codechallenge/crypt"
 	"github.com/smartedge/codechallenge/deps"
 	"github.com/xeipuuv/gojsonschema"
+	"os"
 	"path/filepath"
 	"reflect"
 	"regexp"
 	"strings"
+	"time"
 )
 
 // JSONValidationSchemaPath the path in the project to the valid response schema.
@@ -329,4 +331,73 @@ func GetProjectPath(d *deps.Dependencies) (string, error) {
 		return "", err
 	}
 	return filepath.Clean(filepath.Dir(filepath.Dir(file))), nil
+}
+
+// StringPtr returns a pointer to a newly allocated copy of the string.
+func StringPtr(s string) *string {
+	return &s
+}
+
+// AreFakeFileSystemsEqual does a deep comparison of two maps of strings to
+// string pointers (being used as fake filesystems.)
+func AreFakeFileSystemsEqual(a map[string]*string, b map[string]*string) bool {
+	if (a == nil) != (b == nil) {
+		return false
+	}
+	for ak, avp := range a {
+		bvp, ok := b[ak]
+		if !ok || ((avp == nil) != (bvp == nil)) {
+			return false
+		}
+		if avp != nil {
+			if *avp != *bvp {
+				return false
+			}
+		}
+	}
+	for bk := range b {
+		_, ok := a[bk]
+		if !ok {
+			return false
+		}
+	}
+	return true
+}
+
+// DummyFileInfo a mock for a os.FileInfo interface.
+type DummyFileInfo struct {
+	NameVal    string
+	SizeVal    int64
+	ModeVal    os.FileMode
+	ModTimeVal time.Time
+}
+
+// Name base name of the file
+func (dfi *DummyFileInfo) Name() string {
+	return dfi.NameVal
+}
+
+// Size length in bytes for regular files; system-dependent for others
+func (dfi *DummyFileInfo) Size() int64 {
+	return dfi.SizeVal
+}
+
+// Mode file mode bits
+func (dfi *DummyFileInfo) Mode() os.FileMode {
+	return dfi.ModeVal
+}
+
+// ModTime modification time
+func (dfi *DummyFileInfo) ModTime() time.Time {
+	return dfi.ModTimeVal
+}
+
+// IsDir abbreviation for Mode().IsDir()
+func (dfi *DummyFileInfo) IsDir() bool {
+	return dfi.Mode().IsDir()
+}
+
+// Sys underlying data source (can return nil)
+func (dfi *DummyFileInfo) Sys() interface{} {
+	return nil
 }
