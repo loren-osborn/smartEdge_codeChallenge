@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"github.com/smartedge/codechallenge/testtools"
 	"github.com/smartedge/codechallenge/testtools/mocks"
+	"os"
 	"path/filepath"
-	"regexp"
 	"strings"
 	"testing"
 )
@@ -108,6 +108,26 @@ func TestWalker(t *testing.T) {
 				"/home/foobar": nil,
 			},
 		},
+		"Bad Write": {
+			homeDir: "/home/foobar",
+			beforeFs: map[string]*string{
+				"/home/foobar/godoc/fred":   testtools.StringPtr("abc 123"),
+				"/home/foobar/godoc/george": testtools.StringPtr(CSSOrigWithLibPath),
+			},
+			setup: func(mdb *mocks.MockDepsBundle) error {
+				mdb.Deps.Io.Ioutil.WriteFile = func(path string, data []byte, perm os.FileMode) error {
+					return errors.New("this is a test")
+				}
+				return nil
+			},
+			status:    2,
+			stdOutput: testtools.NewStringStringMatcher(""),
+			stdErr:    testtools.NewStringStringMatcher("Error writing file \"/home/foobar/godoc/george\": this is a test\nerror walking the path \"/home/foobar/godoc\": this is a test\n"),
+			afterFs: map[string]*string{
+				"/home/foobar/godoc/fred":   testtools.StringPtr("abc 123"),
+				"/home/foobar/godoc/george": testtools.StringPtr(CSSOrigWithLibPath),
+			},
+		},
 	} {
 		t.Run(fmt.Sprintf("Subtest: %s", desc), func(tt *testing.T) {
 			mockDepsBundle := mocks.NewDefaultMockDeps("", []string{"filterdocs"}, tc.homeDir, &tc.beforeFs)
@@ -141,50 +161,71 @@ func TestWalker(t *testing.T) {
 	}
 }
 
-// TestConvertLibPath tests proper translation of a localhost:6060/lib/ path.
-func TestConvertLibPath(t *testing.T) {
-	// t.Skip("Skiping currently known-broken tests.")
-	for caseName, tc := range GetRepetitions(CSSOrigWithLibPath, CSSTranslatedWithLibPath) {
-		t.Run(fmt.Sprintf("Testing %s", fmt.Sprintf(caseName, "/lib/ path")), func(tt *testing.T) {
-			actual := FilterFileContent(tc.From)
-			if tc.To != actual {
-				tt.Errorf("File content:\n\t%#v\nnot translated properly. Expected:\n\t%#v\nbut instead got:\n\t%#v", tc.From, tc.To, actual)
-			}
-		})
-	}
-}
-
-// TestRegexps tests proper translation of a localhost:6060/lib/ path.
-func TestRegexps(t *testing.T) {
-	for _, tc := range []struct {
-		CaseName    string
-		Pattern     *regexp.Regexp
-		Replacement string
-		From        string
-		To          string
+// TestConvertContent tests proper translation of different content.
+func TestConvertContent(t *testing.T) {
+	for _, outerTC := range []struct {
+		Description string
+		Input       string
+		Expected    string
 	}{
 		{
-			CaseName:    "replace hostname",
-			Pattern:     Patterns.HostnameToReplace,
-			Replacement: "MY NEW HOST",
-			From:        "This is a http://localhost:6060/ test",
-			To:          "This is a MY NEW HOST test",
+			Description: "Content containing a http://localhost:6060/ path link",
+			Input:       "This is a http://localhost:6060/ test",
+			Expected:    "This is a https://golang.org/ test",
 		},
 		{
-			CaseName:    "real-world replace hostname",
-			Pattern:     Patterns.HostnameToReplace,
-			Replacement: `https://golang.org/`,
-			From:        "background-image: url(http://localhost:6060/lib/godoc/images/treeview-red-line.gif); ",
-			To:          "background-image: url(https://golang.org/lib/godoc/images/treeview-red-line.gif); ",
+			Description: "Content containing a http://localhost:6060/lib/ path link",
+			Input:       CSSOrigWithLibPath,
+			Expected:    CSSTranslatedWithLibPath,
+		},
+		{
+			Description: "Content containing a http://localhost:6060/src/github.com/smartedge/codechallenge/ path link",
+			Input:       `<h2 id="GenerateResponse">func <a href="http://localhost:6060/src/github.com/smartedge/codechallenge/response.go?s=459:576#L9">GenerateResponse</a>`,
+			Expected:    `<h2 id="GenerateResponse">func <a href="https://github.com/loren-osborn/smartEdge_codeChallenge/blob/master/response.go#L19">GenerateResponse</a>`,
 		},
 	} {
-		for repeatTestCaseName, rtc := range GetRepetitions(tc.From, tc.To) {
-			t.Run(fmt.Sprintf(repeatTestCaseName, tc.CaseName), func(tt *testing.T) {
-				actual := Patterns.HostnameToReplace.ReplaceAllString(rtc.From, tc.Replacement)
-				if rtc.To != actual {
-					tt.Errorf("File content:\n\t%#v\nnot translated properly. Expected:\n\t%#v\nbut instead got:\n\t%#v", rtc.From, rtc.To, actual)
+		for caseName, tc := range GetRepetitions(outerTC.Input, outerTC.Expected) {
+			t.Run(fmt.Sprintf("Testing %s", fmt.Sprintf(caseName, outerTC.Description)), func(tt *testing.T) {
+				actual := FilterFileContent(tc.From)
+				if tc.To != actual {
+					tt.Errorf("File content:\n\t%#v\nnot translated properly. Expected:\n\t%#v\nbut instead got:\n\t%#v", tc.From, tc.To, actual)
 				}
 			})
 		}
 	}
 }
+
+// // TestRegexps tests proper translation of a localhost:6060/lib/ path.
+// func TestRegexps(t *testing.T) {
+// 	for _, tc := range []struct {
+// 		CaseName    string
+// 		Pattern     *regexp.Regexp
+// 		Replacement string
+// 		From        string
+// 		To          string
+// 	}{
+// 		{
+// 			CaseName:    "replace hostname",
+// 			Pattern:     Patterns.HostnameToReplace,
+// 			Replacement: "MY NEW HOST",
+// 			From:        "This is a http://localhost:6060/ test",
+// 			To:          "This is a MY NEW HOST test",
+// 		},
+// 		{
+// 			CaseName:    "real-world replace hostname",
+// 			Pattern:     Patterns.HostnameToReplace,
+// 			Replacement: `https://golang.org/`,
+// 			From:        "background-image: url(http://localhost:6060/lib/godoc/images/treeview-red-line.gif); ",
+// 			To:          "background-image: url(https://golang.org/lib/godoc/images/treeview-red-line.gif); ",
+// 		},
+// 	} {
+// 		for repeatTestCaseName, rtc := range GetRepetitions(tc.From, tc.To) {
+// 			t.Run(fmt.Sprintf(repeatTestCaseName, tc.CaseName), func(tt *testing.T) {
+// 				actual := Patterns.HostnameToReplace.ReplaceAllString(rtc.From, tc.Replacement)
+// 				if rtc.To != actual {
+// 					tt.Errorf("File content:\n\t%#v\nnot translated properly. Expected:\n\t%#v\nbut instead got:\n\t%#v", rtc.From, rtc.To, actual)
+// 				}
+// 			})
+// 		}
+// 	}
+// }
