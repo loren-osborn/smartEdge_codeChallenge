@@ -144,7 +144,7 @@ func TestDependencies(t *testing.T) {
 		},
 	} {
 		t.Run(fmt.Sprintf("Verifying %s", tc.DepName), func(tt *testing.T) {
-			// There are three types of dependancies:
+			// There are three types of dependencies:
 			same := false
 			switch origTyped := tc.Orig.(type) {
 			case *os.File:
