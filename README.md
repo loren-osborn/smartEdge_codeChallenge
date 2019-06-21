@@ -1,7 +1,7 @@
 # Short Message Signer
 ## An employment coding challenge for [Smart Edge of Irvine, CA](https://smart-edge.com/)
 
-[![Go Report](https://goreportcard.com/badge/github.com/loren-osborn/smartEdge_codeChallenge)](https://goreportcard.com/badge/github.com/loren-osborn/smartEdge_codeChallenge)
+[![Go Report](https://goreportcard.com/badge/github.com/loren-osborn/smartEdge_codeChallenge)](https://goreportcard.com/report/github.com/loren-osborn/smartEdge_codeChallenge)
 
 ### Purpose:
 While this is based on a real world problem, the goal of this project is to demonstrate my aptitude and potential value to [Smart Edge](https://smart-edge.com/) as a future employee.
