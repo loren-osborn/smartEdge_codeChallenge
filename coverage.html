@@ -54,7 +54,7 @@
 			<div id="nav">
 				<select id="files">
 				
-				<option value="file0">github.com/smartedge/codechallenge/buildtools/filterdocs.go (77.8%)</option>
+				<option value="file0">github.com/smartedge/codechallenge/buildtools/filterdocs.go (95.6%)</option>
 				
 				<option value="file1">github.com/smartedge/codechallenge/cmd/codechallenge/main.go (100.0%)</option>
 				
@@ -178,7 +178,7 @@ func RealMain(d *deps.Dependencies) <span class="cov8" title="1">{
                         filteredStr := ContentFilterFunction(origStr)
                         if filteredStr != origStr </span><span class="cov8" title="1">{
                                 err = d.Io.Ioutil.WriteFile(path, []byte(filteredStr), info.Mode())
-                                if err != nil </span><span class="cov0" title="0">{
+                                if err != nil </span><span class="cov8" title="1">{
                                         fmt.Fprintf(d.Os.Stderr, "Error writing file %q: %v\n", path, err)
                                         return err
                                 }</span>
@@ -245,20 +245,20 @@ func FilterFileContent(contents string) string <span class="cov8" title="1">{
                 PackageSourceCodeBrowsableRoot+"/")
         contents = Patterns.SrcLineNumToReplace.ReplaceAllStringFunc(
                 contents,
-                func(inStr string) string </span><span class="cov0" title="0">{
+                func(inStr string) string </span><span class="cov8" title="1">{
                         outStr := Patterns.SEqualsToRemove.ReplaceAllString(inStr, "#L")
                         outStr = Patterns.LineNoToModify.ReplaceAllStringFunc(
                                 outStr,
-                                func(lineNumStr string) string </span><span class="cov0" title="0">{
+                                func(lineNumStr string) string </span><span class="cov8" title="1">{
                                         line, err := strconv.Atoi(lineNumStr)
                                         if err != nil </span><span class="cov0" title="0">{
                                                 panic(fmt.Sprintf(
                                                         "This should be impossible: %s",
                                                         err.Error()))</span>
                                         }
-                                        <span class="cov0" title="0">return fmt.Sprintf("%d", line+10)</span>
+                                        <span class="cov8" title="1">return fmt.Sprintf("%d", line+10)</span>
                                 })
-                        <span class="cov0" title="0">return outStr</span>
+                        <span class="cov8" title="1">return outStr</span>
                 })
         <span class="cov8" title="1">contents = Patterns.LicenseURLToReplace.ReplaceAllString(
                 contents,
