@@ -5,8 +5,11 @@ import (
 	"fmt"
 	"github.com/smartedge/codechallenge/testtools"
 	"github.com/smartedge/codechallenge/testtools/mocks"
+	"image"
+	"image/png"
 	"os"
 	"path/filepath"
+	"regexp"
 	"strings"
 	"testing"
 )
@@ -163,11 +166,26 @@ func TestWalker(t *testing.T) {
 
 // TestConvertContent tests proper translation of different content.
 func TestConvertContent(t *testing.T) {
+	img := image.NewRGBA(image.Rect(0, 0, 16, 16))
+	imgFileStrBldr := &strings.Builder{}
+	err := png.Encode(imgFileStrBldr, img)
+	if err != nil {
+		t.Errorf("%t: %s", err, err.Error())
+	}
+	_, err = fmt.Fprintln(imgFileStrBldr, CSSOrigWithLibPath)
+	if err != nil {
+		t.Errorf("%t: %s", err, err.Error())
+	}
 	for _, outerTC := range []struct {
 		Description string
 		Input       string
 		Expected    string
 	}{
+		{
+			Description: "Content is a binary file:",
+			Input:       imgFileStrBldr.String(),
+			Expected:    imgFileStrBldr.String(),
+		},
 		{
 			Description: "Content containing a http://localhost:6060/ path link",
 			Input:       "This is a http://localhost:6060/ test",
@@ -195,37 +213,26 @@ func TestConvertContent(t *testing.T) {
 	}
 }
 
-// // TestRegexps tests proper translation of a localhost:6060/lib/ path.
-// func TestRegexps(t *testing.T) {
-// 	for _, tc := range []struct {
-// 		CaseName    string
-// 		Pattern     *regexp.Regexp
-// 		Replacement string
-// 		From        string
-// 		To          string
-// 	}{
-// 		{
-// 			CaseName:    "replace hostname",
-// 			Pattern:     Patterns.HostnameToReplace,
-// 			Replacement: "MY NEW HOST",
-// 			From:        "This is a http://localhost:6060/ test",
-// 			To:          "This is a MY NEW HOST test",
-// 		},
-// 		{
-// 			CaseName:    "real-world replace hostname",
-// 			Pattern:     Patterns.HostnameToReplace,
-// 			Replacement: `https://golang.org/`,
-// 			From:        "background-image: url(http://localhost:6060/lib/godoc/images/treeview-red-line.gif); ",
-// 			To:          "background-image: url(https://golang.org/lib/godoc/images/treeview-red-line.gif); ",
-// 		},
-// 	} {
-// 		for repeatTestCaseName, rtc := range GetRepetitions(tc.From, tc.To) {
-// 			t.Run(fmt.Sprintf(repeatTestCaseName, tc.CaseName), func(tt *testing.T) {
-// 				actual := Patterns.HostnameToReplace.ReplaceAllString(rtc.From, tc.Replacement)
-// 				if rtc.To != actual {
-// 					tt.Errorf("File content:\n\t%#v\nnot translated properly. Expected:\n\t%#v\nbut instead got:\n\t%#v", rtc.From, rtc.To, actual)
-// 				}
-// 			})
-// 		}
-// 	}
-// }
+// TestForceMatchPanic tests proper translation of different content.
+func TestForceMatchPanic(t *testing.T) {
+	realPattern := Patterns.LineNoToModify
+	defer func() {
+		Patterns.LineNoToModify = realPattern
+		if r := recover(); r != nil {
+			expected := "This should be impossible: strconv.Atoi: parsing \"#L9\": invalid syntax"
+			v, ok := r.(string)
+			if !ok {
+				// not our panic... re-panic it.
+				panic(r)
+			}
+			if v != expected {
+				t.Errorf("Was expecting panic %#v, but saw panic %#v instead", expected, v)
+			}
+			// Exit was called, and now caught.
+			// Continue with not further warnings.
+		}
+	}()
+	Patterns.LineNoToModify = regexp.MustCompile(`#L\d+$`)
+	FilterFileContent(`<h2 id="GenerateResponse">func <a href="http://localhost:6060/src/github.com/smartedge/codechallenge/response.go?s=459:576#L9">GenerateResponse</a>`)
+	t.Error("Anticipated panic never happened.")
+}

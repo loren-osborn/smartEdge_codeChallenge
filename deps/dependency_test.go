@@ -170,9 +170,9 @@ func TestDependencies(t *testing.T) {
 				} else {
 					same = eq
 				}
-				if !same {
-					tt.Errorf("%s should evaluate to %s", tc.DepName, tc.OrigName)
-				}
+			}
+			if !same {
+				tt.Errorf("%s should evaluate to %s", tc.DepName, tc.OrigName)
 			}
 		})
 
