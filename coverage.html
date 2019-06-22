@@ -78,7 +78,7 @@
 				
 				<option value="file11">github.com/smartedge/codechallenge/testtools/errorspec.go (100.0%)</option>
 				
-				<option value="file12">github.com/smartedge/codechallenge/testtools/mocks/deps.go (57.3%)</option>
+				<option value="file12">github.com/smartedge/codechallenge/testtools/mocks/deps.go (59.3%)</option>
 				
 				<option value="file13">github.com/smartedge/codechallenge/testtools/mocks/os_exit.go (100.0%)</option>
 				
@@ -1475,20 +1475,38 @@ func (mdb *MockDepsBundle) InvokeCallInMockedEnv(wrapped func() error) (outErr e
                 return
         }</span>
 
-        // Setup fake filesystem
-        <span class="cov8" title="1">mdb.prevCwd, outErr = os.Getwd()
-        if outErr != nil </span><span class="cov0" title="0">{
-                return
-        }</span>
-        <span class="cov8" title="1">fakeRootPath := filepath.Join(os.TempDir(), "tmpfs", fmt.Sprintf("sm_codechallenge_test_%d", os.Getpid()))
-        mdb.FakeFSRoot = fakeRootPath
-        outErr = mdb.NativeDeps.Os.MkdirAll(filepath.Join(fakeRootPath, mdb.homeDirPath), 0755)
+        <span class="cov8" title="1">cleanupFilesystem, outErr := mdb.setupFakeFilesystem()
         if outErr != nil </span><span class="cov8" title="1">{
                 return
         }</span>
-        <span class="cov8" title="1">outErr = mdb.NativeDeps.Os.Chdir(filepath.Join(fakeRootPath, mdb.homeDirPath))
-        if outErr != nil </span><span class="cov0" title="0">{
-                return
+        <span class="cov8" title="1">defer func() </span><span class="cov8" title="1">{
+                outErr = cleanupFilesystem(outErr)
+        }</span>()
+
+        // Run the code requested:
+        <span class="cov8" title="1">return mdb.exitHarness.InvokeCallThatMightExit(wrapped)</span>
+}
+
+// setupFakeFilesystem sertup creation and teardown of fake filesystem.
+func (mdb *MockDepsBundle) setupFakeFilesystem() (func(error) error, error) <span class="cov8" title="1">{
+        // no-op cleanup func
+        cleanupFunc := func(err error) error </span><span class="cov0" title="0">{
+                return err
+        }</span>
+        <span class="cov8" title="1">var err error
+        mdb.prevCwd, err = os.Getwd()
+        if err != nil </span><span class="cov0" title="0">{
+                return cleanupFunc, err
+        }</span>
+        <span class="cov8" title="1">fakeRootPath := filepath.Join(os.TempDir(), "tmpfs", fmt.Sprintf("sm_codechallenge_test_%d", os.Getpid()))
+        mdb.FakeFSRoot = fakeRootPath
+        err = mdb.NativeDeps.Os.MkdirAll(filepath.Join(fakeRootPath, mdb.homeDirPath), 0755)
+        if err != nil </span><span class="cov8" title="1">{
+                return cleanupFunc, err
+        }</span>
+        <span class="cov8" title="1">err = mdb.NativeDeps.Os.Chdir(filepath.Join(fakeRootPath, mdb.homeDirPath))
+        if err != nil </span><span class="cov0" title="0">{
+                return cleanupFunc, err
         }</span>
         <span class="cov8" title="1">mdb.MapPathIn = func(path string) (string, error) </span><span class="cov8" title="1">{
                 return filepath.Join(fakeRootPath, path), nil
@@ -1505,7 +1523,94 @@ func (mdb *MockDepsBundle) InvokeCallInMockedEnv(wrapped func() error) (outErr e
                 }</span>
                 <span class="cov8" title="1">return cleanPath[len(cleanFakeRoot)-1:], nil</span>
         }
-        <span class="cov8" title="1">mdb.Deps.Io.Ioutil.ReadFile = func(path string) ([]byte, error) </span><span class="cov0" title="0">{
+        <span class="cov8" title="1">mdb.populatePathMappingMocks()
+        // Populate fake file system
+        mdb.hiddenFiles = mdb.Files
+        // Not kept in sync with mock environment. Set to nil to prevent access.
+        mdb.Files = nil
+        for path, content := range *mdb.hiddenFiles </span><span class="cov8" title="1">{
+                realPath, err := mdb.MapPathIn(path)
+                if err != nil </span><span class="cov0" title="0">{
+                        return cleanupFunc, err
+                }</span>
+                <span class="cov8" title="1">if content == nil </span><span class="cov8" title="1">{
+                        err = mdb.NativeDeps.Os.MkdirAll(realPath, 0755)
+                        if err != nil </span><span class="cov0" title="0">{
+                                return cleanupFunc, err
+                        }</span>
+                } else<span class="cov0" title="0"> {
+                        err := mdb.NativeDeps.Os.MkdirAll(filepath.Dir(realPath), 0755)
+                        if err != nil </span><span class="cov0" title="0">{
+                                return cleanupFunc, err
+                        }</span>
+                        <span class="cov0" title="0">err = mdb.NativeDeps.Io.Ioutil.WriteFile(realPath, []byte(*content), 0644)
+                        if err != nil </span><span class="cov0" title="0">{
+                                return cleanupFunc, err
+                        }</span>
+                }
+        }
+
+        // Function to teardown fake filesystem
+        <span class="cov8" title="1">cleanupFunc = func(inErr error) error </span><span class="cov8" title="1">{
+                // Restore nil file map to restore visability
+                mdb.Files = mdb.hiddenFiles
+                *mdb.Files = make(map[string]*string)
+                newErr := mdb.NativeDeps.Path.FilePath.Walk(fakeRootPath, func(realPath string, info os.FileInfo, err error) error </span><span class="cov8" title="1">{
+                        if err != nil </span><span class="cov0" title="0">{
+                                return err
+                        }</span>
+                        <span class="cov8" title="1">path, err := mdb.MapPathOut(realPath)
+                        if err != nil </span><span class="cov0" title="0">{
+                                return err
+                        }</span>
+                        <span class="cov8" title="1">if info.IsDir() </span><span class="cov8" title="1">{
+                                dirFileHandle, err := mdb.NativeDeps.Os.Open(realPath)
+                                if err != nil </span><span class="cov0" title="0">{
+                                        return err
+                                }</span>
+                                <span class="cov8" title="1">dirFileNames, err := dirFileHandle.Readdirnames(AllItems)
+                                if err != nil </span><span class="cov0" title="0">{
+                                        return err
+                                }</span>
+                                <span class="cov8" title="1">childCount := 0
+                                for _, name := range dirFileNames </span><span class="cov8" title="1">{
+                                        if (name != ".") &amp;&amp; (name != "..") </span><span class="cov8" title="1">{
+                                                childCount++
+                                        }</span>
+                                }
+                                <span class="cov8" title="1">if childCount == 0 </span><span class="cov8" title="1">{
+                                        (*mdb.Files)[path] = nil
+                                }</span>
+                                <span class="cov8" title="1">return nil</span>
+                        }
+                        <span class="cov0" title="0">fileBuf, err := mdb.NativeDeps.Io.Ioutil.ReadFile(realPath)
+                        if err != nil </span><span class="cov0" title="0">{
+                                return err
+                        }</span>
+                        <span class="cov0" title="0">content := string(fileBuf)
+                        (*mdb.Files)[path] = &amp;content
+                        return nil</span>
+                })
+                <span class="cov8" title="1">if inErr == nil </span><span class="cov8" title="1">{
+                        inErr = newErr
+                }</span>
+                <span class="cov8" title="1">newErr = mdb.NativeDeps.Os.Chdir(mdb.prevCwd)
+                if inErr == nil </span><span class="cov8" title="1">{
+                        inErr = newErr
+                }</span>
+                <span class="cov8" title="1">newErr = mdb.NativeDeps.Os.RemoveAll(fakeRootPath)
+                if inErr == nil </span><span class="cov8" title="1">{
+                        inErr = newErr
+                }</span>
+                <span class="cov8" title="1">return inErr</span>
+        }
+        <span class="cov8" title="1">return cleanupFunc, nil</span>
+}
+
+// populatePathMappingMocks creates all the mocked dependencies that map the
+// fake filesystem paths.
+func (mdb *MockDepsBundle) populatePathMappingMocks() <span class="cov8" title="1">{
+        mdb.Deps.Io.Ioutil.ReadFile = func(path string) ([]byte, error) </span><span class="cov0" title="0">{
                 realPath, err := mdb.MapPathIn(path)
                 if err != nil </span><span class="cov0" title="0">{
                         return nil, err
@@ -1586,88 +1691,6 @@ func (mdb *MockDepsBundle) InvokeCallInMockedEnv(wrapped func() error) (outErr e
                 })
                 <span class="cov0" title="0">return mdb.NativeDeps.Path.FilePath.Walk(realRoot, realWalkFunc)</span>
         }
-        // Populate fake file system
-        <span class="cov8" title="1">mdb.hiddenFiles = mdb.Files
-        // Not kept in sync with mock environment. Set to nil to prevent access.
-        mdb.Files = nil
-        for path, content := range *mdb.hiddenFiles </span><span class="cov8" title="1">{
-                realPath, err := mdb.MapPathIn(path)
-                if err != nil </span><span class="cov0" title="0">{
-                        return err
-                }</span>
-                <span class="cov8" title="1">if content == nil </span><span class="cov8" title="1">{
-                        err = mdb.NativeDeps.Os.MkdirAll(realPath, 0755)
-                        if err != nil </span><span class="cov0" title="0">{
-                                return err
-                        }</span>
-                } else<span class="cov0" title="0"> {
-                        err := mdb.NativeDeps.Os.MkdirAll(filepath.Dir(realPath), 0755)
-                        if err != nil </span><span class="cov0" title="0">{
-                                return err
-                        }</span>
-                        <span class="cov0" title="0">err = mdb.NativeDeps.Io.Ioutil.WriteFile(realPath, []byte(*content), 0644)
-                        if err != nil </span><span class="cov0" title="0">{
-                                return err
-                        }</span>
-                }
-        }
-
-        // Teardown fake filesystem
-        <span class="cov8" title="1">defer func() </span><span class="cov8" title="1">{
-                // Restore nil file map to restore visability
-                mdb.Files = mdb.hiddenFiles
-                *mdb.Files = make(map[string]*string)
-                newErr := mdb.NativeDeps.Path.FilePath.Walk(fakeRootPath, func(realPath string, info os.FileInfo, err error) error </span><span class="cov8" title="1">{
-                        if err != nil </span><span class="cov0" title="0">{
-                                return err
-                        }</span>
-                        <span class="cov8" title="1">path, err := mdb.MapPathOut(realPath)
-                        if err != nil </span><span class="cov0" title="0">{
-                                return err
-                        }</span>
-                        <span class="cov8" title="1">if info.IsDir() </span><span class="cov8" title="1">{
-                                dirFileHandle, err := mdb.NativeDeps.Os.Open(realPath)
-                                if err != nil </span><span class="cov0" title="0">{
-                                        return err
-                                }</span>
-                                <span class="cov8" title="1">dirFileNames, err := dirFileHandle.Readdirnames(AllItems)
-                                if err != nil </span><span class="cov0" title="0">{
-                                        return err
-                                }</span>
-                                <span class="cov8" title="1">childCount := 0
-                                for _, name := range dirFileNames </span><span class="cov8" title="1">{
-                                        if (name != ".") &amp;&amp; (name != "..") </span><span class="cov8" title="1">{
-                                                childCount++
-                                        }</span>
-                                }
-                                <span class="cov8" title="1">if childCount == 0 </span><span class="cov8" title="1">{
-                                        (*mdb.Files)[path] = nil
-                                }</span>
-                                <span class="cov8" title="1">return nil</span>
-                        }
-                        <span class="cov0" title="0">fileBuf, err := mdb.NativeDeps.Io.Ioutil.ReadFile(realPath)
-                        if err != nil </span><span class="cov0" title="0">{
-                                return err
-                        }</span>
-                        <span class="cov0" title="0">content := string(fileBuf)
-                        (*mdb.Files)[path] = &amp;content
-                        return nil</span>
-                })
-                <span class="cov8" title="1">if outErr == nil </span><span class="cov8" title="1">{
-                        outErr = newErr
-                }</span>
-                <span class="cov8" title="1">newErr = mdb.NativeDeps.Os.Chdir(mdb.prevCwd)
-                if outErr == nil </span><span class="cov8" title="1">{
-                        outErr = newErr
-                }</span>
-                <span class="cov8" title="1">newErr = mdb.NativeDeps.Os.RemoveAll(fakeRootPath)
-                if outErr == nil </span><span class="cov8" title="1">{
-                        outErr = newErr
-                }</span>
-        }()
-
-        // Run the code requested:
-        <span class="cov8" title="1">return mdb.exitHarness.InvokeCallThatMightExit(wrapped)</span>
 }
 </pre>
 		
