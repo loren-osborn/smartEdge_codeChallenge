@@ -58,7 +58,7 @@
 				
 				<option value="file1">github.com/smartedge/codechallenge/cmd/codechallenge/main.go (100.0%)</option>
 				
-				<option value="file2">github.com/smartedge/codechallenge/crypt/buffers.go (17.1%)</option>
+				<option value="file2">github.com/smartedge/codechallenge/crypt/buffers.go (39.0%)</option>
 				
 				<option value="file3">github.com/smartedge/codechallenge/crypt/ecdsa.go (0.0%)</option>
 				
@@ -342,34 +342,34 @@ func (x X509Encoded) EncodeToPEM(algorithm string, kt KeyType) PEMEncoded <span 
 }</span>
 
 // AsGenericPublicKey decodes the public key (if it is one)
-func (x X509Encoded) AsGenericPublicKey() (crypto.PublicKey, error) <span class="cov0" title="0">{
+func (x X509Encoded) AsGenericPublicKey() (crypto.PublicKey, error) <span class="cov8" title="1">{
         genericPublicKey, err := x509.ParsePKIXPublicKey([]byte(x))
-        if err != nil </span><span class="cov0" title="0">{
-                return false, err
+        if err != nil </span><span class="cov8" title="1">{
+                return nil, err
         }</span>
-        <span class="cov0" title="0">return crypto.PublicKey(genericPublicKey), nil</span>
+        <span class="cov8" title="1">return crypto.PublicKey(genericPublicKey), nil</span>
 }
 
 // PEMEncoded text data buffer
 type PEMEncoded []byte
 
 // NewPEMBufferFromString turns a string into a PEM buffer.
-func NewPEMBufferFromString(src string) PEMEncoded <span class="cov0" title="0">{
+func NewPEMBufferFromString(src string) PEMEncoded <span class="cov8" title="1">{
         return PEMEncoded([]byte(src))
 }</span>
 
 // String renders the PEM encoded data as a string.
-func (pemBuf PEMEncoded) String() string <span class="cov0" title="0">{
+func (pemBuf PEMEncoded) String() string <span class="cov8" title="1">{
         return string([]byte(pemBuf))
 }</span>
 
 // DecodeToX509 decodes the PEM key data block to a x509 buffer
-func (pemBuf PEMEncoded) DecodeToX509() (X509Encoded, error) <span class="cov0" title="0">{
+func (pemBuf PEMEncoded) DecodeToX509() (X509Encoded, error) <span class="cov8" title="1">{
         blockPub, _ := pem.Decode([]byte(pemBuf))
         if blockPub == nil </span><span class="cov0" title="0">{
                 return nil, errors.New("No PEM data was found")
         }</span>
-        <span class="cov0" title="0">return X509Encoded(blockPub.Bytes), nil</span>
+        <span class="cov8" title="1">return X509Encoded(blockPub.Bytes), nil</span>
 }
 
 // DigestHash data buffer
