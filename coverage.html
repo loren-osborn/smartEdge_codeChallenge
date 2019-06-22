@@ -58,7 +58,7 @@
 				
 				<option value="file1">github.com/smartedge/codechallenge/cmd/codechallenge/main.go (100.0%)</option>
 				
-				<option value="file2">github.com/smartedge/codechallenge/crypt/buffers.go (0.0%)</option>
+				<option value="file2">github.com/smartedge/codechallenge/crypt/buffers.go (17.1%)</option>
 				
 				<option value="file3">github.com/smartedge/codechallenge/crypt/ecdsa.go (0.0%)</option>
 				
@@ -317,23 +317,23 @@ const (
         PrivateKey
 )
 
-func (t KeyType) String() string <span class="cov0" title="0">{
+func (t KeyType) String() string <span class="cov8" title="1">{
         nameLookup := map[KeyType]string{
                 PublicKey:  "public",
                 PrivateKey: "private",
         }
         name, ok := nameLookup[t]
-        if !ok </span><span class="cov0" title="0">{
+        if !ok </span><span class="cov8" title="1">{
                 return fmt.Sprintf("Unknown KeyType %#v (INTERNAL ERROR)", t)
         }</span>
-        <span class="cov0" title="0">return name</span>
+        <span class="cov8" title="1">return name</span>
 }
 
 // X509Encoded data buffer
 type X509Encoded []byte
 
 // EncodeToPEM encodes the x509 key as a PEM text block
-func (x X509Encoded) EncodeToPEM(algorithm string, kt KeyType) PEMEncoded <span class="cov0" title="0">{
+func (x X509Encoded) EncodeToPEM(algorithm string, kt KeyType) PEMEncoded <span class="cov8" title="1">{
         pemEncodedKey := pem.EncodeToMemory(&amp;pem.Block{
                 Type:  strings.ToUpper(fmt.Sprintf("%s %s key", algorithm, kt.String())),
                 Bytes: []byte(x),
