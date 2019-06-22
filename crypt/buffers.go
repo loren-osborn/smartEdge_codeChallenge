@@ -52,7 +52,7 @@ func (x X509Encoded) EncodeToPEM(algorithm string, kt KeyType) PEMEncoded {
 func (x X509Encoded) AsGenericPublicKey() (crypto.PublicKey, error) {
 	genericPublicKey, err := x509.ParsePKIXPublicKey([]byte(x))
 	if err != nil {
-		return false, err
+		return nil, err
 	}
 	return crypto.PublicKey(genericPublicKey), nil
 }
