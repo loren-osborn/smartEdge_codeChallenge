@@ -147,20 +147,38 @@ func (mdb *MockDepsBundle) InvokeCallInMockedEnv(wrapped func() error) (outErr e
 		return
 	}
 
-	// Setup fake filesystem
-	mdb.prevCwd, outErr = os.Getwd()
+	cleanupFilesystem, outErr := mdb.setupFakeFilesystem()
 	if outErr != nil {
 		return
+	}
+	defer func() {
+		outErr = cleanupFilesystem(outErr)
+	}()
+
+	// Run the code requested:
+	return mdb.exitHarness.InvokeCallThatMightExit(wrapped)
+}
+
+// setupFakeFilesystem sertup creation and teardown of fake filesystem.
+func (mdb *MockDepsBundle) setupFakeFilesystem() (func(error) error, error) {
+	// no-op cleanup func
+	cleanupFunc := func(err error) error {
+		return err
+	}
+	var err error
+	mdb.prevCwd, err = os.Getwd()
+	if err != nil {
+		return cleanupFunc, err
 	}
 	fakeRootPath := filepath.Join(os.TempDir(), "tmpfs", fmt.Sprintf("sm_codechallenge_test_%d", os.Getpid()))
 	mdb.FakeFSRoot = fakeRootPath
-	outErr = mdb.NativeDeps.Os.MkdirAll(filepath.Join(fakeRootPath, mdb.homeDirPath), 0755)
-	if outErr != nil {
-		return
+	err = mdb.NativeDeps.Os.MkdirAll(filepath.Join(fakeRootPath, mdb.homeDirPath), 0755)
+	if err != nil {
+		return cleanupFunc, err
 	}
-	outErr = mdb.NativeDeps.Os.Chdir(filepath.Join(fakeRootPath, mdb.homeDirPath))
-	if outErr != nil {
-		return
+	err = mdb.NativeDeps.Os.Chdir(filepath.Join(fakeRootPath, mdb.homeDirPath))
+	if err != nil {
+		return cleanupFunc, err
 	}
 	mdb.MapPathIn = func(path string) (string, error) {
 		return filepath.Join(fakeRootPath, path), nil
@@ -177,6 +195,93 @@ func (mdb *MockDepsBundle) InvokeCallInMockedEnv(wrapped func() error) (outErr e
 		}
 		return cleanPath[len(cleanFakeRoot)-1:], nil
 	}
+	mdb.populatePathMappingMocks()
+	// Populate fake file system
+	mdb.hiddenFiles = mdb.Files
+	// Not kept in sync with mock environment. Set to nil to prevent access.
+	mdb.Files = nil
+	for path, content := range *mdb.hiddenFiles {
+		realPath, err := mdb.MapPathIn(path)
+		if err != nil {
+			return cleanupFunc, err
+		}
+		if content == nil {
+			err = mdb.NativeDeps.Os.MkdirAll(realPath, 0755)
+			if err != nil {
+				return cleanupFunc, err
+			}
+		} else {
+			err := mdb.NativeDeps.Os.MkdirAll(filepath.Dir(realPath), 0755)
+			if err != nil {
+				return cleanupFunc, err
+			}
+			err = mdb.NativeDeps.Io.Ioutil.WriteFile(realPath, []byte(*content), 0644)
+			if err != nil {
+				return cleanupFunc, err
+			}
+		}
+	}
+
+	// Function to teardown fake filesystem
+	cleanupFunc = func(inErr error) error {
+		// Restore nil file map to restore visability
+		mdb.Files = mdb.hiddenFiles
+		*mdb.Files = make(map[string]*string)
+		newErr := mdb.NativeDeps.Path.FilePath.Walk(fakeRootPath, func(realPath string, info os.FileInfo, err error) error {
+			if err != nil {
+				return err
+			}
+			path, err := mdb.MapPathOut(realPath)
+			if err != nil {
+				return err
+			}
+			if info.IsDir() {
+				dirFileHandle, err := mdb.NativeDeps.Os.Open(realPath)
+				if err != nil {
+					return err
+				}
+				dirFileNames, err := dirFileHandle.Readdirnames(AllItems)
+				if err != nil {
+					return err
+				}
+				childCount := 0
+				for _, name := range dirFileNames {
+					if (name != ".") && (name != "..") {
+						childCount++
+					}
+				}
+				if childCount == 0 {
+					(*mdb.Files)[path] = nil
+				}
+				return nil
+			}
+			fileBuf, err := mdb.NativeDeps.Io.Ioutil.ReadFile(realPath)
+			if err != nil {
+				return err
+			}
+			content := string(fileBuf)
+			(*mdb.Files)[path] = &content
+			return nil
+		})
+		if inErr == nil {
+			inErr = newErr
+		}
+		newErr = mdb.NativeDeps.Os.Chdir(mdb.prevCwd)
+		if inErr == nil {
+			inErr = newErr
+		}
+		newErr = mdb.NativeDeps.Os.RemoveAll(fakeRootPath)
+		if inErr == nil {
+			inErr = newErr
+		}
+		return inErr
+	}
+	return cleanupFunc, nil
+}
+
+// populatePathMappingMocks creates all the mocked dependencies that map the
+// fake filesystem paths.
+func (mdb *MockDepsBundle) populatePathMappingMocks() {
 	mdb.Deps.Io.Ioutil.ReadFile = func(path string) ([]byte, error) {
 		realPath, err := mdb.MapPathIn(path)
 		if err != nil {
@@ -258,86 +363,4 @@ func (mdb *MockDepsBundle) InvokeCallInMockedEnv(wrapped func() error) (outErr e
 		})
 		return mdb.NativeDeps.Path.FilePath.Walk(realRoot, realWalkFunc)
 	}
-	// Populate fake file system
-	mdb.hiddenFiles = mdb.Files
-	// Not kept in sync with mock environment. Set to nil to prevent access.
-	mdb.Files = nil
-	for path, content := range *mdb.hiddenFiles {
-		realPath, err := mdb.MapPathIn(path)
-		if err != nil {
-			return err
-		}
-		if content == nil {
-			err = mdb.NativeDeps.Os.MkdirAll(realPath, 0755)
-			if err != nil {
-				return err
-			}
-		} else {
-			err := mdb.NativeDeps.Os.MkdirAll(filepath.Dir(realPath), 0755)
-			if err != nil {
-				return err
-			}
-			err = mdb.NativeDeps.Io.Ioutil.WriteFile(realPath, []byte(*content), 0644)
-			if err != nil {
-				return err
-			}
-		}
-	}
-
-	// Teardown fake filesystem
-	defer func() {
-		// Restore nil file map to restore visability
-		mdb.Files = mdb.hiddenFiles
-		*mdb.Files = make(map[string]*string)
-		newErr := mdb.NativeDeps.Path.FilePath.Walk(fakeRootPath, func(realPath string, info os.FileInfo, err error) error {
-			if err != nil {
-				return err
-			}
-			path, err := mdb.MapPathOut(realPath)
-			if err != nil {
-				return err
-			}
-			if info.IsDir() {
-				dirFileHandle, err := mdb.NativeDeps.Os.Open(realPath)
-				if err != nil {
-					return err
-				}
-				dirFileNames, err := dirFileHandle.Readdirnames(AllItems)
-				if err != nil {
-					return err
-				}
-				childCount := 0
-				for _, name := range dirFileNames {
-					if (name != ".") && (name != "..") {
-						childCount++
-					}
-				}
-				if childCount == 0 {
-					(*mdb.Files)[path] = nil
-				}
-				return nil
-			}
-			fileBuf, err := mdb.NativeDeps.Io.Ioutil.ReadFile(realPath)
-			if err != nil {
-				return err
-			}
-			content := string(fileBuf)
-			(*mdb.Files)[path] = &content
-			return nil
-		})
-		if outErr == nil {
-			outErr = newErr
-		}
-		newErr = mdb.NativeDeps.Os.Chdir(mdb.prevCwd)
-		if outErr == nil {
-			outErr = newErr
-		}
-		newErr = mdb.NativeDeps.Os.RemoveAll(fakeRootPath)
-		if outErr == nil {
-			outErr = newErr
-		}
-	}()
-
-	// Run the code requested:
-	return mdb.exitHarness.InvokeCallThatMightExit(wrapped)
 }
