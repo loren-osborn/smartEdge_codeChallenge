@@ -58,7 +58,7 @@
 				
 				<option value="file1">github.com/smartedge/codechallenge/cmd/codechallenge/main.go (100.0%)</option>
 				
-				<option value="file2">github.com/smartedge/codechallenge/crypt/buffers.go (46.5%)</option>
+				<option value="file2">github.com/smartedge/codechallenge/crypt/buffers.go (58.1%)</option>
 				
 				<option value="file3">github.com/smartedge/codechallenge/crypt/ecdsa.go (0.0%)</option>
 				
@@ -394,17 +394,17 @@ type BinarySignature []byte
 
 // NewBinarySignatureFromBase64 creates a new BinarySignature buffer
 // from a base64 string.
-func NewBinarySignatureFromBase64(src string) (BinarySignature, error) <span class="cov0" title="0">{
+func NewBinarySignatureFromBase64(src string) (BinarySignature, error) <span class="cov8" title="1">{
         buf, err := base64.StdEncoding.DecodeString(src)
-        if err != nil </span><span class="cov0" title="0">{
+        if err != nil </span><span class="cov8" title="1">{
                 return nil, err
         }</span>
-        <span class="cov0" title="0">return BinarySignature(buf), nil</span>
+        <span class="cov8" title="1">return BinarySignature(buf), nil</span>
 }
 
 // Base64 renders the signature as a RFC 4648 compliant Base64
 // encoded string.
-func (sig BinarySignature) Base64() string <span class="cov0" title="0">{
+func (sig BinarySignature) Base64() string <span class="cov8" title="1">{
         return base64.StdEncoding.EncodeToString([]byte(sig))
 }</span>
 
