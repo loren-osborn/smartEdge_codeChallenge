@@ -4,7 +4,6 @@ import (
 	"crypto"
 	"crypto/ecdsa"
 	"crypto/elliptic"
-	"crypto/sha256"
 	"crypto/x509"
 	"encoding/asn1"
 	"fmt"
@@ -35,14 +34,6 @@ func (p *ECDSAPlugin) GenKeyPair(randReader io.Reader) (pubKey X509Encoded, priv
 // InjestPrivateKey loads a ECDSA private key from a X509Encoded buffer,
 func (p *ECDSAPlugin) InjestPrivateKey(privKey X509Encoded) (signer crypto.Signer, err error) {
 	return x509.ParseECPrivateKey([]byte(privKey))
-}
-
-// HashMessage respecting whatever salting is necessary, Since
-// ECDSA needs no special hashing, this is a thin wrapper over
-// crypto/sha256.Sum256()
-func (p *ECDSAPlugin) HashMessage(message string) DigestHash {
-	digest := sha256.Sum256([]byte(message))
-	return DigestHash(digest[0:])
 }
 
 // VerifySignature verifies a ECDSA signature for a message digest,

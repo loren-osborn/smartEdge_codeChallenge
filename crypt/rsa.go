@@ -32,14 +32,6 @@ func (p *RSAPlugin) InjestPrivateKey(privKey X509Encoded) (signer crypto.Signer,
 	return x509.ParsePKCS1PrivateKey([]byte(privKey))
 }
 
-// HashMessage respecting whatever salting is necessary, Here we
-// handle PSS salting
-func (p *RSAPlugin) HashMessage(message string) DigestHash {
-	pssh := crypto.SHA256.New()
-	pssh.Write([]byte(message))
-	return DigestHash(pssh.Sum(nil))
-}
-
 // VerifySignature verifies a RSA signature for a message digest,
 func (p *RSAPlugin) VerifySignature(sha256Hash DigestHash, binSig BinarySignature, publicKey crypto.PublicKey) (bool, error) {
 	rsaPublicKey, ok := publicKey.(*rsa.PublicKey)

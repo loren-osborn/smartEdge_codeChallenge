@@ -75,17 +75,29 @@ func TestX509EncodedEncodeToPEM(t *testing.T) {
 // TestX509EncodedAsGenericPublicKey tests how x509 buffers are decoded into public keys.
 func TestX509EncodedAsGenericPublicKey(t *testing.T) {
 	for i, tc := range []struct {
-		Desc          string
-		PEMData       string
-		ExpectedKey   string
-		ExpectedError *testtools.ErrorSpec
+		Desc                 string
+		PEMData              string
+		ExpectedKey          string
+		ExpectPEMDecodeError bool
+		ExpectedError        *testtools.ErrorSpec
 	}{
 		{
-			Desc: "Invalid input",
+			Desc:                 "Invalid PEM input",
+			PEMData:              "abc123\n",
+			ExpectedKey:          "", // n/a
+			ExpectPEMDecodeError: true,
+			ExpectedError: &testtools.ErrorSpec{
+				Type:    "*errors.errorString",
+				Message: "No PEM data was found",
+			},
+		},
+		{
+			Desc: "Invalid x509 input",
 			PEMData: "-----BEGIN FOO PUBLIC KEY-----\n" +
 				"YWJjMTIz\n" +
 				"-----END FOO PUBLIC KEY-----\n",
-			ExpectedKey: "<nil>",
+			ExpectedKey:          "<nil>",
+			ExpectPEMDecodeError: false,
 			ExpectedError: &testtools.ErrorSpec{
 				Type: "asn1.StructuralError",
 				Message: "asn1: structure error: tags don't match " +
@@ -125,7 +137,8 @@ func TestX509EncodedAsGenericPublicKey(t *testing.T) {
 				"1766701590200578211474964612687407014185219512140269663909935873" +
 				"8279934060503875651084074546544931657240541911067692979624712687" +
 				"649, E:65537}",
-			ExpectedError: nil,
+			ExpectPEMDecodeError: false,
+			ExpectedError:        nil,
 		},
 	} {
 		t.Run(fmt.Sprintf("Subtest %d: %s", i+1, tc.Desc), func(tt *testing.T) {
@@ -134,6 +147,14 @@ func TestX509EncodedAsGenericPublicKey(t *testing.T) {
 				tt.Errorf("PEM buffer:\n%#v\ndidn't match expected:\n%#v", pemBuffer.String(), tc.PEMData)
 			}
 			x509Buf, err := pemBuffer.DecodeToX509()
+			if tc.ExpectPEMDecodeError {
+				if tc.ExpectedError == nil {
+					tt.Error("Invalid test, ExpectedError must be non-nil when ExpectPEMDecodeError is true")
+				} else if matchErr := tc.ExpectedError.EnsureMatches(err); matchErr != nil {
+					tt.Error(matchErr.Error())
+				}
+				return
+			}
 			if err != nil {
 				tt.Errorf("Error decoding valid PEM buffer: %T %s", err, err.Error())
 				return
@@ -147,6 +168,55 @@ func TestX509EncodedAsGenericPublicKey(t *testing.T) {
 			}
 			if (actualErr != nil) == (actualKey != nil) {
 				tt.Errorf("Exactly one of key and err should be nil: key: %#v; error: %T %s", actualKey, actualErr, actualErr.Error())
+			}
+		})
+	}
+}
+
+// TestDigestHash tests how the hash buffer output of SHA256 behaves.
+func TestDigestHash(t *testing.T) {
+	for i, tc := range []struct {
+		Desc              string
+		TestData          string
+		ExpectedSHA256    string
+		ExpectedSHA256Hex string
+	}{
+		{
+			Desc:              "Data to hash",
+			TestData:          "abc123",
+			ExpectedSHA256:    "\x6c\xa1\x3d\x52\xca\x70\xc8\x83\xe0\xf0\xbb\x10\x1e\x42\x5a\x89\xe8\x62\x4d\xe5\x1d\xb2\xd2\x39\x25\x93\xaf\x6a\x84\x11\x80\x90",
+			ExpectedSHA256Hex: "6ca13d52ca70c883e0f0bb101e425a89e8624de51db2d2392593af6a84118090",
+		},
+		{
+			Desc:              "Other data to hash",
+			TestData:          "456def",
+			ExpectedSHA256:    "\x5e\x68\x9f\xe2\xea\xed\x09\x7f\x8a\x9d\xc7\x4e\x6d\x2a\xaa\xef\x59\x68\x8d\x82\x0e\xcb\x4c\xef\xc7\xb1\xa6\x5c\xc7\x8f\xa0\xa2",
+			ExpectedSHA256Hex: "5e689fe2eaed097f8a9dc74e6d2aaaef59688d820ecb4cefc7b1a65cc78fa0a2",
+		},
+	} {
+		t.Run(fmt.Sprintf("Subtest %d: %s", i+1, tc.Desc), func(tt *testing.T) {
+			digestHash := crypt.NewSHA256DigestHash(tc.TestData)
+			if string([]byte(digestHash)) != tc.ExpectedSHA256 {
+				tt.Errorf("Test data:\n"+
+					"%#v\n"+
+					"does not have expected SHA256 string:\n"+
+					"%#v\n"+
+					"instead got string:\n"+
+					"%#v",
+					tc.TestData,
+					tc.ExpectedSHA256,
+					string([]byte(digestHash)))
+			}
+			if digestHash.Hex() != tc.ExpectedSHA256Hex {
+				tt.Errorf("Test data:\n"+
+					"%#v\n"+
+					"does not have expected Hexidecimal string:\n"+
+					"%#v\n"+
+					"instead got string:\n"+
+					"%#v",
+					tc.TestData,
+					tc.ExpectedSHA256Hex,
+					digestHash.Hex())
 			}
 		})
 	}

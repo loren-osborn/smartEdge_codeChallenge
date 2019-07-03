@@ -2,6 +2,7 @@ package crypt
 
 import (
 	"crypto"
+	"crypto/sha256"
 	"crypto/x509"
 	"encoding/base64"
 	"encoding/hex"
@@ -81,6 +82,13 @@ func (pemBuf PEMEncoded) DecodeToX509() (X509Encoded, error) {
 
 // DigestHash data buffer
 type DigestHash []byte
+
+// NewSHA256DigestHash hashes the provided string buffer, This is a thin wrapper
+// over crypto/sha256.Sum256()
+func NewSHA256DigestHash(data string) DigestHash {
+	digest := sha256.Sum256([]byte(data))
+	return DigestHash(digest[0:])
+}
 
 // Hex renders the hash digest as a hex string.
 // This is primarily for debugging and error messages.

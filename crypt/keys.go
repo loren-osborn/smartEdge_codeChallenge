@@ -22,7 +22,6 @@ type PkiSettings struct {
 type AlgorithmPlugin interface {
 	GenKeyPair(randReader io.Reader) (pubKey X509Encoded, privKey X509Encoded, err error)
 	InjestPrivateKey(privKey X509Encoded) (signer crypto.Signer, err error)
-	HashMessage(message string) DigestHash
 	VerifySignature(sha256Hash DigestHash, binSig BinarySignature, publicKey crypto.PublicKey) (bool, error)
 	GetAlgorithmName() string
 }
@@ -116,11 +115,6 @@ func (ct *CryptoTooling) GetKeys() error {
 	return nil
 }
 
-// HashMessage defers to the AlgPlugin to handle hashing.
-func (ct *CryptoTooling) HashMessage(msg string) DigestHash {
-	return ct.AlgPlugin.HashMessage(msg)
-}
-
 // Sign is a thin wrapper over cryptoSigner.Sign() to ease
 // type conversions and dependencies.
 func (ct *CryptoTooling) Sign(digest DigestHash) (BinarySignature, error) {
@@ -140,7 +134,7 @@ func (ct *CryptoTooling) Sign(digest DigestHash) (BinarySignature, error) {
 // SignMessage simply sighs a hash of the message. It was added for
 // consistancy with VerifySignedMessage.
 func (ct *CryptoTooling) SignMessage(msg string) (BinarySignature, error) {
-	return ct.Sign(ct.HashMessage(msg))
+	return ct.Sign(NewSHA256DigestHash(msg))
 }
 
 // VerifySignedMessage simply sighs a hash of the message. It was added for
@@ -158,7 +152,7 @@ func (ct *CryptoTooling) VerifySignedMessage(msg string, base64Sig string, pemPu
 	if err != nil {
 		return false, err
 	}
-	valid, err := ct.AlgPlugin.VerifySignature(ct.HashMessage(msg), sig, genericPubKey)
+	valid, err := ct.AlgPlugin.VerifySignature(NewSHA256DigestHash(msg), sig, genericPubKey)
 	if err != nil {
 		return false, err
 	}
