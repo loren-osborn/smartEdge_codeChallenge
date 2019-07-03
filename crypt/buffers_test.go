@@ -221,3 +221,82 @@ func TestDigestHash(t *testing.T) {
 		})
 	}
 }
+
+// TestBinarySignature tests how the binary signature buffer behaves.
+func TestBinarySignature(t *testing.T) {
+	for i, tc := range []struct {
+		Desc          string
+		Base64Input   string
+		ExpectedError *testtools.ErrorSpec
+		ExpectedData  string
+	}{
+		{
+			Desc:        "bad data",
+			Base64Input: "!@#$^&*()Punctuation!@#$^&*()",
+			ExpectedError: &testtools.ErrorSpec{
+				Type:    "base64.CorruptInputError",
+				Message: "illegal base64 data at input byte 0",
+			},
+			ExpectedData: "",
+		},
+		{
+			Desc:          "Exactly 6 bytes",
+			Base64Input:   "45/7de+g",
+			ExpectedError: nil,
+			ExpectedData:  "\xe3\x9f\xfb\x75\xef\xa0",
+		},
+		{
+			Desc:        "invalid padding",
+			Base64Input: "45/7de+g=",
+			ExpectedError: &testtools.ErrorSpec{
+				Type:    "base64.CorruptInputError",
+				Message: "illegal base64 data at input byte 8",
+			},
+			ExpectedData: "",
+		},
+		{
+			Desc:          "data with padding",
+			Base64Input:   "456def8=",
+			ExpectedError: nil,
+			ExpectedData:  "\xe3\x9e\x9d\x79\xff",
+		},
+	} {
+		t.Run(fmt.Sprintf("Subtest %d: %s", i+1, tc.Desc), func(tt *testing.T) {
+			binSig, actualErr := crypt.NewBinarySignatureFromBase64(tc.Base64Input)
+			if err := tc.ExpectedError.EnsureMatches(actualErr); err != nil {
+				tt.Error(err.Error())
+			}
+			if tc.ExpectedError != nil {
+				if binSig != nil {
+					tt.Errorf("If there is an error, the returned buffer "+
+						"should be nil. Instead it's:\n"+
+						"%#v",
+						[]byte(binSig))
+				}
+				return
+			}
+			if string([]byte(binSig)) != tc.ExpectedData {
+				tt.Errorf("Test base64 data:\n"+
+					"%#v\n"+
+					"does not have expected value:\n"+
+					"%#v\n"+
+					"instead got:\n"+
+					"%#v",
+					tc.Base64Input,
+					[]byte(tc.ExpectedData),
+					binSig)
+			}
+			if binSig.Base64() != tc.Base64Input {
+				tt.Errorf("Test binary data:\n"+
+					"%#v\n"+
+					"does not have base64 value:\n"+
+					"%#v\n"+
+					"instead got:\n"+
+					"%#v",
+					[]byte(tc.ExpectedData),
+					tc.Base64Input,
+					binSig.Base64())
+			}
+		})
+	}
+}
