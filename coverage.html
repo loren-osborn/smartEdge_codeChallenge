@@ -58,7 +58,7 @@
 				
 				<option value="file1">github.com/smartedge/codechallenge/cmd/codechallenge/main.go (100.0%)</option>
 				
-				<option value="file2">github.com/smartedge/codechallenge/crypt/buffers.go (39.0%)</option>
+				<option value="file2">github.com/smartedge/codechallenge/crypt/buffers.go (46.5%)</option>
 				
 				<option value="file3">github.com/smartedge/codechallenge/crypt/ecdsa.go (0.0%)</option>
 				
@@ -295,6 +295,7 @@ func main() <span class="cov8" title="1">{
 
 import (
         "crypto"
+        "crypto/sha256"
         "crypto/x509"
         "encoding/base64"
         "encoding/hex"
@@ -366,7 +367,7 @@ func (pemBuf PEMEncoded) String() string <span class="cov8" title="1">{
 // DecodeToX509 decodes the PEM key data block to a x509 buffer
 func (pemBuf PEMEncoded) DecodeToX509() (X509Encoded, error) <span class="cov8" title="1">{
         blockPub, _ := pem.Decode([]byte(pemBuf))
-        if blockPub == nil </span><span class="cov0" title="0">{
+        if blockPub == nil </span><span class="cov8" title="1">{
                 return nil, errors.New("No PEM data was found")
         }</span>
         <span class="cov8" title="1">return X509Encoded(blockPub.Bytes), nil</span>
@@ -375,9 +376,16 @@ func (pemBuf PEMEncoded) DecodeToX509() (X509Encoded, error) <span class="cov8" 
 // DigestHash data buffer
 type DigestHash []byte
 
+// NewSHA256DigestHash hashes the provided string buffer, This is a thin wrapper
+// over crypto/sha256.Sum256()
+func NewSHA256DigestHash(data string) DigestHash <span class="cov8" title="1">{
+        digest := sha256.Sum256([]byte(data))
+        return DigestHash(digest[0:])
+}</span>
+
 // Hex renders the hash digest as a hex string.
 // This is primarily for debugging and error messages.
-func (hash DigestHash) Hex() string <span class="cov0" title="0">{
+func (hash DigestHash) Hex() string <span class="cov8" title="1">{
         return hex.EncodeToString([]byte(hash))
 }</span>
 
@@ -453,7 +461,6 @@ import (
         "crypto"
         "crypto/ecdsa"
         "crypto/elliptic"
-        "crypto/sha256"
         "crypto/x509"
         "encoding/asn1"
         "fmt"
@@ -484,14 +491,6 @@ func (p *ECDSAPlugin) GenKeyPair(randReader io.Reader) (pubKey X509Encoded, priv
 // InjestPrivateKey loads a ECDSA private key from a X509Encoded buffer,
 func (p *ECDSAPlugin) InjestPrivateKey(privKey X509Encoded) (signer crypto.Signer, err error) <span class="cov0" title="0">{
         return x509.ParseECPrivateKey([]byte(privKey))
-}</span>
-
-// HashMessage respecting whatever salting is necessary, Since
-// ECDSA needs no special hashing, this is a thin wrapper over
-// crypto/sha256.Sum256()
-func (p *ECDSAPlugin) HashMessage(message string) DigestHash <span class="cov0" title="0">{
-        digest := sha256.Sum256([]byte(message))
-        return DigestHash(digest[0:])
 }</span>
 
 // VerifySignature verifies a ECDSA signature for a message digest,
@@ -541,7 +540,6 @@ type PkiSettings struct {
 type AlgorithmPlugin interface {
         GenKeyPair(randReader io.Reader) (pubKey X509Encoded, privKey X509Encoded, err error)
         InjestPrivateKey(privKey X509Encoded) (signer crypto.Signer, err error)
-        HashMessage(message string) DigestHash
         VerifySignature(sha256Hash DigestHash, binSig BinarySignature, publicKey crypto.PublicKey) (bool, error)
         GetAlgorithmName() string
 }
@@ -635,11 +633,6 @@ func (ct *CryptoTooling) GetKeys() error <span class="cov0" title="0">{
         <span class="cov0" title="0">return nil</span>
 }
 
-// HashMessage defers to the AlgPlugin to handle hashing.
-func (ct *CryptoTooling) HashMessage(msg string) DigestHash <span class="cov0" title="0">{
-        return ct.AlgPlugin.HashMessage(msg)
-}</span>
-
 // Sign is a thin wrapper over cryptoSigner.Sign() to ease
 // type conversions and dependencies.
 func (ct *CryptoTooling) Sign(digest DigestHash) (BinarySignature, error) <span class="cov0" title="0">{
@@ -659,7 +652,7 @@ func (ct *CryptoTooling) Sign(digest DigestHash) (BinarySignature, error) <span 
 // SignMessage simply sighs a hash of the message. It was added for
 // consistancy with VerifySignedMessage.
 func (ct *CryptoTooling) SignMessage(msg string) (BinarySignature, error) <span class="cov0" title="0">{
-        return ct.Sign(ct.HashMessage(msg))
+        return ct.Sign(NewSHA256DigestHash(msg))
 }</span>
 
 // VerifySignedMessage simply sighs a hash of the message. It was added for
@@ -677,7 +670,7 @@ func (ct *CryptoTooling) VerifySignedMessage(msg string, base64Sig string, pemPu
         if err != nil </span><span class="cov0" title="0">{
                 return false, err
         }</span>
-        <span class="cov0" title="0">valid, err := ct.AlgPlugin.VerifySignature(ct.HashMessage(msg), sig, genericPubKey)
+        <span class="cov0" title="0">valid, err := ct.AlgPlugin.VerifySignature(NewSHA256DigestHash(msg), sig, genericPubKey)
         if err != nil </span><span class="cov0" title="0">{
                 return false, err
         }</span>
@@ -717,14 +710,6 @@ func (p *RSAPlugin) GenKeyPair(randReader io.Reader) (pubKey X509Encoded, privKe
 // InjestPrivateKey loads a RSA private key from a X509Encoded buffer,
 func (p *RSAPlugin) InjestPrivateKey(privKey X509Encoded) (signer crypto.Signer, err error) <span class="cov0" title="0">{
         return x509.ParsePKCS1PrivateKey([]byte(privKey))
-}</span>
-
-// HashMessage respecting whatever salting is necessary, Here we
-// handle PSS salting
-func (p *RSAPlugin) HashMessage(message string) DigestHash <span class="cov0" title="0">{
-        pssh := crypto.SHA256.New()
-        pssh.Write([]byte(message))
-        return DigestHash(pssh.Sum(nil))
 }</span>
 
 // VerifySignature verifies a RSA signature for a message digest,

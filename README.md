@@ -134,5 +134,5 @@ These are areas where I would improve this project given more time:
         * A string flag where the default can be computed dynamically, or set after `flag.Parse()`
     * Reorganize what functions are in which files to make them easier to find.
     * Determine what package members should be made private, and ensure they are still fully testable
-    * Investigate if the RSA PSS padding needs its own sha256 hashing function. (If not, these should be consolidated.)
+    * ~~Investigate if the RSA PSS padding needs its own sha256 hashing function. (If not, these should be consolidated.)~~
 * Build process: Seperate `godoc` generation from `go test` so the documentation doesn't need to be generated every time the tests don't fail.

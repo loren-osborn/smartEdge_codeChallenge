@@ -141,9 +141,6 @@
 					<dd>&nbsp; &nbsp; <a href="index.html#CryptoTooling.GetKeys">func (ct *CryptoTooling) GetKeys() error</a></dd>
 				
 					
-					<dd>&nbsp; &nbsp; <a href="index.html#CryptoTooling.HashMessage">func (ct *CryptoTooling) HashMessage(msg string) DigestHash</a></dd>
-				
-					
 					<dd>&nbsp; &nbsp; <a href="index.html#CryptoTooling.Sign">func (ct *CryptoTooling) Sign(digest DigestHash) (BinarySignature, error)</a></dd>
 				
 					
@@ -155,6 +152,9 @@
 			
 				
 				<dd><a href="index.html#DigestHash">type DigestHash</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="index.html#NewSHA256DigestHash">func NewSHA256DigestHash(data string) DigestHash</a></dd>
 				
 				
 					
@@ -170,9 +170,6 @@
 				
 					
 					<dd>&nbsp; &nbsp; <a href="index.html#ECDSAPlugin.GetAlgorithmName">func (p *ECDSAPlugin) GetAlgorithmName() string</a></dd>
-				
-					
-					<dd>&nbsp; &nbsp; <a href="index.html#ECDSAPlugin.HashMessage">func (p *ECDSAPlugin) HashMessage(message string) DigestHash</a></dd>
 				
 					
 					<dd>&nbsp; &nbsp; <a href="index.html#ECDSAPlugin.InjestPrivateKey">func (p *ECDSAPlugin) InjestPrivateKey(privKey X509Encoded) (signer crypto.Signer, err error)</a></dd>
@@ -223,9 +220,6 @@
 				
 					
 					<dd>&nbsp; &nbsp; <a href="index.html#RSAPlugin.GetAlgorithmName">func (p *RSAPlugin) GetAlgorithmName() string</a></dd>
-				
-					
-					<dd>&nbsp; &nbsp; <a href="index.html#RSAPlugin.HashMessage">func (p *RSAPlugin) HashMessage(message string) DigestHash</a></dd>
 				
 					
 					<dd>&nbsp; &nbsp; <a href="index.html#RSAPlugin.InjestPrivateKey">func (p *RSAPlugin) InjestPrivateKey(privKey X509Encoded) (signer crypto.Signer, err error)</a></dd>
@@ -323,7 +317,6 @@ AlgorithmPlugin is used to encapsulate algorithm specific code.
 			<pre>type AlgorithmPlugin interface {
     GenKeyPair(randReader <a href="https://golang.org/pkg/io/">io</a>.<a href="https://golang.org/pkg/io/#Reader">Reader</a>) (pubKey <a href="index.html#X509Encoded">X509Encoded</a>, privKey <a href="index.html#X509Encoded">X509Encoded</a>, err <a href="https://golang.org/pkg/builtin/#error">error</a>)
     InjestPrivateKey(privKey <a href="index.html#X509Encoded">X509Encoded</a>) (signer <a href="https://golang.org/pkg/crypto/">crypto</a>.<a href="https://golang.org/pkg/crypto/#Signer">Signer</a>, err <a href="https://golang.org/pkg/builtin/#error">error</a>)
-    HashMessage(message <a href="https://golang.org/pkg/builtin/#string">string</a>) <a href="index.html#DigestHash">DigestHash</a>
     VerifySignature(sha256Hash <a href="index.html#DigestHash">DigestHash</a>, binSig <a href="index.html#BinarySignature">BinarySignature</a>, publicKey <a href="https://golang.org/pkg/crypto/">crypto</a>.<a href="https://golang.org/pkg/crypto/#PublicKey">PublicKey</a>) (<a href="https://golang.org/pkg/builtin/#bool">bool</a>, <a href="https://golang.org/pkg/builtin/#error">error</a>)
     GetAlgorithmName() <a href="https://golang.org/pkg/builtin/#string">string</a>
 }</pre>
@@ -342,7 +335,7 @@ AlgorithmPlugin is used to encapsulate algorithm specific code.
 		
 			
 			
-			<h2 id="BinarySignature">type <a href="https://github.com/loren-osborn/smartEdge_codeChallenge/blob/master/crypt/buffers.go#L92">BinarySignature</a>
+			<h2 id="BinarySignature">type <a href="https://github.com/loren-osborn/smartEdge_codeChallenge/blob/master/crypt/buffers.go#L100">BinarySignature</a>
 				<a class="permalink" href="index.html#BinarySignature">&#xb6;</a>
 			</h2>
 			<p>
@@ -361,7 +354,7 @@ BinarySignature data buffer
 
 			
 				
-				<h3 id="NewBinarySignatureFromBase64">func <a href="https://github.com/loren-osborn/smartEdge_codeChallenge/blob/master/crypt/buffers.go#L96">NewBinarySignatureFromBase64</a>
+				<h3 id="NewBinarySignatureFromBase64">func <a href="https://github.com/loren-osborn/smartEdge_codeChallenge/blob/master/crypt/buffers.go#L104">NewBinarySignatureFromBase64</a>
 					<a class="permalink" href="index.html#NewBinarySignatureFromBase64">&#xb6;</a>
 				</h3>
 				<pre>func NewBinarySignatureFromBase64(src <a href="https://golang.org/pkg/builtin/#string">string</a>) (<a href="index.html#BinarySignature">BinarySignature</a>, <a href="https://golang.org/pkg/builtin/#error">error</a>)</pre>
@@ -376,7 +369,7 @@ from a base64 string.
 
 			
 				
-				<h3 id="BinarySignature.Base64">func (BinarySignature) <a href="https://github.com/loren-osborn/smartEdge_codeChallenge/blob/master/crypt/buffers.go#L106">Base64</a>
+				<h3 id="BinarySignature.Base64">func (BinarySignature) <a href="https://github.com/loren-osborn/smartEdge_codeChallenge/blob/master/crypt/buffers.go#L114">Base64</a>
 					<a class="permalink" href="index.html#BinarySignature.Base64">&#xb6;</a>
 				</h3>
 				<pre>func (sig <a href="index.html#BinarySignature">BinarySignature</a>) Base64() <a href="https://golang.org/pkg/builtin/#string">string</a></pre>
@@ -392,7 +385,7 @@ encoded string.
 		
 			
 			
-			<h2 id="CryptoTooling">type <a href="https://github.com/loren-osborn/smartEdge_codeChallenge/blob/master/crypt/keys.go#L31">CryptoTooling</a>
+			<h2 id="CryptoTooling">type <a href="https://github.com/loren-osborn/smartEdge_codeChallenge/blob/master/crypt/keys.go#L30">CryptoTooling</a>
 				<a class="permalink" href="index.html#CryptoTooling">&#xb6;</a>
 			</h2>
 			<p>
@@ -418,7 +411,7 @@ CryptoTooling home to all crypto tool state.
 
 			
 				
-				<h3 id="GetCryptoTooling">func <a href="https://github.com/loren-osborn/smartEdge_codeChallenge/blob/master/crypt/keys.go#L42">GetCryptoTooling</a>
+				<h3 id="GetCryptoTooling">func <a href="https://github.com/loren-osborn/smartEdge_codeChallenge/blob/master/crypt/keys.go#L41">GetCryptoTooling</a>
 					<a class="permalink" href="index.html#GetCryptoTooling">&#xb6;</a>
 				</h3>
 				<pre>func GetCryptoTooling(d *<a href="../deps/index.html">deps</a>.<a href="../deps/index.html#Dependencies">Dependencies</a>, keySettings *<a href="index.html#PkiSettings">PkiSettings</a>) (*<a href="index.html#CryptoTooling">CryptoTooling</a>, <a href="https://golang.org/pkg/builtin/#error">error</a>)</pre>
@@ -433,7 +426,7 @@ verification lives.
 
 			
 				
-				<h3 id="CryptoTooling.GetKeys">func (*CryptoTooling) <a href="https://github.com/loren-osborn/smartEdge_codeChallenge/blob/master/crypt/keys.go#L62">GetKeys</a>
+				<h3 id="CryptoTooling.GetKeys">func (*CryptoTooling) <a href="https://github.com/loren-osborn/smartEdge_codeChallenge/blob/master/crypt/keys.go#L61">GetKeys</a>
 					<a class="permalink" href="index.html#CryptoTooling.GetKeys">&#xb6;</a>
 				</h3>
 				<pre>func (ct *<a href="index.html#CryptoTooling">CryptoTooling</a>) GetKeys() <a href="https://golang.org/pkg/builtin/#error">error</a></pre>
@@ -447,20 +440,7 @@ if necessary.
 				
 			
 				
-				<h3 id="CryptoTooling.HashMessage">func (*CryptoTooling) <a href="https://github.com/loren-osborn/smartEdge_codeChallenge/blob/master/crypt/keys.go#L120">HashMessage</a>
-					<a class="permalink" href="index.html#CryptoTooling.HashMessage">&#xb6;</a>
-				</h3>
-				<pre>func (ct *<a href="index.html#CryptoTooling">CryptoTooling</a>) HashMessage(msg <a href="https://golang.org/pkg/builtin/#string">string</a>) <a href="index.html#DigestHash">DigestHash</a></pre>
-				<p>
-HashMessage defers to the AlgPlugin to handle hashing.
-</p>
-
-				
-				
-				
-			
-				
-				<h3 id="CryptoTooling.Sign">func (*CryptoTooling) <a href="https://github.com/loren-osborn/smartEdge_codeChallenge/blob/master/crypt/keys.go#L126">Sign</a>
+				<h3 id="CryptoTooling.Sign">func (*CryptoTooling) <a href="https://github.com/loren-osborn/smartEdge_codeChallenge/blob/master/crypt/keys.go#L120">Sign</a>
 					<a class="permalink" href="index.html#CryptoTooling.Sign">&#xb6;</a>
 				</h3>
 				<pre>func (ct *<a href="index.html#CryptoTooling">CryptoTooling</a>) Sign(digest <a href="index.html#DigestHash">DigestHash</a>) (<a href="index.html#BinarySignature">BinarySignature</a>, <a href="https://golang.org/pkg/builtin/#error">error</a>)</pre>
@@ -474,7 +454,7 @@ type conversions and dependencies.
 				
 			
 				
-				<h3 id="CryptoTooling.SignMessage">func (*CryptoTooling) <a href="https://github.com/loren-osborn/smartEdge_codeChallenge/blob/master/crypt/keys.go#L142">SignMessage</a>
+				<h3 id="CryptoTooling.SignMessage">func (*CryptoTooling) <a href="https://github.com/loren-osborn/smartEdge_codeChallenge/blob/master/crypt/keys.go#L136">SignMessage</a>
 					<a class="permalink" href="index.html#CryptoTooling.SignMessage">&#xb6;</a>
 				</h3>
 				<pre>func (ct *<a href="index.html#CryptoTooling">CryptoTooling</a>) SignMessage(msg <a href="https://golang.org/pkg/builtin/#string">string</a>) (<a href="index.html#BinarySignature">BinarySignature</a>, <a href="https://golang.org/pkg/builtin/#error">error</a>)</pre>
@@ -488,7 +468,7 @@ consistancy with VerifySignedMessage.
 				
 			
 				
-				<h3 id="CryptoTooling.VerifySignedMessage">func (*CryptoTooling) <a href="https://github.com/loren-osborn/smartEdge_codeChallenge/blob/master/crypt/keys.go#L148">VerifySignedMessage</a>
+				<h3 id="CryptoTooling.VerifySignedMessage">func (*CryptoTooling) <a href="https://github.com/loren-osborn/smartEdge_codeChallenge/blob/master/crypt/keys.go#L142">VerifySignedMessage</a>
 					<a class="permalink" href="index.html#CryptoTooling.VerifySignedMessage">&#xb6;</a>
 				</h3>
 				<pre>func (ct *<a href="index.html#CryptoTooling">CryptoTooling</a>) VerifySignedMessage(msg <a href="https://golang.org/pkg/builtin/#string">string</a>, base64Sig <a href="https://golang.org/pkg/builtin/#string">string</a>, pemPubKey <a href="https://golang.org/pkg/builtin/#string">string</a>) (<a href="https://golang.org/pkg/builtin/#bool">bool</a>, <a href="https://golang.org/pkg/builtin/#error">error</a>)</pre>
@@ -504,7 +484,7 @@ consistancy with VerifySignedMessage.
 		
 			
 			
-			<h2 id="DigestHash">type <a href="https://github.com/loren-osborn/smartEdge_codeChallenge/blob/master/crypt/buffers.go#L83">DigestHash</a>
+			<h2 id="DigestHash">type <a href="https://github.com/loren-osborn/smartEdge_codeChallenge/blob/master/crypt/buffers.go#L84">DigestHash</a>
 				<a class="permalink" href="index.html#DigestHash">&#xb6;</a>
 			</h2>
 			<p>
@@ -522,10 +502,23 @@ DigestHash data buffer
 			
 
 			
+				
+				<h3 id="NewSHA256DigestHash">func <a href="https://github.com/loren-osborn/smartEdge_codeChallenge/blob/master/crypt/buffers.go#L88">NewSHA256DigestHash</a>
+					<a class="permalink" href="index.html#NewSHA256DigestHash">&#xb6;</a>
+				</h3>
+				<pre>func NewSHA256DigestHash(data <a href="https://golang.org/pkg/builtin/#string">string</a>) <a href="index.html#DigestHash">DigestHash</a></pre>
+				<p>
+NewSHA256DigestHash hashes the provided string buffer, This is a thin wrapper
+over crypto/sha256.Sum256()
+</p>
+
+				
+				
+			
 
 			
 				
-				<h3 id="DigestHash.Hex">func (DigestHash) <a href="https://github.com/loren-osborn/smartEdge_codeChallenge/blob/master/crypt/buffers.go#L87">Hex</a>
+				<h3 id="DigestHash.Hex">func (DigestHash) <a href="https://github.com/loren-osborn/smartEdge_codeChallenge/blob/master/crypt/buffers.go#L95">Hex</a>
 					<a class="permalink" href="index.html#DigestHash.Hex">&#xb6;</a>
 				</h3>
 				<pre>func (hash <a href="index.html#DigestHash">DigestHash</a>) Hex() <a href="https://golang.org/pkg/builtin/#string">string</a></pre>
@@ -541,7 +534,7 @@ This is primarily for debugging and error messages.
 		
 			
 			
-			<h2 id="ECDSAPlugin">type <a href="https://github.com/loren-osborn/smartEdge_codeChallenge/blob/master/crypt/ecdsa.go#L15">ECDSAPlugin</a>
+			<h2 id="ECDSAPlugin">type <a href="https://github.com/loren-osborn/smartEdge_codeChallenge/blob/master/crypt/ecdsa.go#L14">ECDSAPlugin</a>
 				<a class="permalink" href="index.html#ECDSAPlugin">&#xb6;</a>
 			</h2>
 			<p>
@@ -562,7 +555,7 @@ ECDSAPlugin Implementation details for ECDSA.
 
 			
 				
-				<h3 id="ECDSAPlugin.GenKeyPair">func (*ECDSAPlugin) <a href="https://github.com/loren-osborn/smartEdge_codeChallenge/blob/master/crypt/ecdsa.go#L18">GenKeyPair</a>
+				<h3 id="ECDSAPlugin.GenKeyPair">func (*ECDSAPlugin) <a href="https://github.com/loren-osborn/smartEdge_codeChallenge/blob/master/crypt/ecdsa.go#L17">GenKeyPair</a>
 					<a class="permalink" href="index.html#ECDSAPlugin.GenKeyPair">&#xb6;</a>
 				</h3>
 				<pre>func (p *<a href="index.html#ECDSAPlugin">ECDSAPlugin</a>) GenKeyPair(randReader <a href="https://golang.org/pkg/io/">io</a>.<a href="https://golang.org/pkg/io/#Reader">Reader</a>) (pubKey <a href="index.html#X509Encoded">X509Encoded</a>, privKey <a href="index.html#X509Encoded">X509Encoded</a>, err <a href="https://golang.org/pkg/builtin/#error">error</a>)</pre>
@@ -575,7 +568,7 @@ GenKeyPair generates a new ECDSA public and private key pair
 				
 			
 				
-				<h3 id="ECDSAPlugin.GetAlgorithmName">func (*ECDSAPlugin) <a href="https://github.com/loren-osborn/smartEdge_codeChallenge/blob/master/crypt/ecdsa.go#L66">GetAlgorithmName</a>
+				<h3 id="ECDSAPlugin.GetAlgorithmName">func (*ECDSAPlugin) <a href="https://github.com/loren-osborn/smartEdge_codeChallenge/blob/master/crypt/ecdsa.go#L57">GetAlgorithmName</a>
 					<a class="permalink" href="index.html#ECDSAPlugin.GetAlgorithmName">&#xb6;</a>
 				</h3>
 				<pre>func (p *<a href="index.html#ECDSAPlugin">ECDSAPlugin</a>) GetAlgorithmName() <a href="https://golang.org/pkg/builtin/#string">string</a></pre>
@@ -588,22 +581,7 @@ GetAlgorithmName returns the string &#34;ECDSA&#34;
 				
 			
 				
-				<h3 id="ECDSAPlugin.HashMessage">func (*ECDSAPlugin) <a href="https://github.com/loren-osborn/smartEdge_codeChallenge/blob/master/crypt/ecdsa.go#L43">HashMessage</a>
-					<a class="permalink" href="index.html#ECDSAPlugin.HashMessage">&#xb6;</a>
-				</h3>
-				<pre>func (p *<a href="index.html#ECDSAPlugin">ECDSAPlugin</a>) HashMessage(message <a href="https://golang.org/pkg/builtin/#string">string</a>) <a href="index.html#DigestHash">DigestHash</a></pre>
-				<p>
-HashMessage respecting whatever salting is necessary, Since
-ECDSA needs no special hashing, this is a thin wrapper over
-crypto/sha256.Sum256()
-</p>
-
-				
-				
-				
-			
-				
-				<h3 id="ECDSAPlugin.InjestPrivateKey">func (*ECDSAPlugin) <a href="https://github.com/loren-osborn/smartEdge_codeChallenge/blob/master/crypt/ecdsa.go#L36">InjestPrivateKey</a>
+				<h3 id="ECDSAPlugin.InjestPrivateKey">func (*ECDSAPlugin) <a href="https://github.com/loren-osborn/smartEdge_codeChallenge/blob/master/crypt/ecdsa.go#L35">InjestPrivateKey</a>
 					<a class="permalink" href="index.html#ECDSAPlugin.InjestPrivateKey">&#xb6;</a>
 				</h3>
 				<pre>func (p *<a href="index.html#ECDSAPlugin">ECDSAPlugin</a>) InjestPrivateKey(privKey <a href="index.html#X509Encoded">X509Encoded</a>) (signer <a href="https://golang.org/pkg/crypto/">crypto</a>.<a href="https://golang.org/pkg/crypto/#Signer">Signer</a>, err <a href="https://golang.org/pkg/builtin/#error">error</a>)</pre>
@@ -616,7 +594,7 @@ InjestPrivateKey loads a ECDSA private key from a X509Encoded buffer,
 				
 			
 				
-				<h3 id="ECDSAPlugin.VerifySignature">func (*ECDSAPlugin) <a href="https://github.com/loren-osborn/smartEdge_codeChallenge/blob/master/crypt/ecdsa.go#L49">VerifySignature</a>
+				<h3 id="ECDSAPlugin.VerifySignature">func (*ECDSAPlugin) <a href="https://github.com/loren-osborn/smartEdge_codeChallenge/blob/master/crypt/ecdsa.go#L40">VerifySignature</a>
 					<a class="permalink" href="index.html#ECDSAPlugin.VerifySignature">&#xb6;</a>
 				</h3>
 				<pre>func (p *<a href="index.html#ECDSAPlugin">ECDSAPlugin</a>) VerifySignature(sha256Hash <a href="index.html#DigestHash">DigestHash</a>, binSig <a href="index.html#BinarySignature">BinarySignature</a>, publicKey <a href="https://golang.org/pkg/crypto/">crypto</a>.<a href="https://golang.org/pkg/crypto/#PublicKey">PublicKey</a>) (<a href="https://golang.org/pkg/builtin/#bool">bool</a>, <a href="https://golang.org/pkg/builtin/#error">error</a>)</pre>
@@ -631,7 +609,7 @@ VerifySignature verifies a ECDSA signature for a message digest,
 		
 			
 			
-			<h2 id="KeyType">type <a href="https://github.com/loren-osborn/smartEdge_codeChallenge/blob/master/crypt/buffers.go#L19">KeyType</a>
+			<h2 id="KeyType">type <a href="https://github.com/loren-osborn/smartEdge_codeChallenge/blob/master/crypt/buffers.go#L20">KeyType</a>
 				<a class="permalink" href="index.html#KeyType">&#xb6;</a>
 			</h2>
 			<p>
@@ -661,7 +639,7 @@ PublicKey indicates a public key
 
 			
 				
-				<h3 id="KeyType.String">func (KeyType) <a href="https://github.com/loren-osborn/smartEdge_codeChallenge/blob/master/crypt/buffers.go#L27">String</a>
+				<h3 id="KeyType.String">func (KeyType) <a href="https://github.com/loren-osborn/smartEdge_codeChallenge/blob/master/crypt/buffers.go#L28">String</a>
 					<a class="permalink" href="index.html#KeyType.String">&#xb6;</a>
 				</h3>
 				<pre>func (t <a href="index.html#KeyType">KeyType</a>) String() <a href="https://golang.org/pkg/builtin/#string">string</a></pre>
@@ -673,7 +651,7 @@ PublicKey indicates a public key
 		
 			
 			
-			<h2 id="PEMEncoded">type <a href="https://github.com/loren-osborn/smartEdge_codeChallenge/blob/master/crypt/buffers.go#L61">PEMEncoded</a>
+			<h2 id="PEMEncoded">type <a href="https://github.com/loren-osborn/smartEdge_codeChallenge/blob/master/crypt/buffers.go#L62">PEMEncoded</a>
 				<a class="permalink" href="index.html#PEMEncoded">&#xb6;</a>
 			</h2>
 			<p>
@@ -692,7 +670,7 @@ PEMEncoded text data buffer
 
 			
 				
-				<h3 id="DecodeAndLoadKey">func <a href="https://github.com/loren-osborn/smartEdge_codeChallenge/blob/master/crypt/buffers.go#L143">DecodeAndLoadKey</a>
+				<h3 id="DecodeAndLoadKey">func <a href="https://github.com/loren-osborn/smartEdge_codeChallenge/blob/master/crypt/buffers.go#L151">DecodeAndLoadKey</a>
 					<a class="permalink" href="index.html#DecodeAndLoadKey">&#xb6;</a>
 				</h3>
 				<pre>func DecodeAndLoadKey(d *<a href="../deps/index.html">deps</a>.<a href="../deps/index.html#Dependencies">Dependencies</a>, filename <a href="https://golang.org/pkg/builtin/#string">string</a>) (<a href="index.html#PEMEncoded">PEMEncoded</a>, <a href="index.html#X509Encoded">X509Encoded</a>, <a href="https://golang.org/pkg/builtin/#error">error</a>)</pre>
@@ -705,7 +683,7 @@ x509 encoded key block. Returns PEM encoded data with key block.
 				
 			
 				
-				<h3 id="EncodeAndSaveKey">func <a href="https://github.com/loren-osborn/smartEdge_codeChallenge/blob/master/crypt/buffers.go#L118">EncodeAndSaveKey</a>
+				<h3 id="EncodeAndSaveKey">func <a href="https://github.com/loren-osborn/smartEdge_codeChallenge/blob/master/crypt/buffers.go#L126">EncodeAndSaveKey</a>
 					<a class="permalink" href="index.html#EncodeAndSaveKey">&#xb6;</a>
 				</h3>
 				<pre>func EncodeAndSaveKey(
@@ -725,7 +703,7 @@ a file. Returns the PEM encoded string data.
 				
 			
 				
-				<h3 id="NewPEMBufferFromString">func <a href="https://github.com/loren-osborn/smartEdge_codeChallenge/blob/master/crypt/buffers.go#L64">NewPEMBufferFromString</a>
+				<h3 id="NewPEMBufferFromString">func <a href="https://github.com/loren-osborn/smartEdge_codeChallenge/blob/master/crypt/buffers.go#L65">NewPEMBufferFromString</a>
 					<a class="permalink" href="index.html#NewPEMBufferFromString">&#xb6;</a>
 				</h3>
 				<pre>func NewPEMBufferFromString(src <a href="https://golang.org/pkg/builtin/#string">string</a>) <a href="index.html#PEMEncoded">PEMEncoded</a></pre>
@@ -739,7 +717,7 @@ NewPEMBufferFromString turns a string into a PEM buffer.
 
 			
 				
-				<h3 id="PEMEncoded.DecodeToX509">func (PEMEncoded) <a href="https://github.com/loren-osborn/smartEdge_codeChallenge/blob/master/crypt/buffers.go#L74">DecodeToX509</a>
+				<h3 id="PEMEncoded.DecodeToX509">func (PEMEncoded) <a href="https://github.com/loren-osborn/smartEdge_codeChallenge/blob/master/crypt/buffers.go#L75">DecodeToX509</a>
 					<a class="permalink" href="index.html#PEMEncoded.DecodeToX509">&#xb6;</a>
 				</h3>
 				<pre>func (pemBuf <a href="index.html#PEMEncoded">PEMEncoded</a>) DecodeToX509() (<a href="index.html#X509Encoded">X509Encoded</a>, <a href="https://golang.org/pkg/builtin/#error">error</a>)</pre>
@@ -752,7 +730,7 @@ DecodeToX509 decodes the PEM key data block to a x509 buffer
 				
 			
 				
-				<h3 id="PEMEncoded.String">func (PEMEncoded) <a href="https://github.com/loren-osborn/smartEdge_codeChallenge/blob/master/crypt/buffers.go#L69">String</a>
+				<h3 id="PEMEncoded.String">func (PEMEncoded) <a href="https://github.com/loren-osborn/smartEdge_codeChallenge/blob/master/crypt/buffers.go#L70">String</a>
 					<a class="permalink" href="index.html#PEMEncoded.String">&#xb6;</a>
 				</h3>
 				<pre>func (pemBuf <a href="index.html#PEMEncoded">PEMEncoded</a>) String() <a href="https://golang.org/pkg/builtin/#string">string</a></pre>
@@ -831,26 +809,12 @@ GenKeyPair generates a new RSA public and private key pair
 				
 			
 				
-				<h3 id="RSAPlugin.GetAlgorithmName">func (*RSAPlugin) <a href="https://github.com/loren-osborn/smartEdge_codeChallenge/blob/master/crypt/rsa.go#L64">GetAlgorithmName</a>
+				<h3 id="RSAPlugin.GetAlgorithmName">func (*RSAPlugin) <a href="https://github.com/loren-osborn/smartEdge_codeChallenge/blob/master/crypt/rsa.go#L56">GetAlgorithmName</a>
 					<a class="permalink" href="index.html#RSAPlugin.GetAlgorithmName">&#xb6;</a>
 				</h3>
 				<pre>func (p *<a href="index.html#RSAPlugin">RSAPlugin</a>) GetAlgorithmName() <a href="https://golang.org/pkg/builtin/#string">string</a></pre>
 				<p>
 GetAlgorithmName returns the string &#34;RSA&#34;
-</p>
-
-				
-				
-				
-			
-				
-				<h3 id="RSAPlugin.HashMessage">func (*RSAPlugin) <a href="https://github.com/loren-osborn/smartEdge_codeChallenge/blob/master/crypt/rsa.go#L37">HashMessage</a>
-					<a class="permalink" href="index.html#RSAPlugin.HashMessage">&#xb6;</a>
-				</h3>
-				<pre>func (p *<a href="index.html#RSAPlugin">RSAPlugin</a>) HashMessage(message <a href="https://golang.org/pkg/builtin/#string">string</a>) <a href="index.html#DigestHash">DigestHash</a></pre>
-				<p>
-HashMessage respecting whatever salting is necessary, Here we
-handle PSS salting
 </p>
 
 				
@@ -871,7 +835,7 @@ InjestPrivateKey loads a RSA private key from a X509Encoded buffer,
 				
 			
 				
-				<h3 id="RSAPlugin.VerifySignature">func (*RSAPlugin) <a href="https://github.com/loren-osborn/smartEdge_codeChallenge/blob/master/crypt/rsa.go#L44">VerifySignature</a>
+				<h3 id="RSAPlugin.VerifySignature">func (*RSAPlugin) <a href="https://github.com/loren-osborn/smartEdge_codeChallenge/blob/master/crypt/rsa.go#L36">VerifySignature</a>
 					<a class="permalink" href="index.html#RSAPlugin.VerifySignature">&#xb6;</a>
 				</h3>
 				<pre>func (p *<a href="index.html#RSAPlugin">RSAPlugin</a>) VerifySignature(sha256Hash <a href="index.html#DigestHash">DigestHash</a>, binSig <a href="index.html#BinarySignature">BinarySignature</a>, publicKey <a href="https://golang.org/pkg/crypto/">crypto</a>.<a href="https://golang.org/pkg/crypto/#PublicKey">PublicKey</a>) (<a href="https://golang.org/pkg/builtin/#bool">bool</a>, <a href="https://golang.org/pkg/builtin/#error">error</a>)</pre>
@@ -886,7 +850,7 @@ VerifySignature verifies a RSA signature for a message digest,
 		
 			
 			
-			<h2 id="X509Encoded">type <a href="https://github.com/loren-osborn/smartEdge_codeChallenge/blob/master/crypt/buffers.go#L40">X509Encoded</a>
+			<h2 id="X509Encoded">type <a href="https://github.com/loren-osborn/smartEdge_codeChallenge/blob/master/crypt/buffers.go#L41">X509Encoded</a>
 				<a class="permalink" href="index.html#X509Encoded">&#xb6;</a>
 			</h2>
 			<p>
@@ -907,7 +871,7 @@ X509Encoded data buffer
 
 			
 				
-				<h3 id="X509Encoded.AsGenericPublicKey">func (X509Encoded) <a href="https://github.com/loren-osborn/smartEdge_codeChallenge/blob/master/crypt/buffers.go#L52">AsGenericPublicKey</a>
+				<h3 id="X509Encoded.AsGenericPublicKey">func (X509Encoded) <a href="https://github.com/loren-osborn/smartEdge_codeChallenge/blob/master/crypt/buffers.go#L53">AsGenericPublicKey</a>
 					<a class="permalink" href="index.html#X509Encoded.AsGenericPublicKey">&#xb6;</a>
 				</h3>
 				<pre>func (x <a href="index.html#X509Encoded">X509Encoded</a>) AsGenericPublicKey() (<a href="https://golang.org/pkg/crypto/">crypto</a>.<a href="https://golang.org/pkg/crypto/#PublicKey">PublicKey</a>, <a href="https://golang.org/pkg/builtin/#error">error</a>)</pre>
@@ -920,7 +884,7 @@ AsGenericPublicKey decodes the public key (if it is one)
 				
 			
 				
-				<h3 id="X509Encoded.EncodeToPEM">func (X509Encoded) <a href="https://github.com/loren-osborn/smartEdge_codeChallenge/blob/master/crypt/buffers.go#L43">EncodeToPEM</a>
+				<h3 id="X509Encoded.EncodeToPEM">func (X509Encoded) <a href="https://github.com/loren-osborn/smartEdge_codeChallenge/blob/master/crypt/buffers.go#L44">EncodeToPEM</a>
 					<a class="permalink" href="index.html#X509Encoded.EncodeToPEM">&#xb6;</a>
 				</h3>
 				<pre>func (x <a href="index.html#X509Encoded">X509Encoded</a>) EncodeToPEM(algorithm <a href="https://golang.org/pkg/builtin/#string">string</a>, kt <a href="index.html#KeyType">KeyType</a>) <a href="index.html#PEMEncoded">PEMEncoded</a></pre>
