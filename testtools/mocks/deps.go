@@ -159,6 +159,39 @@ func (mdb *MockDepsBundle) InvokeCallInMockedEnv(wrapped func() error) (outErr e
 	return mdb.exitHarness.InvokeCallThatMightExit(wrapped)
 }
 
+// generateMappingFuncs generates funcs to map between real and mocked
+// filesystem paths.
+func (mdb *MockDepsBundle) generateMappingFuncs(fakeRootPath string) (func(string) (string, error), func(string) (string, error)) {
+	mapPathIn := func(path string) (string, error) {
+		if path == "" {
+			return "", errors.New("path must not be empty")
+		}
+		if filepath.IsAbs(path) {
+			return filepath.Join(fakeRootPath, path), nil
+		}
+		return path, nil
+	}
+	mapPathOut := func(path string) (string, error) {
+		if path == "" {
+			return "", errors.New("path must not be empty")
+		}
+		if !filepath.IsAbs(path) {
+			return path, nil
+		}
+		cleanFakeRoot := filepath.Clean(fakeRootPath)
+		cleanPath := filepath.Clean(path)
+		if cleanFakeRoot == cleanPath {
+			return "/", nil
+		}
+		cleanFakeRoot = fmt.Sprintf("%s/", cleanFakeRoot)
+		if (len(cleanPath) < len(cleanFakeRoot)) || (cleanPath[0:len(cleanFakeRoot)] != cleanFakeRoot) {
+			return "", fmt.Errorf("File %#v not inside fake root %#v when trying to map it outside", cleanPath, cleanFakeRoot)
+		}
+		return cleanPath[len(cleanFakeRoot)-1:], nil
+	}
+	return mapPathIn, mapPathOut
+}
+
 // setupFakeFilesystem sertup creation and teardown of fake filesystem.
 func (mdb *MockDepsBundle) setupFakeFilesystem() (func(error) error, error) {
 	// no-op cleanup func
@@ -166,7 +199,7 @@ func (mdb *MockDepsBundle) setupFakeFilesystem() (func(error) error, error) {
 		return err
 	}
 	var err error
-	mdb.prevCwd, err = os.Getwd()
+	mdb.prevCwd, err = mdb.NativeDeps.Os.Getwd()
 	if err != nil {
 		return cleanupFunc, err
 	}
@@ -180,21 +213,7 @@ func (mdb *MockDepsBundle) setupFakeFilesystem() (func(error) error, error) {
 	if err != nil {
 		return cleanupFunc, err
 	}
-	mdb.MapPathIn = func(path string) (string, error) {
-		return filepath.Join(fakeRootPath, path), nil
-	}
-	mdb.MapPathOut = func(path string) (string, error) {
-		cleanFakeRoot := filepath.Clean(fakeRootPath)
-		cleanPath := filepath.Clean(path)
-		if cleanFakeRoot == cleanPath {
-			return "/", nil
-		}
-		cleanFakeRoot = fmt.Sprintf("%s/", cleanFakeRoot)
-		if (len(cleanPath) < len(cleanFakeRoot)) || (cleanPath[0:len(cleanFakeRoot)] != cleanFakeRoot) {
-			return "", fmt.Errorf("File %#v not inside fake root %#v when trying to map it outside", cleanPath, cleanFakeRoot)
-		}
-		return cleanPath[len(cleanFakeRoot)-1:], nil
-	}
+	mdb.MapPathIn, mdb.MapPathOut = mdb.generateMappingFuncs(fakeRootPath)
 	mdb.populatePathMappingMocks()
 	// Populate fake file system
 	mdb.hiddenFiles = mdb.Files

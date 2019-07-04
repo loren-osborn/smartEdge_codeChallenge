@@ -44,6 +44,9 @@ func WriteDirAndFile(d *deps.Dependencies, filename string, data []byte, filePer
 		userID := ids[0]
 		groupID := ids[1]
 		maxDirDepth := strings.Count(filename, string(os.PathSeparator))
+		if maxDirDepth < 3 {
+			maxDirDepth = 3
+		}
 		filesToChown := make([]string, 1, maxDirDepth)
 		filesToChown[0] = filename
 		for parent := filepath.Dir(filename); (len(parent) > len(string(os.PathSeparator))) && !FileExists(d, parent); parent = filepath.Dir(parent) {

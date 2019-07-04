@@ -146,9 +146,9 @@ func EncodeAndSaveKey(
 	return pemEncodedKey, nil
 }
 
-// DecodeAndLoadKey loads PEM encoded file and decodes it into a
+// LoadAndDecodeKey loads PEM encoded file and decodes it into a
 // x509 encoded key block. Returns PEM encoded data with key block.
-func DecodeAndLoadKey(d *deps.Dependencies, filename string) (PEMEncoded, X509Encoded, error) {
+func LoadAndDecodeKey(d *deps.Dependencies, filename string) (PEMEncoded, X509Encoded, error) {
 	pemEncodedKey, err := d.Io.Ioutil.ReadFile(filename)
 	if err != nil {
 		return nil, nil, err

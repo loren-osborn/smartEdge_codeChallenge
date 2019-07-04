@@ -364,6 +364,22 @@ func AreFakeFileSystemsEqual(a map[string]*string, b map[string]*string) bool {
 	return true
 }
 
+// CloneFakeFileSystemsEqual makes a deep clone of the map.
+func CloneFakeFileSystemsEqual(orig map[string]*string) map[string]*string {
+	if orig == nil {
+		return nil
+	}
+	result := make(map[string]*string, len(orig))
+	for key, val := range orig {
+		if val == nil {
+			result[key] = nil
+		} else {
+			result[key] = StringPtr(*val)
+		}
+	}
+	return result
+}
+
 // DummyFileInfo a mock for a os.FileInfo interface.
 type DummyFileInfo struct {
 	NameVal    string

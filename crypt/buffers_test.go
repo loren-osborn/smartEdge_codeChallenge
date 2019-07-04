@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"github.com/smartedge/codechallenge/crypt"
 	"github.com/smartedge/codechallenge/testtools"
+	"github.com/smartedge/codechallenge/testtools/mocks"
+	"os"
 	"strings"
 	"testing"
 )
@@ -60,6 +62,14 @@ func TestX509EncodedEncodeToPEM(t *testing.T) {
 			Expected: "-----BEGIN BAR PUBLIC KEY-----\n" +
 				"WFlaOTg3NjU0MzIxMA==\n" +
 				"-----END BAR PUBLIC KEY-----\n",
+		},
+		{
+			Data:          "\x00\xff\x11\xee\x33\xcc\x77\x88",
+			AlgorithmName: "hot crossed buns",
+			Type:          crypt.PrivateKey,
+			Expected: "-----BEGIN HOT CROSSED BUNS PRIVATE KEY-----\n" +
+				"AP8R7jPMd4g=\n" +
+				"-----END HOT CROSSED BUNS PRIVATE KEY-----\n",
 		},
 	} {
 		t.Run(fmt.Sprintf("Subtest: %d", i+1), func(tt *testing.T) {
@@ -296,6 +306,176 @@ func TestBinarySignature(t *testing.T) {
 					[]byte(tc.ExpectedData),
 					tc.Base64Input,
 					binSig.Base64())
+			}
+		})
+	}
+}
+
+// TestEncodeAndSaveKey tests EncodeAndSaveKey().
+func TestEncodeAndSaveKey(t *testing.T) {
+	for _, tc := range []struct {
+		desc                    string
+		x509Data                string
+		algorithmName           string
+		keyType                 crypt.KeyType
+		filename                string
+		fileMode                os.FileMode
+		expectedPEMKey          string
+		expectedError           *testtools.ErrorSpec
+		expectedFileSystemState map[string]*string
+	}{
+		{
+			desc:          "Basic example",
+			x509Data:      "1234567890abcdefghijklmnopqrstuvwxyz",
+			algorithmName: "charset",
+			keyType:       crypt.PrivateKey,
+			filename:      "charset_priv.key",
+			fileMode:      0600,
+			expectedPEMKey: "-----BEGIN CHARSET PRIVATE KEY-----\n" +
+				"MTIzNDU2Nzg5MGFiY2RlZmdoaWprbG1ub3BxcnN0dXZ3eHl6\n" +
+				"-----END CHARSET PRIVATE KEY-----\n",
+			expectedError: nil,
+			expectedFileSystemState: map[string]*string{
+				"/home/user/charset_priv.key": testtools.StringPtr("-----BEGIN CHARSET PRIVATE KEY-----\n" +
+					"MTIzNDU2Nzg5MGFiY2RlZmdoaWprbG1ub3BxcnN0dXZ3eHl6\n" +
+					"-----END CHARSET PRIVATE KEY-----\n"),
+			},
+		},
+		{
+			desc:           "Error writing file",
+			x509Data:       "do re mi fa so la ti do",
+			algorithmName:  "notes",
+			keyType:        crypt.PublicKey,
+			filename:       "",
+			fileMode:       0644,
+			expectedPEMKey: "",
+			expectedError: &testtools.ErrorSpec{
+				Type:    "*errors.errorString",
+				Message: "path must not be empty",
+			},
+			expectedFileSystemState: map[string]*string{
+				"/home/user": nil,
+			},
+		},
+	} {
+		t.Run(fmt.Sprintf("Subtest: %s", tc.desc), func(tt *testing.T) {
+			mockDepsBundle := mocks.NewDefaultMockDeps("", []string{"progname"}, "/home/user", nil)
+			returnedNormally := false
+			actualPEMBuf, actualErr := crypt.PEMEncoded(nil), error(nil)
+			err := mockDepsBundle.InvokeCallInMockedEnv(func() error {
+				actualPEMBuf, actualErr = crypt.EncodeAndSaveKey(mockDepsBundle.Deps,
+					crypt.X509Encoded([]byte(tc.x509Data)),
+					tc.algorithmName,
+					tc.keyType,
+					tc.filename,
+					tc.fileMode)
+				returnedNormally = true
+				return nil
+			})
+			if err != nil {
+				tt.Errorf("Unexpected error calling mockDepsBundle.InvokeCallInMockedEnv(): %s", err.Error())
+			}
+			if exitStatus := mockDepsBundle.GetExitStatus(); (exitStatus != 0) || !returnedNormally {
+				tt.Error("EncodeAndSaveKey() should not have paniced or called os.Exit.")
+			}
+			if (mockDepsBundle.OutBuf.String() != "") || (mockDepsBundle.ErrBuf.String() != "") {
+				tt.Errorf("EncodeAndSaveKey() should not have output any data. Saw stdout:\n%s\nstderr:\n%s", mockDepsBundle.OutBuf.String(), mockDepsBundle.ErrBuf.String())
+			}
+			if string(actualPEMBuf) != tc.expectedPEMKey {
+				tt.Errorf("EncodeAndSaveKey() did not return correct PEM buffer content. Expected:\n[]byte(%#v)\nActual:\n[]byte(%#v)", tc.expectedPEMKey, string(actualPEMBuf))
+			}
+			if err := tc.expectedError.EnsureMatches(actualErr); err != nil {
+				tt.Error(err.Error())
+			}
+			if !testtools.AreFakeFileSystemsEqual(tc.expectedFileSystemState, *mockDepsBundle.Files) {
+				tt.Errorf("Unexpected final filesystem state. Expected:\n%#v\nActual:\n%#v", tc.expectedFileSystemState, *mockDepsBundle.Files)
+			}
+		})
+	}
+}
+
+// TestLoadAndDecodeKey tests LoadAndDecodeKey().
+func TestLoadAndDecodeKey(t *testing.T) {
+	for _, tc := range []struct {
+		desc             string
+		fileSystemState  map[string]*string
+		filename         string
+		expectedPEMKey   string
+		expectedX509Data string
+		expectedError    *testtools.ErrorSpec
+	}{
+		{
+			desc: "Basic example",
+			fileSystemState: map[string]*string{
+				"/home/user/charset_priv.key": testtools.StringPtr("-----BEGIN CHARSET PRIVATE KEY-----\n" +
+					"MTIzNDU2Nzg5MGFiY2RlZmdoaWprbG1ub3BxcnN0dXZ3eHl6\n" +
+					"-----END CHARSET PRIVATE KEY-----\n"),
+			},
+			filename: "charset_priv.key",
+			expectedPEMKey: "-----BEGIN CHARSET PRIVATE KEY-----\n" +
+				"MTIzNDU2Nzg5MGFiY2RlZmdoaWprbG1ub3BxcnN0dXZ3eHl6\n" +
+				"-----END CHARSET PRIVATE KEY-----\n",
+			expectedX509Data: "1234567890abcdefghijklmnopqrstuvwxyz",
+			expectedError:    nil,
+		},
+		{
+			desc: "Missing file",
+			fileSystemState: map[string]*string{
+				"/home/user": nil,
+			},
+			filename:         "charset_priv.key",
+			expectedPEMKey:   "",
+			expectedX509Data: "",
+			expectedError: &testtools.ErrorSpec{
+				Type:    "*os.PathError",
+				Message: "open charset_priv.key: no such file or directory",
+			},
+		},
+		{
+			desc: "no PEM data",
+			fileSystemState: map[string]*string{
+				"/home/user/charset_priv.key": testtools.StringPtr("fred flintstone\n"),
+			},
+			filename:         "charset_priv.key",
+			expectedPEMKey:   "",
+			expectedX509Data: "",
+			expectedError: &testtools.ErrorSpec{
+				Type:    "*errors.errorString",
+				Message: "No PEM data was found",
+			},
+		},
+	} {
+		t.Run(fmt.Sprintf("Subtest: %s", tc.desc), func(tt *testing.T) {
+			curFileSysState := testtools.CloneFakeFileSystemsEqual(tc.fileSystemState)
+			mockDepsBundle := mocks.NewDefaultMockDeps("", []string{"progname"}, "/home/user", &curFileSysState)
+			returnedNormally := false
+			actualPEMBuf, actualX509Buf, actualErr := crypt.PEMEncoded(nil), crypt.X509Encoded(nil), error(nil)
+			err := mockDepsBundle.InvokeCallInMockedEnv(func() error {
+				actualPEMBuf, actualX509Buf, actualErr = crypt.LoadAndDecodeKey(mockDepsBundle.Deps,
+					tc.filename)
+				returnedNormally = true
+				return nil
+			})
+			if err != nil {
+				tt.Errorf("Unexpected error calling mockDepsBundle.InvokeCallInMockedEnv(): %s", err.Error())
+			}
+			if exitStatus := mockDepsBundle.GetExitStatus(); (exitStatus != 0) || !returnedNormally {
+				tt.Error("EncodeAndSaveKey() should not have paniced or called os.Exit.")
+			}
+			if (mockDepsBundle.OutBuf.String() != "") || (mockDepsBundle.ErrBuf.String() != "") {
+				tt.Errorf("EncodeAndSaveKey() should not have output any data. Saw stdout:\n%s\nstderr:\n%s", mockDepsBundle.OutBuf.String(), mockDepsBundle.ErrBuf.String())
+			}
+			if string(actualPEMBuf) != tc.expectedPEMKey {
+				tt.Errorf("EncodeAndSaveKey() did not return correct PEM buffer content. Expected:\n[]byte(%#v)\nActual:\n[]byte(%#v)", tc.expectedPEMKey, string(actualPEMBuf))
+			}
+			if string(actualX509Buf) != tc.expectedX509Data {
+				tt.Errorf("EncodeAndSaveKey() did not return correct x509 buffer content. Expected:\n[]byte(%#v)\nActual:\n[]byte(%#v)", tc.expectedX509Data, string(actualX509Buf))
+			}
+			if err := tc.expectedError.EnsureMatches(actualErr); err != nil {
+				tt.Error(err.Error())
+			}
+			if !testtools.AreFakeFileSystemsEqual(tc.fileSystemState, *mockDepsBundle.Files) {
+				tt.Errorf("Unexpected change in filesystem state. Expected:\n%#v\nActual:\n%#v", tc.fileSystemState, *mockDepsBundle.Files)
 			}
 		})
 	}

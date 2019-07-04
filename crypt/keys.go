@@ -76,7 +76,7 @@ func (ct *CryptoTooling) GetKeys() error {
 			return err
 		}
 	}
-	pemPrivKey, x509PrivKey, err := DecodeAndLoadKey(ct.D, ct.Settings.PrivateKeyPath)
+	pemPrivKey, x509PrivKey, err := LoadAndDecodeKey(ct.D, ct.Settings.PrivateKeyPath)
 	if err != nil {
 		return err
 	}
@@ -92,7 +92,7 @@ func (ct *CryptoTooling) GetKeys() error {
 	} else {
 		ct.PrivKey = pemPrivKey
 	}
-	pemPubKey, _, err := DecodeAndLoadKey(ct.D, ct.Settings.PublicKeyPath)
+	pemPubKey, _, err := LoadAndDecodeKey(ct.D, ct.Settings.PublicKeyPath)
 	if err != nil {
 		return err
 	}
