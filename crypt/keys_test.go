@@ -533,3 +533,334 @@ func TestPopulateKeys(t *testing.T) {
 		})
 	}
 }
+
+// TestSignMessage tests SignMessage().
+func TestSignMessage(t *testing.T) {
+	for _, tc := range []struct {
+		desc            string
+		settings        *crypt.PkiSettings
+		fileSystemState testtools.FakeFileSystem
+		setup           func(mdb *mocks.MockDepsBundle, setupDone *bool) error
+		messageToSign   string
+		expectedError   *testtools.ErrorSpec
+	}{
+		{
+			desc: "ecdsa",
+			settings: &crypt.PkiSettings{
+				Algorithm:      x509.ECDSA,
+				PrivateKeyPath: ".prog/ecdsa_priv.key",
+				PublicKeyPath:  ".prog/ecdsa.pub",
+			},
+			fileSystemState: nil,
+			setup: func(mdb *mocks.MockDepsBundle, setupDone *bool) error {
+				return nil
+			},
+			messageToSign: "This is a test message",
+			expectedError: nil,
+		},
+		{
+			desc: "rsa",
+			settings: &crypt.PkiSettings{
+				Algorithm:      x509.RSA,
+				RSAKeyBits:     2048,
+				PrivateKeyPath: ".prog/rsa_priv.key",
+				PublicKeyPath:  ".prog/rsa.pub",
+			},
+			fileSystemState: nil,
+			setup: func(mdb *mocks.MockDepsBundle, setupDone *bool) error {
+				return nil
+			},
+			messageToSign: "This is a different test message",
+			expectedError: nil,
+		},
+		{
+			desc: "signing failure",
+			settings: &crypt.PkiSettings{
+				Algorithm:      x509.ECDSA,
+				PrivateKeyPath: ".prog/ecdsa_priv.key",
+				PublicKeyPath:  ".prog/ecdsa.pub",
+			},
+			fileSystemState: nil,
+			setup: func(mdb *mocks.MockDepsBundle, setupDone *bool) error {
+				origCryptoRandReader := mdb.Deps.Crypto.Rand.Reader
+				mdb.Deps.Crypto.Rand.Reader = testtools.ReaderFunc(func(p []byte) (n int, err error) {
+					if *setupDone {
+						return 0, errors.New("Fake I/O Error")
+					}
+					return origCryptoRandReader.Read(p)
+				})
+				return nil
+			},
+			messageToSign: "some other message",
+			expectedError: &testtools.ErrorSpec{
+				Type:    "*errors.errorString",
+				Message: "Fake I/O Error",
+			},
+		},
+	} {
+		t.Run(fmt.Sprintf("Subtest: %s", tc.desc), func(tt *testing.T) {
+			curFileSysState := tc.fileSystemState.Clone()
+			mockDepsBundle := mocks.NewDefaultMockDeps("", []string{"progname"}, "/home/user", &curFileSysState)
+			returnedNormally := false
+			var tooling *crypt.CryptoTooling
+			var actualErr error
+			var actualBinSignature crypt.BinarySignature
+			err := mockDepsBundle.InvokeCallInMockedEnv(func() error {
+				setupComplete := false
+				innerErr := tc.setup(mockDepsBundle, &setupComplete)
+				if innerErr != nil {
+					return innerErr
+				}
+				var toolingErr error
+				tooling, toolingErr = crypt.GetCryptoTooling(mockDepsBundle.Deps, tc.settings)
+				if toolingErr != nil {
+					return toolingErr
+				}
+				popKeysErr := tooling.PopulateKeys()
+				if popKeysErr != nil {
+					return popKeysErr
+				}
+				setupComplete = true
+				actualBinSignature, actualErr = tooling.SignMessage(tc.messageToSign)
+				returnedNormally = true
+				return nil
+			})
+			if err != nil {
+				tt.Errorf("Unexpected error calling mockDepsBundle.InvokeCallInMockedEnv(): %s", err.Error())
+			}
+			if exitStatus := mockDepsBundle.GetExitStatus(); (exitStatus != 0) || !returnedNormally {
+				tt.Error("EncodeAndSaveKey() should not have paniced or called os.Exit.")
+			}
+			if (mockDepsBundle.OutBuf.String() != "") || (mockDepsBundle.ErrBuf.String() != "") {
+				tt.Errorf("EncodeAndSaveKey() should not have output any data. Saw stdout:\n%s\nstderr:\n%s", mockDepsBundle.OutBuf.String(), mockDepsBundle.ErrBuf.String())
+			}
+			if err := tc.expectedError.EnsureMatches(actualErr); err != nil {
+				tt.Error(err.Error())
+			}
+			if tc.expectedError == nil {
+				expectedFileSysState := tc.fileSystemState.Clone()
+				if expectedFileSysState == nil {
+					expectedFileSysState = make(testtools.FakeFileSystem, 2)
+				}
+				expectedFileSysState[filepath.Join("/home/user", tc.settings.PrivateKeyPath)] = testtools.StringPtr(tooling.PrivKey.String())
+				expectedFileSysState[filepath.Join("/home/user", tc.settings.PublicKeyPath)] = testtools.StringPtr(tooling.PubKey.String())
+				if !expectedFileSysState.IsEqualTo(*mockDepsBundle.Files) {
+					tt.Errorf("Unexpected change in filesystem state. Expected:\n%s\nActual:\n%s", expectedFileSysState.String(), mockDepsBundle.Files.String())
+				}
+				valid, verifyErr := tooling.VerifySignedMessage(tc.messageToSign, actualBinSignature.Base64(), tooling.PubKey.String())
+				if verifyErr != nil {
+					tt.Errorf("Unexpected error validating signature: %s", verifyErr.Error())
+				}
+				if !valid {
+					tt.Error("Signature not valid")
+				}
+			}
+		})
+	}
+}
+
+// TestVerifySignedMessage tests VerifySignedMessage() error conditions.
+// Happy path was already tested above.
+func TestVerifySignedMessage(t *testing.T) {
+	for _, tc := range []struct {
+		desc             string
+		settings         *crypt.PkiSettings
+		setup            func(mdb *mocks.MockDepsBundle, setupDone *bool) error
+		messageToSign    string
+		base64Signature  string
+		PEMPublicKey     string
+		expectedError    *testtools.ErrorSpec
+		expectedValidity bool
+	}{
+		{
+			desc: "invalid base64 signature",
+			settings: &crypt.PkiSettings{
+				Algorithm:      x509.ECDSA,
+				PrivateKeyPath: ".prog/ecdsa_priv.key",
+				PublicKeyPath:  ".prog/ecdsa.pub",
+			},
+			setup: func(mdb *mocks.MockDepsBundle, setupDone *bool) error {
+				return nil
+			},
+			messageToSign:   "some other message",
+			base64Signature: "@#$^&*()_",
+			PEMPublicKey:    "",
+			expectedError: &testtools.ErrorSpec{
+				Type:    "base64.CorruptInputError",
+				Message: "illegal base64 data at input byte 0",
+			},
+			expectedValidity: false,
+		},
+		{
+			desc: "empty PEM key",
+			settings: &crypt.PkiSettings{
+				Algorithm:      x509.ECDSA,
+				PrivateKeyPath: ".prog/ecdsa_priv.key",
+				PublicKeyPath:  ".prog/ecdsa.pub",
+			},
+			setup: func(mdb *mocks.MockDepsBundle, setupDone *bool) error {
+				return nil
+			},
+			messageToSign:   "some other message",
+			base64Signature: "abcdefgh",
+			PEMPublicKey:    "",
+			expectedError: &testtools.ErrorSpec{
+				Type:    "*errors.errorString",
+				Message: "No PEM data was found",
+			},
+			expectedValidity: false,
+		},
+		{
+			desc: "bad key data",
+			settings: &crypt.PkiSettings{
+				Algorithm:      x509.ECDSA,
+				PrivateKeyPath: ".prog/ecdsa_priv.key",
+				PublicKeyPath:  ".prog/ecdsa.pub",
+			},
+			setup: func(mdb *mocks.MockDepsBundle, setupDone *bool) error {
+				return nil
+			},
+			messageToSign:   "some other message",
+			base64Signature: "abcdefgh",
+			PEMPublicKey: "-----BEGIN INVALID DATA-----\n" +
+				"MTIzNDU2Nzg5MGFiY2RlZmdoaWprbG1ub3BxcnN0dXZ3eHl6\n" +
+				"-----END INVALID DATA-----\n",
+			expectedError: &testtools.ErrorSpec{
+				Type: "asn1.StructuralError",
+				Message: "asn1: structure " +
+					"error: tags don't match (16 vs {class:0 " +
+					"tag:17 " +
+					"length:50 " +
+					"isCompound:true}) {optional:false " +
+					"explicit:false " +
+					"application:false " +
+					"defaultValue:<nil> " +
+					"tag:<nil> " +
+					"stringType:0 " +
+					"timeType:0 " +
+					"set:false " +
+					"omitEmpty:false} publicKeyInfo @2",
+			},
+			expectedValidity: false,
+		},
+		{
+			desc: "invalid signature",
+			settings: &crypt.PkiSettings{
+				Algorithm:      x509.ECDSA,
+				PrivateKeyPath: ".prog/ecdsa_priv.key",
+				PublicKeyPath:  ".prog/ecdsa.pub",
+			},
+			setup: func(mdb *mocks.MockDepsBundle, setupDone *bool) error {
+				return nil
+			},
+			messageToSign:   "some other message",
+			base64Signature: "abcdefgh",
+			PEMPublicKey: "-----BEGIN ECDSA PUBLIC KEY-----\n" +
+				"MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAE7WzVjtn9Gk+WHr5xbv8XMvooqU25\n" +
+				"BhgNjZ/vHZLBdVtCOjk4KxjS1UBfQm0c3TRxWBl3hj2AmnJbCrnGofMHBQ==\n" +
+				"-----END ECDSA PUBLIC KEY-----\n",
+			expectedError: &testtools.ErrorSpec{
+				Type:    "asn1.SyntaxError",
+				Message: "asn1: syntax error: truncated tag or length",
+			},
+			expectedValidity: false,
+		},
+		{
+			desc: "ecdsa key for rsa mode",
+			settings: &crypt.PkiSettings{
+				Algorithm:      x509.RSA,
+				PrivateKeyPath: ".prog/ecdsa_priv.key",
+				PublicKeyPath:  ".prog/ecdsa.pub",
+			},
+			setup: func(mdb *mocks.MockDepsBundle, setupDone *bool) error {
+				return nil
+			},
+			messageToSign:   "some other message",
+			base64Signature: "N3SuIdWI7XlXDteTmcOZUd2OBacyUWY+/+A8SC4QUBz9rXnldBqXha6YyGwnTuizxuy6quQ2QDFdtW16dj7EQk3lozfngskyhc2r86q3AUbdFDvrQVphMQhzsgBhHVoMjCL/YRfvtzCTWhBxegjVMLraLDCBb8IZTIqcMYafYyeJTvAnjBuntlZ+14TDuTt14Uqz85T04CXxBEqlIXMMKpTc01ST4Jsxz5HLO+At1htXp5eHOUFtQSilm3G7iO8ynhgPcXHDWfMAWu6VySUoHWCG70pJaCq6ehF7223t0UFOCqAyDyyQyP9yeUHj8F75SPSxfJm8iKXGx2LND/qLYw==",
+			PEMPublicKey: "-----BEGIN RSA PUBLIC KEY-----\n" +
+				"MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAE7WzVjtn9Gk+WHr5xbv8XMvooqU25\n" +
+				"BhgNjZ/vHZLBdVtCOjk4KxjS1UBfQm0c3TRxWBl3hj2AmnJbCrnGofMHBQ==\n" +
+				"-----END RSA PUBLIC KEY-----\n",
+			expectedError: &testtools.ErrorSpec{
+				Type:    "*errors.errorString",
+				Message: "Expecting a *rsa.PublicKey, but encountered a *ecdsa.PublicKey instead",
+			},
+			expectedValidity: false,
+		},
+		{
+			desc: "rsa key for ecdsa mode",
+			settings: &crypt.PkiSettings{
+				Algorithm:      x509.ECDSA,
+				PrivateKeyPath: ".prog/ecdsa_priv.key",
+				PublicKeyPath:  ".prog/ecdsa.pub",
+			},
+			setup: func(mdb *mocks.MockDepsBundle, setupDone *bool) error {
+				return nil
+			},
+			messageToSign:   "some other message",
+			base64Signature: "MEYCIQDPM0fc/PFauoZzpltH3RpWtlaqRnL0gFk5WFiLMrFqrwIhAIDvlBozU6Ky2UC9xOSq3YZ5iFuO356t9RnHOElaaXFJ",
+			PEMPublicKey: "-----BEGIN RSA PUBLIC KEY-----\n" +
+				"MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAzCTTFKQBHfTN8jW6q8PT\n" +
+				"HNZKWnRPxSt9kpgWmyqFaZnEUipgoKGAxSIsVrl2PJSm5OlgkVzx+MY+LWM64VKM\n" +
+				"bRpUUGJR3zdMNhwZQX0hjOpLpVJvUwD78utVs8vijrU7sH48usFiaZQYjy4m4hQh\n" +
+				"63/x4h3KVz7YqUnlRMzYJFT43+AwYzYuEpzWRxtW7IObJPtjtmYVoqva98fF6aj5\n" +
+				"uHAsvaAgZGBalHXmCiPzKiGU/halzXSPvyJ2Cqz2aUqMHgwi/2Ip4z/mrfX+mUTa\n" +
+				"S+LyBy7GgqJ5vbkGArMagJIc0eARF60r6Uf483xh17oniABdLJy4qlLf6PcEU+ut\n" +
+				"EwIDAQAB\n" +
+				"-----END RSA PUBLIC KEY-----\n",
+			expectedError: &testtools.ErrorSpec{
+				Type:    "*errors.errorString",
+				Message: "Expecting a *ecdsa.PublicKey, but encountered a *rsa.PublicKey instead",
+			},
+			expectedValidity: false,
+		},
+	} {
+		t.Run(fmt.Sprintf("Subtest: %s", tc.desc), func(tt *testing.T) {
+			mockDepsBundle := mocks.NewDefaultMockDeps("", []string{"progname"}, "/home/user", nil)
+			returnedNormally := false
+			var tooling *crypt.CryptoTooling
+			var actualErr error
+			var actualValidity bool
+			err := mockDepsBundle.InvokeCallInMockedEnv(func() error {
+				setupComplete := false
+				innerErr := tc.setup(mockDepsBundle, &setupComplete)
+				if innerErr != nil {
+					return innerErr
+				}
+				var toolingErr error
+				tooling, toolingErr = crypt.GetCryptoTooling(mockDepsBundle.Deps, tc.settings)
+				if toolingErr != nil {
+					return toolingErr
+				}
+				setupComplete = true
+				actualValidity, actualErr = tooling.VerifySignedMessage(tc.messageToSign, tc.base64Signature, tc.PEMPublicKey)
+				returnedNormally = true
+				return nil
+			})
+			if err != nil {
+				tt.Errorf("Unexpected error calling mockDepsBundle.InvokeCallInMockedEnv(): %s", err.Error())
+			}
+			if exitStatus := mockDepsBundle.GetExitStatus(); (exitStatus != 0) || !returnedNormally {
+				tt.Error("EncodeAndSaveKey() should not have paniced or called os.Exit.")
+			}
+			if (mockDepsBundle.OutBuf.String() != "") || (mockDepsBundle.ErrBuf.String() != "") {
+				tt.Errorf("EncodeAndSaveKey() should not have output any data. Saw stdout:\n%s\nstderr:\n%s", mockDepsBundle.OutBuf.String(), mockDepsBundle.ErrBuf.String())
+			}
+			if err := tc.expectedError.EnsureMatches(actualErr); err != nil {
+				tt.Error(err.Error())
+			}
+			if tc.expectedError == nil {
+				if actualValidity != tc.expectedValidity {
+					tt.Errorf("Signature is %#v when %#v expected", actualValidity, tc.expectedValidity)
+				}
+			} else {
+				if tc.expectedValidity {
+					tt.Error("TEST CASE INVALID. Should not expect \"valid\".")
+				}
+				if actualValidity {
+					tt.Error("Error was expected. Should not report \"valid\".")
+				}
+			}
+		})
+	}
+}
