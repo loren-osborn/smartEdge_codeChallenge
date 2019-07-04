@@ -138,7 +138,7 @@
 				
 				
 					
-					<dd>&nbsp; &nbsp; <a href="index.html#CryptoTooling.GetKeys">func (ct *CryptoTooling) GetKeys() error</a></dd>
+					<dd>&nbsp; &nbsp; <a href="index.html#CryptoTooling.PopulateKeys">func (ct *CryptoTooling) PopulateKeys() error</a></dd>
 				
 					
 					<dd>&nbsp; &nbsp; <a href="index.html#CryptoTooling.Sign">func (ct *CryptoTooling) Sign(digest DigestHash) (BinarySignature, error)</a></dd>
@@ -307,7 +307,7 @@
 		
 			
 			
-			<h2 id="AlgorithmPlugin">type <a href="https://github.com/loren-osborn/smartEdge_codeChallenge/blob/master/crypt/keys.go#L22">AlgorithmPlugin</a>
+			<h2 id="AlgorithmPlugin">type <a href="https://github.com/loren-osborn/smartEdge_codeChallenge/blob/master/crypt/keys.go#L23">AlgorithmPlugin</a>
 				<a class="permalink" href="index.html#AlgorithmPlugin">&#xb6;</a>
 			</h2>
 			<p>
@@ -385,7 +385,7 @@ encoded string.
 		
 			
 			
-			<h2 id="CryptoTooling">type <a href="https://github.com/loren-osborn/smartEdge_codeChallenge/blob/master/crypt/keys.go#L30">CryptoTooling</a>
+			<h2 id="CryptoTooling">type <a href="https://github.com/loren-osborn/smartEdge_codeChallenge/blob/master/crypt/keys.go#L31">CryptoTooling</a>
 				<a class="permalink" href="index.html#CryptoTooling">&#xb6;</a>
 			</h2>
 			<p>
@@ -411,7 +411,7 @@ CryptoTooling home to all crypto tool state.
 
 			
 				
-				<h3 id="GetCryptoTooling">func <a href="https://github.com/loren-osborn/smartEdge_codeChallenge/blob/master/crypt/keys.go#L41">GetCryptoTooling</a>
+				<h3 id="GetCryptoTooling">func <a href="https://github.com/loren-osborn/smartEdge_codeChallenge/blob/master/crypt/keys.go#L42">GetCryptoTooling</a>
 					<a class="permalink" href="index.html#GetCryptoTooling">&#xb6;</a>
 				</h3>
 				<pre>func GetCryptoTooling(d *<a href="../deps/index.html">deps</a>.<a href="../deps/index.html#Dependencies">Dependencies</a>, keySettings *<a href="index.html#PkiSettings">PkiSettings</a>) (*<a href="index.html#CryptoTooling">CryptoTooling</a>, <a href="https://golang.org/pkg/builtin/#error">error</a>)</pre>
@@ -426,13 +426,13 @@ verification lives.
 
 			
 				
-				<h3 id="CryptoTooling.GetKeys">func (*CryptoTooling) <a href="https://github.com/loren-osborn/smartEdge_codeChallenge/blob/master/crypt/keys.go#L61">GetKeys</a>
-					<a class="permalink" href="index.html#CryptoTooling.GetKeys">&#xb6;</a>
+				<h3 id="CryptoTooling.PopulateKeys">func (*CryptoTooling) <a href="https://github.com/loren-osborn/smartEdge_codeChallenge/blob/master/crypt/keys.go#L65">PopulateKeys</a>
+					<a class="permalink" href="index.html#CryptoTooling.PopulateKeys">&#xb6;</a>
 				</h3>
-				<pre>func (ct *<a href="index.html#CryptoTooling">CryptoTooling</a>) GetKeys() <a href="https://golang.org/pkg/builtin/#error">error</a></pre>
+				<pre>func (ct *<a href="index.html#CryptoTooling">CryptoTooling</a>) PopulateKeys() <a href="https://golang.org/pkg/builtin/#error">error</a></pre>
 				<p>
-GetKeys retrieves the private key from the filesystem, generating keypair
-if necessary.
+PopulateKeys populates the public and private keypair into ct from the
+filesystem, generating and storing keypair if missing.
 </p>
 
 				
@@ -440,7 +440,7 @@ if necessary.
 				
 			
 				
-				<h3 id="CryptoTooling.Sign">func (*CryptoTooling) <a href="https://github.com/loren-osborn/smartEdge_codeChallenge/blob/master/crypt/keys.go#L120">Sign</a>
+				<h3 id="CryptoTooling.Sign">func (*CryptoTooling) <a href="https://github.com/loren-osborn/smartEdge_codeChallenge/blob/master/crypt/keys.go#L124">Sign</a>
 					<a class="permalink" href="index.html#CryptoTooling.Sign">&#xb6;</a>
 				</h3>
 				<pre>func (ct *<a href="index.html#CryptoTooling">CryptoTooling</a>) Sign(digest <a href="index.html#DigestHash">DigestHash</a>) (<a href="index.html#BinarySignature">BinarySignature</a>, <a href="https://golang.org/pkg/builtin/#error">error</a>)</pre>
@@ -454,7 +454,7 @@ type conversions and dependencies.
 				
 			
 				
-				<h3 id="CryptoTooling.SignMessage">func (*CryptoTooling) <a href="https://github.com/loren-osborn/smartEdge_codeChallenge/blob/master/crypt/keys.go#L136">SignMessage</a>
+				<h3 id="CryptoTooling.SignMessage">func (*CryptoTooling) <a href="https://github.com/loren-osborn/smartEdge_codeChallenge/blob/master/crypt/keys.go#L140">SignMessage</a>
 					<a class="permalink" href="index.html#CryptoTooling.SignMessage">&#xb6;</a>
 				</h3>
 				<pre>func (ct *<a href="index.html#CryptoTooling">CryptoTooling</a>) SignMessage(msg <a href="https://golang.org/pkg/builtin/#string">string</a>) (<a href="index.html#BinarySignature">BinarySignature</a>, <a href="https://golang.org/pkg/builtin/#error">error</a>)</pre>
@@ -468,7 +468,7 @@ consistancy with VerifySignedMessage.
 				
 			
 				
-				<h3 id="CryptoTooling.VerifySignedMessage">func (*CryptoTooling) <a href="https://github.com/loren-osborn/smartEdge_codeChallenge/blob/master/crypt/keys.go#L142">VerifySignedMessage</a>
+				<h3 id="CryptoTooling.VerifySignedMessage">func (*CryptoTooling) <a href="https://github.com/loren-osborn/smartEdge_codeChallenge/blob/master/crypt/keys.go#L146">VerifySignedMessage</a>
 					<a class="permalink" href="index.html#CryptoTooling.VerifySignedMessage">&#xb6;</a>
 				</h3>
 				<pre>func (ct *<a href="index.html#CryptoTooling">CryptoTooling</a>) VerifySignedMessage(msg <a href="https://golang.org/pkg/builtin/#string">string</a>, base64Sig <a href="https://golang.org/pkg/builtin/#string">string</a>, pemPubKey <a href="https://golang.org/pkg/builtin/#string">string</a>) (<a href="https://golang.org/pkg/builtin/#bool">bool</a>, <a href="https://golang.org/pkg/builtin/#error">error</a>)</pre>
@@ -745,7 +745,7 @@ String renders the PEM encoded data as a string.
 		
 			
 			
-			<h2 id="PkiSettings">type <a href="https://github.com/loren-osborn/smartEdge_codeChallenge/blob/master/crypt/keys.go#L14">PkiSettings</a>
+			<h2 id="PkiSettings">type <a href="https://github.com/loren-osborn/smartEdge_codeChallenge/blob/master/crypt/keys.go#L15">PkiSettings</a>
 				<a class="permalink" href="index.html#PkiSettings">&#xb6;</a>
 			</h2>
 			<p>

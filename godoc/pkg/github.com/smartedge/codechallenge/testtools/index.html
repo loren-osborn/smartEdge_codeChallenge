@@ -118,16 +118,10 @@
 			
 			
 				
-				<dd><a href="index.html#AreFakeFileSystemsEqual">func AreFakeFileSystemsEqual(a map[string]*string, b map[string]*string) bool</a></dd>
-			
-				
 				<dd><a href="index.html#AreFuncsEqual">func AreFuncsEqual(a interface{}, b interface{}) (bool, error)</a></dd>
 			
 				
 				<dd><a href="index.html#AreStringSlicesEqual">func AreStringSlicesEqual(a []string, b []string) bool</a></dd>
-			
-				
-				<dd><a href="index.html#CloneFakeFileSystemsEqual">func CloneFakeFileSystemsEqual(orig map[string]*string) map[string]*string</a></dd>
 			
 				
 				<dd><a href="index.html#CloneStringSlice">func CloneStringSlice(inSlice []string) []string</a></dd>
@@ -198,6 +192,20 @@
 				
 			
 				
+				<dd><a href="index.html#FakeFileSystem">type FakeFileSystem</a></dd>
+				
+				
+					
+					<dd>&nbsp; &nbsp; <a href="index.html#FakeFileSystem.Clone">func (ffs FakeFileSystem) Clone() FakeFileSystem</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="index.html#FakeFileSystem.IsEqualTo">func (ffs FakeFileSystem) IsEqualTo(other FakeFileSystem) bool</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="index.html#FakeFileSystem.String">func (ffs FakeFileSystem) String() string</a></dd>
+				
+			
+				
 				<dd><a href="index.html#GenericStringMatcher">type GenericStringMatcher</a></dd>
 				
 					
@@ -212,6 +220,14 @@
 				
 					
 					<dd>&nbsp; &nbsp; <a href="index.html#GenericStringMatcher.String">func (gsm GenericStringMatcher) String() string</a></dd>
+				
+			
+				
+				<dd><a href="index.html#ReaderFunc">type ReaderFunc</a></dd>
+				
+				
+					
+					<dd>&nbsp; &nbsp; <a href="index.html#ReaderFunc.Read">func (rf ReaderFunc) Read(p []byte) (int, error)</a></dd>
 				
 			
 				
@@ -323,22 +339,7 @@ JSONValidationSchemaPath the path in the project to the valid response schema.
 		
 			
 			
-			<h2 id="AreFakeFileSystemsEqual">func <a href="https://github.com/loren-osborn/smartEdge_codeChallenge/blob/master/testtools/utils.go#L343">AreFakeFileSystemsEqual</a>
-				<a class="permalink" href="index.html#AreFakeFileSystemsEqual">&#xb6;</a>
-			</h2>
-			<pre>func AreFakeFileSystemsEqual(a map[<a href="https://golang.org/pkg/builtin/#string">string</a>]*<a href="https://golang.org/pkg/builtin/#string">string</a>, b map[<a href="https://golang.org/pkg/builtin/#string">string</a>]*<a href="https://golang.org/pkg/builtin/#string">string</a>) <a href="https://golang.org/pkg/builtin/#bool">bool</a></pre>
-			<p>
-AreFakeFileSystemsEqual does a deep comparison of two maps of strings to
-string pointers (being used as fake filesystems.)
-</p>
-
-			
-			
-
-		
-			
-			
-			<h2 id="AreFuncsEqual">func <a href="https://github.com/loren-osborn/smartEdge_codeChallenge/blob/master/testtools/utils.go#L31">AreFuncsEqual</a>
+			<h2 id="AreFuncsEqual">func <a href="https://github.com/loren-osborn/smartEdge_codeChallenge/blob/master/testtools/utils.go#L32">AreFuncsEqual</a>
 				<a class="permalink" href="index.html#AreFuncsEqual">&#xb6;</a>
 			</h2>
 			<pre>func AreFuncsEqual(a interface{}, b interface{}) (<a href="https://golang.org/pkg/builtin/#bool">bool</a>, <a href="https://golang.org/pkg/builtin/#error">error</a>)</pre>
@@ -355,7 +356,7 @@ arguments are nil,
 		
 			
 			
-			<h2 id="AreStringSlicesEqual">func <a href="https://github.com/loren-osborn/smartEdge_codeChallenge/blob/master/testtools/utils.go#L81">AreStringSlicesEqual</a>
+			<h2 id="AreStringSlicesEqual">func <a href="https://github.com/loren-osborn/smartEdge_codeChallenge/blob/master/testtools/utils.go#L82">AreStringSlicesEqual</a>
 				<a class="permalink" href="index.html#AreStringSlicesEqual">&#xb6;</a>
 			</h2>
 			<pre>func AreStringSlicesEqual(a []<a href="https://golang.org/pkg/builtin/#string">string</a>, b []<a href="https://golang.org/pkg/builtin/#string">string</a>) <a href="https://golang.org/pkg/builtin/#bool">bool</a></pre>
@@ -370,21 +371,7 @@ distinguishes nil-ness, but not capacity
 		
 			
 			
-			<h2 id="CloneFakeFileSystemsEqual">func <a href="https://github.com/loren-osborn/smartEdge_codeChallenge/blob/master/testtools/utils.go#L368">CloneFakeFileSystemsEqual</a>
-				<a class="permalink" href="index.html#CloneFakeFileSystemsEqual">&#xb6;</a>
-			</h2>
-			<pre>func CloneFakeFileSystemsEqual(orig map[<a href="https://golang.org/pkg/builtin/#string">string</a>]*<a href="https://golang.org/pkg/builtin/#string">string</a>) map[<a href="https://golang.org/pkg/builtin/#string">string</a>]*<a href="https://golang.org/pkg/builtin/#string">string</a></pre>
-			<p>
-CloneFakeFileSystemsEqual makes a deep clone of the map.
-</p>
-
-			
-			
-
-		
-			
-			
-			<h2 id="CloneStringSlice">func <a href="https://github.com/loren-osborn/smartEdge_codeChallenge/blob/master/testtools/utils.go#L97">CloneStringSlice</a>
+			<h2 id="CloneStringSlice">func <a href="https://github.com/loren-osborn/smartEdge_codeChallenge/blob/master/testtools/utils.go#L98">CloneStringSlice</a>
 				<a class="permalink" href="index.html#CloneStringSlice">&#xb6;</a>
 			</h2>
 			<pre>func CloneStringSlice(inSlice []<a href="https://golang.org/pkg/builtin/#string">string</a>) []<a href="https://golang.org/pkg/builtin/#string">string</a></pre>
@@ -413,7 +400,7 @@ blob against a JSON schema
 		
 			
 			
-			<h2 id="GetPEMPublicKeyAlgorithm">func <a href="https://github.com/loren-osborn/smartEdge_codeChallenge/blob/master/testtools/utils.go#L231">GetPEMPublicKeyAlgorithm</a>
+			<h2 id="GetPEMPublicKeyAlgorithm">func <a href="https://github.com/loren-osborn/smartEdge_codeChallenge/blob/master/testtools/utils.go#L232">GetPEMPublicKeyAlgorithm</a>
 				<a class="permalink" href="index.html#GetPEMPublicKeyAlgorithm">&#xb6;</a>
 			</h2>
 			<pre>func GetPEMPublicKeyAlgorithm(PEMPublicKey <a href="https://golang.org/pkg/builtin/#string">string</a>) (<a href="https://golang.org/pkg/crypto/x509/">x509</a>.<a href="https://golang.org/pkg/crypto/x509/#PublicKeyAlgorithm">PublicKeyAlgorithm</a>, <a href="https://golang.org/pkg/builtin/#error">error</a>)</pre>
@@ -429,7 +416,7 @@ moved to a methods of the X509Encoded and PEMEncoded types)
 		
 			
 			
-			<h2 id="GetProjectPath">func <a href="https://github.com/loren-osborn/smartEdge_codeChallenge/blob/master/testtools/utils.go#L328">GetProjectPath</a>
+			<h2 id="GetProjectPath">func <a href="https://github.com/loren-osborn/smartEdge_codeChallenge/blob/master/testtools/utils.go#L329">GetProjectPath</a>
 				<a class="permalink" href="index.html#GetProjectPath">&#xb6;</a>
 			</h2>
 			<pre>func GetProjectPath(d *<a href="../deps/index.html">deps</a>.<a href="../deps/index.html#Dependencies">Dependencies</a>) (<a href="https://golang.org/pkg/builtin/#string">string</a>, <a href="https://golang.org/pkg/builtin/#error">error</a>)</pre>
@@ -443,7 +430,7 @@ GetProjectPath returns the root path of the project (at compile time.)
 		
 			
 			
-			<h2 id="GetSourceFilename">func <a href="https://github.com/loren-osborn/smartEdge_codeChallenge/blob/master/testtools/utils.go#L318">GetSourceFilename</a>
+			<h2 id="GetSourceFilename">func <a href="https://github.com/loren-osborn/smartEdge_codeChallenge/blob/master/testtools/utils.go#L319">GetSourceFilename</a>
 				<a class="permalink" href="index.html#GetSourceFilename">&#xb6;</a>
 			</h2>
 			<pre>func GetSourceFilename(d *<a href="../deps/index.html">deps</a>.<a href="../deps/index.html#Dependencies">Dependencies</a>) (<a href="https://golang.org/pkg/builtin/#string">string</a>, <a href="https://golang.org/pkg/builtin/#error">error</a>)</pre>
@@ -457,7 +444,7 @@ GetSourceFilename returns the filename of the caller&#39;s source code.
 		
 			
 			
-			<h2 id="GetURLFromProjectPath">func <a href="https://github.com/loren-osborn/smartEdge_codeChallenge/blob/master/testtools/utils.go#L254">GetURLFromProjectPath</a>
+			<h2 id="GetURLFromProjectPath">func <a href="https://github.com/loren-osborn/smartEdge_codeChallenge/blob/master/testtools/utils.go#L255">GetURLFromProjectPath</a>
 				<a class="permalink" href="index.html#GetURLFromProjectPath">&#xb6;</a>
 			</h2>
 			<pre>func GetURLFromProjectPath(d *<a href="../deps/index.html">deps</a>.<a href="../deps/index.html#Dependencies">Dependencies</a>, projPath <a href="https://golang.org/pkg/builtin/#string">string</a>) (<a href="https://golang.org/pkg/builtin/#string">string</a>, <a href="https://golang.org/pkg/builtin/#error">error</a>)</pre>
@@ -471,7 +458,7 @@ GetURLFromProjectPath converts a project path to a file:/// URL.
 		
 			
 			
-			<h2 id="StringPtr">func <a href="https://github.com/loren-osborn/smartEdge_codeChallenge/blob/master/testtools/utils.go#L337">StringPtr</a>
+			<h2 id="StringPtr">func <a href="https://github.com/loren-osborn/smartEdge_codeChallenge/blob/master/testtools/utils.go#L338">StringPtr</a>
 				<a class="permalink" href="index.html#StringPtr">&#xb6;</a>
 			</h2>
 			<pre>func StringPtr(s <a href="https://golang.org/pkg/builtin/#string">string</a>) *<a href="https://golang.org/pkg/builtin/#string">string</a></pre>
@@ -485,7 +472,7 @@ StringPtr returns a pointer to a newly allocated copy of the string.
 		
 			
 			
-			<h2 id="ValidateJSONSchema">func <a href="https://github.com/loren-osborn/smartEdge_codeChallenge/blob/master/testtools/utils.go#L264">ValidateJSONSchema</a>
+			<h2 id="ValidateJSONSchema">func <a href="https://github.com/loren-osborn/smartEdge_codeChallenge/blob/master/testtools/utils.go#L265">ValidateJSONSchema</a>
 				<a class="permalink" href="index.html#ValidateJSONSchema">&#xb6;</a>
 			</h2>
 			<pre>func ValidateJSONSchema(d *<a href="../deps/index.html">deps</a>.<a href="../deps/index.html#Dependencies">Dependencies</a>, responseStr <a href="https://golang.org/pkg/builtin/#string">string</a>, schemaPath <a href="https://golang.org/pkg/builtin/#string">string</a>) <a href="https://golang.org/pkg/builtin/#error">error</a></pre>
@@ -500,7 +487,7 @@ the specified schema.
 		
 			
 			
-			<h2 id="ValidateResponse">func <a href="https://github.com/loren-osborn/smartEdge_codeChallenge/blob/master/testtools/utils.go#L287">ValidateResponse</a>
+			<h2 id="ValidateResponse">func <a href="https://github.com/loren-osborn/smartEdge_codeChallenge/blob/master/testtools/utils.go#L288">ValidateResponse</a>
 				<a class="permalink" href="index.html#ValidateResponse">&#xb6;</a>
 			</h2>
 			<pre>func ValidateResponse(d *<a href="../deps/index.html">deps</a>.<a href="../deps/index.html#Dependencies">Dependencies</a>, responseStr <a href="https://golang.org/pkg/builtin/#string">string</a>) (*<a href="../index.html">codechallenge</a>.<a href="../index.html#SignedMessage">SignedMessage</a>, <a href="https://golang.org/pkg/crypto/x509/">x509</a>.<a href="https://golang.org/pkg/crypto/x509/#PublicKeyAlgorithm">PublicKeyAlgorithm</a>, <a href="https://golang.org/pkg/builtin/#error">error</a>)</pre>
@@ -518,7 +505,7 @@ parsed JSON response, the signing algorithm and any errors encountered.
 		
 			
 			
-			<h2 id="WrapFuncCallWithCounter">func <a href="https://github.com/loren-osborn/smartEdge_codeChallenge/blob/master/testtools/utils.go#L110">WrapFuncCallWithCounter</a>
+			<h2 id="WrapFuncCallWithCounter">func <a href="https://github.com/loren-osborn/smartEdge_codeChallenge/blob/master/testtools/utils.go#L111">WrapFuncCallWithCounter</a>
 				<a class="permalink" href="index.html#WrapFuncCallWithCounter">&#xb6;</a>
 			</h2>
 			<pre>func WrapFuncCallWithCounter(f func()) (func(), *<a href="https://golang.org/pkg/builtin/#int">int</a>)</pre>
@@ -534,7 +521,7 @@ pointer to a call counter.
 		
 			
 			
-			<h2 id="DummyFileInfo">type <a href="https://github.com/loren-osborn/smartEdge_codeChallenge/blob/master/testtools/utils.go#L384">DummyFileInfo</a>
+			<h2 id="DummyFileInfo">type <a href="https://github.com/loren-osborn/smartEdge_codeChallenge/blob/master/testtools/utils.go#L436">DummyFileInfo</a>
 				<a class="permalink" href="index.html#DummyFileInfo">&#xb6;</a>
 			</h2>
 			<p>
@@ -560,7 +547,7 @@ DummyFileInfo a mock for a os.FileInfo interface.
 
 			
 				
-				<h3 id="DummyFileInfo.IsDir">func (*DummyFileInfo) <a href="https://github.com/loren-osborn/smartEdge_codeChallenge/blob/master/testtools/utils.go#L412">IsDir</a>
+				<h3 id="DummyFileInfo.IsDir">func (*DummyFileInfo) <a href="https://github.com/loren-osborn/smartEdge_codeChallenge/blob/master/testtools/utils.go#L464">IsDir</a>
 					<a class="permalink" href="index.html#DummyFileInfo.IsDir">&#xb6;</a>
 				</h3>
 				<pre>func (dfi *<a href="index.html#DummyFileInfo">DummyFileInfo</a>) IsDir() <a href="https://golang.org/pkg/builtin/#bool">bool</a></pre>
@@ -573,7 +560,7 @@ IsDir abbreviation for Mode().IsDir()
 				
 			
 				
-				<h3 id="DummyFileInfo.ModTime">func (*DummyFileInfo) <a href="https://github.com/loren-osborn/smartEdge_codeChallenge/blob/master/testtools/utils.go#L407">ModTime</a>
+				<h3 id="DummyFileInfo.ModTime">func (*DummyFileInfo) <a href="https://github.com/loren-osborn/smartEdge_codeChallenge/blob/master/testtools/utils.go#L459">ModTime</a>
 					<a class="permalink" href="index.html#DummyFileInfo.ModTime">&#xb6;</a>
 				</h3>
 				<pre>func (dfi *<a href="index.html#DummyFileInfo">DummyFileInfo</a>) ModTime() <a href="https://golang.org/pkg/time/">time</a>.<a href="https://golang.org/pkg/time/#Time">Time</a></pre>
@@ -586,7 +573,7 @@ ModTime modification time
 				
 			
 				
-				<h3 id="DummyFileInfo.Mode">func (*DummyFileInfo) <a href="https://github.com/loren-osborn/smartEdge_codeChallenge/blob/master/testtools/utils.go#L402">Mode</a>
+				<h3 id="DummyFileInfo.Mode">func (*DummyFileInfo) <a href="https://github.com/loren-osborn/smartEdge_codeChallenge/blob/master/testtools/utils.go#L454">Mode</a>
 					<a class="permalink" href="index.html#DummyFileInfo.Mode">&#xb6;</a>
 				</h3>
 				<pre>func (dfi *<a href="index.html#DummyFileInfo">DummyFileInfo</a>) Mode() <a href="https://golang.org/pkg/os/">os</a>.<a href="https://golang.org/pkg/os/#FileMode">FileMode</a></pre>
@@ -599,7 +586,7 @@ Mode file mode bits
 				
 			
 				
-				<h3 id="DummyFileInfo.Name">func (*DummyFileInfo) <a href="https://github.com/loren-osborn/smartEdge_codeChallenge/blob/master/testtools/utils.go#L392">Name</a>
+				<h3 id="DummyFileInfo.Name">func (*DummyFileInfo) <a href="https://github.com/loren-osborn/smartEdge_codeChallenge/blob/master/testtools/utils.go#L444">Name</a>
 					<a class="permalink" href="index.html#DummyFileInfo.Name">&#xb6;</a>
 				</h3>
 				<pre>func (dfi *<a href="index.html#DummyFileInfo">DummyFileInfo</a>) Name() <a href="https://golang.org/pkg/builtin/#string">string</a></pre>
@@ -612,7 +599,7 @@ Name base name of the file
 				
 			
 				
-				<h3 id="DummyFileInfo.Size">func (*DummyFileInfo) <a href="https://github.com/loren-osborn/smartEdge_codeChallenge/blob/master/testtools/utils.go#L397">Size</a>
+				<h3 id="DummyFileInfo.Size">func (*DummyFileInfo) <a href="https://github.com/loren-osborn/smartEdge_codeChallenge/blob/master/testtools/utils.go#L449">Size</a>
 					<a class="permalink" href="index.html#DummyFileInfo.Size">&#xb6;</a>
 				</h3>
 				<pre>func (dfi *<a href="index.html#DummyFileInfo">DummyFileInfo</a>) Size() <a href="https://golang.org/pkg/builtin/#int64">int64</a></pre>
@@ -625,7 +612,7 @@ Size length in bytes for regular files; system-dependent for others
 				
 			
 				
-				<h3 id="DummyFileInfo.Sys">func (*DummyFileInfo) <a href="https://github.com/loren-osborn/smartEdge_codeChallenge/blob/master/testtools/utils.go#L417">Sys</a>
+				<h3 id="DummyFileInfo.Sys">func (*DummyFileInfo) <a href="https://github.com/loren-osborn/smartEdge_codeChallenge/blob/master/testtools/utils.go#L469">Sys</a>
 					<a class="permalink" href="index.html#DummyFileInfo.Sys">&#xb6;</a>
 				</h3>
 				<pre>func (dfi *<a href="index.html#DummyFileInfo">DummyFileInfo</a>) Sys() interface{}</pre>
@@ -704,7 +691,72 @@ String returns string representation of es.
 		
 			
 			
-			<h2 id="GenericStringMatcher">type <a href="https://github.com/loren-osborn/smartEdge_codeChallenge/blob/master/testtools/utils.go#L173">GenericStringMatcher</a>
+			<h2 id="FakeFileSystem">type <a href="https://github.com/loren-osborn/smartEdge_codeChallenge/blob/master/testtools/utils.go#L345">FakeFileSystem</a>
+				<a class="permalink" href="index.html#FakeFileSystem">&#xb6;</a>
+			</h2>
+			<p>
+FakeFileSystem is a representation of the filesystem:
+</p>
+<pre>* all empty leaf directories are represented by a nil
+* all files are represented by a pointer to a string of its contents
+</pre>
+
+			<pre>type FakeFileSystem map[<a href="https://golang.org/pkg/builtin/#string">string</a>]*<a href="https://golang.org/pkg/builtin/#string">string</a></pre>
+
+			
+
+			
+
+			
+			
+			
+
+			
+
+			
+				
+				<h3 id="FakeFileSystem.Clone">func (FakeFileSystem) <a href="https://github.com/loren-osborn/smartEdge_codeChallenge/blob/master/testtools/utils.go#L373">Clone</a>
+					<a class="permalink" href="index.html#FakeFileSystem.Clone">&#xb6;</a>
+				</h3>
+				<pre>func (ffs <a href="index.html#FakeFileSystem">FakeFileSystem</a>) Clone() <a href="index.html#FakeFileSystem">FakeFileSystem</a></pre>
+				<p>
+Clone makes a deep clone of the FakeFileSystem.
+</p>
+
+				
+				
+				
+			
+				
+				<h3 id="FakeFileSystem.IsEqualTo">func (FakeFileSystem) <a href="https://github.com/loren-osborn/smartEdge_codeChallenge/blob/master/testtools/utils.go#L348">IsEqualTo</a>
+					<a class="permalink" href="index.html#FakeFileSystem.IsEqualTo">&#xb6;</a>
+				</h3>
+				<pre>func (ffs <a href="index.html#FakeFileSystem">FakeFileSystem</a>) IsEqualTo(other <a href="index.html#FakeFileSystem">FakeFileSystem</a>) <a href="https://golang.org/pkg/builtin/#bool">bool</a></pre>
+				<p>
+IsEqualTo does a deep comparison of two FakeFileSystems
+</p>
+
+				
+				
+				
+			
+				
+				<h3 id="FakeFileSystem.String">func (FakeFileSystem) <a href="https://github.com/loren-osborn/smartEdge_codeChallenge/blob/master/testtools/utils.go#L389">String</a>
+					<a class="permalink" href="index.html#FakeFileSystem.String">&#xb6;</a>
+				</h3>
+				<pre>func (ffs <a href="index.html#FakeFileSystem">FakeFileSystem</a>) String() <a href="https://golang.org/pkg/builtin/#string">string</a></pre>
+				<p>
+String returns a string representation of the FakeFileSystem.
+</p>
+
+				
+				
+				
+			
+		
+			
+			
+			<h2 id="GenericStringMatcher">type <a href="https://github.com/loren-osborn/smartEdge_codeChallenge/blob/master/testtools/utils.go#L174">GenericStringMatcher</a>
 				<a class="permalink" href="index.html#GenericStringMatcher">&#xb6;</a>
 			</h2>
 			<p>
@@ -723,7 +775,7 @@ GenericStringMatcher is generic matcher for a string validation function.
 
 			
 				
-				<h3 id="GetResponseMatcherForMessageAndAlgorithm">func <a href="https://github.com/loren-osborn/smartEdge_codeChallenge/blob/master/testtools/utils.go#L212">GetResponseMatcherForMessageAndAlgorithm</a>
+				<h3 id="GetResponseMatcherForMessageAndAlgorithm">func <a href="https://github.com/loren-osborn/smartEdge_codeChallenge/blob/master/testtools/utils.go#L213">GetResponseMatcherForMessageAndAlgorithm</a>
 					<a class="permalink" href="index.html#GetResponseMatcherForMessageAndAlgorithm">&#xb6;</a>
 				</h3>
 				<pre>func GetResponseMatcherForMessageAndAlgorithm(d *<a href="../deps/index.html">deps</a>.<a href="../deps/index.html#Dependencies">Dependencies</a>, msg <a href="https://golang.org/pkg/builtin/#string">string</a>, algorithm <a href="https://golang.org/pkg/crypto/x509/">x509</a>.<a href="https://golang.org/pkg/crypto/x509/#PublicKeyAlgorithm">PublicKeyAlgorithm</a>) <a href="index.html#GenericStringMatcher">GenericStringMatcher</a></pre>
@@ -736,7 +788,7 @@ response with a specific message and algorithm
 				
 			
 				
-				<h3 id="GetResponseMatcherForMessageAndPubKey">func <a href="https://github.com/loren-osborn/smartEdge_codeChallenge/blob/master/testtools/utils.go#L187">GetResponseMatcherForMessageAndPubKey</a>
+				<h3 id="GetResponseMatcherForMessageAndPubKey">func <a href="https://github.com/loren-osborn/smartEdge_codeChallenge/blob/master/testtools/utils.go#L188">GetResponseMatcherForMessageAndPubKey</a>
 					<a class="permalink" href="index.html#GetResponseMatcherForMessageAndPubKey">&#xb6;</a>
 				</h3>
 				<pre>func GetResponseMatcherForMessageAndPubKey(d *<a href="../deps/index.html">deps</a>.<a href="../deps/index.html#Dependencies">Dependencies</a>, msg <a href="https://golang.org/pkg/builtin/#string">string</a>, pubKey <a href="https://golang.org/pkg/builtin/#string">string</a>) <a href="index.html#GenericStringMatcher">GenericStringMatcher</a></pre>
@@ -751,7 +803,7 @@ response with a specific message and public key
 
 			
 				
-				<h3 id="GenericStringMatcher.MatchString">func (GenericStringMatcher) <a href="https://github.com/loren-osborn/smartEdge_codeChallenge/blob/master/testtools/utils.go#L176">MatchString</a>
+				<h3 id="GenericStringMatcher.MatchString">func (GenericStringMatcher) <a href="https://github.com/loren-osborn/smartEdge_codeChallenge/blob/master/testtools/utils.go#L177">MatchString</a>
 					<a class="permalink" href="index.html#GenericStringMatcher.MatchString">&#xb6;</a>
 				</h3>
 				<pre>func (gsm <a href="index.html#GenericStringMatcher">GenericStringMatcher</a>) MatchString(s <a href="https://golang.org/pkg/builtin/#string">string</a>) <a href="https://golang.org/pkg/builtin/#error">error</a></pre>
@@ -764,7 +816,7 @@ MatchString returns whether the strings match.
 				
 			
 				
-				<h3 id="GenericStringMatcher.String">func (GenericStringMatcher) <a href="https://github.com/loren-osborn/smartEdge_codeChallenge/blob/master/testtools/utils.go#L181">String</a>
+				<h3 id="GenericStringMatcher.String">func (GenericStringMatcher) <a href="https://github.com/loren-osborn/smartEdge_codeChallenge/blob/master/testtools/utils.go#L182">String</a>
 					<a class="permalink" href="index.html#GenericStringMatcher.String">&#xb6;</a>
 				</h3>
 				<pre>func (gsm <a href="index.html#GenericStringMatcher">GenericStringMatcher</a>) String() <a href="https://golang.org/pkg/builtin/#string">string</a></pre>
@@ -779,7 +831,43 @@ String returns a generic printable representation
 		
 			
 			
-			<h2 id="RegexpStringMatcher">type <a href="https://github.com/loren-osborn/smartEdge_codeChallenge/blob/master/testtools/utils.go#L150">RegexpStringMatcher</a>
+			<h2 id="ReaderFunc">type <a href="https://github.com/loren-osborn/smartEdge_codeChallenge/blob/master/testtools/utils.go#L474">ReaderFunc</a>
+				<a class="permalink" href="index.html#ReaderFunc">&#xb6;</a>
+			</h2>
+			<p>
+ReaderFunc is a func that implements the io.Reader interface.
+</p>
+
+			<pre>type ReaderFunc func([]<a href="https://golang.org/pkg/builtin/#byte">byte</a>) (<a href="https://golang.org/pkg/builtin/#int">int</a>, <a href="https://golang.org/pkg/builtin/#error">error</a>)</pre>
+
+			
+
+			
+
+			
+			
+			
+
+			
+
+			
+				
+				<h3 id="ReaderFunc.Read">func (ReaderFunc) <a href="https://github.com/loren-osborn/smartEdge_codeChallenge/blob/master/testtools/utils.go#L477">Read</a>
+					<a class="permalink" href="index.html#ReaderFunc.Read">&#xb6;</a>
+				</h3>
+				<pre>func (rf <a href="index.html#ReaderFunc">ReaderFunc</a>) Read(p []<a href="https://golang.org/pkg/builtin/#byte">byte</a>) (<a href="https://golang.org/pkg/builtin/#int">int</a>, <a href="https://golang.org/pkg/builtin/#error">error</a>)</pre>
+				<p>
+Read implements Read() for ReaderFunc.
+</p>
+
+				
+				
+				
+			
+		
+			
+			
+			<h2 id="RegexpStringMatcher">type <a href="https://github.com/loren-osborn/smartEdge_codeChallenge/blob/master/testtools/utils.go#L151">RegexpStringMatcher</a>
 				<a class="permalink" href="index.html#RegexpStringMatcher">&#xb6;</a>
 			</h2>
 			<p>
@@ -801,7 +889,7 @@ String() result.
 
 			
 				
-				<h3 id="NewRegexpStringMatcher">func <a href="https://github.com/loren-osborn/smartEdge_codeChallenge/blob/master/testtools/utils.go#L155">NewRegexpStringMatcher</a>
+				<h3 id="NewRegexpStringMatcher">func <a href="https://github.com/loren-osborn/smartEdge_codeChallenge/blob/master/testtools/utils.go#L156">NewRegexpStringMatcher</a>
 					<a class="permalink" href="index.html#NewRegexpStringMatcher">&#xb6;</a>
 				</h3>
 				<pre>func NewRegexpStringMatcher(pattern <a href="https://golang.org/pkg/builtin/#string">string</a>) *<a href="index.html#RegexpStringMatcher">RegexpStringMatcher</a></pre>
@@ -815,7 +903,7 @@ NewRegexpStringMatcher returns a RegexpStringMatcher from the pattern.
 
 			
 				
-				<h3 id="RegexpStringMatcher.MatchString">func (*RegexpStringMatcher) <a href="https://github.com/loren-osborn/smartEdge_codeChallenge/blob/master/testtools/utils.go#L160">MatchString</a>
+				<h3 id="RegexpStringMatcher.MatchString">func (*RegexpStringMatcher) <a href="https://github.com/loren-osborn/smartEdge_codeChallenge/blob/master/testtools/utils.go#L161">MatchString</a>
 					<a class="permalink" href="index.html#RegexpStringMatcher.MatchString">&#xb6;</a>
 				</h3>
 				<pre>func (rsm *<a href="index.html#RegexpStringMatcher">RegexpStringMatcher</a>) MatchString(s <a href="https://golang.org/pkg/builtin/#string">string</a>) <a href="https://golang.org/pkg/builtin/#error">error</a></pre>
@@ -828,7 +916,7 @@ MatchString returns whether the strings match the pattern.
 				
 			
 				
-				<h3 id="RegexpStringMatcher.String">func (*RegexpStringMatcher) <a href="https://github.com/loren-osborn/smartEdge_codeChallenge/blob/master/testtools/utils.go#L168">String</a>
+				<h3 id="RegexpStringMatcher.String">func (*RegexpStringMatcher) <a href="https://github.com/loren-osborn/smartEdge_codeChallenge/blob/master/testtools/utils.go#L169">String</a>
 					<a class="permalink" href="index.html#RegexpStringMatcher.String">&#xb6;</a>
 				</h3>
 				<pre>func (rsm *<a href="index.html#RegexpStringMatcher">RegexpStringMatcher</a>) String() <a href="https://golang.org/pkg/builtin/#string">string</a></pre>
@@ -843,7 +931,7 @@ String returns a printable representation of the regular expression
 		
 			
 			
-			<h2 id="StringMatcher">type <a href="https://github.com/loren-osborn/smartEdge_codeChallenge/blob/master/testtools/utils.go#L120">StringMatcher</a>
+			<h2 id="StringMatcher">type <a href="https://github.com/loren-osborn/smartEdge_codeChallenge/blob/master/testtools/utils.go#L121">StringMatcher</a>
 				<a class="permalink" href="index.html#StringMatcher">&#xb6;</a>
 			</h2>
 			<p>
@@ -869,7 +957,7 @@ StringMatcher is an interface for comparing strings.
 		
 			
 			
-			<h2 id="StringStringMatcher">type <a href="https://github.com/loren-osborn/smartEdge_codeChallenge/blob/master/testtools/utils.go#L126">StringStringMatcher</a>
+			<h2 id="StringStringMatcher">type <a href="https://github.com/loren-osborn/smartEdge_codeChallenge/blob/master/testtools/utils.go#L127">StringStringMatcher</a>
 				<a class="permalink" href="index.html#StringStringMatcher">&#xb6;</a>
 			</h2>
 			<p>
@@ -890,7 +978,7 @@ StringStringMatcher returns StringMatcher only matching itself.
 
 			
 				
-				<h3 id="NewStringStringMatcher">func <a href="https://github.com/loren-osborn/smartEdge_codeChallenge/blob/master/testtools/utils.go#L131">NewStringStringMatcher</a>
+				<h3 id="NewStringStringMatcher">func <a href="https://github.com/loren-osborn/smartEdge_codeChallenge/blob/master/testtools/utils.go#L132">NewStringStringMatcher</a>
 					<a class="permalink" href="index.html#NewStringStringMatcher">&#xb6;</a>
 				</h3>
 				<pre>func NewStringStringMatcher(s <a href="https://golang.org/pkg/builtin/#string">string</a>) *<a href="index.html#StringStringMatcher">StringStringMatcher</a></pre>
@@ -904,7 +992,7 @@ NewStringStringMatcher returns a new StringStringMatcher from the string s.
 
 			
 				
-				<h3 id="StringStringMatcher.MatchString">func (*StringStringMatcher) <a href="https://github.com/loren-osborn/smartEdge_codeChallenge/blob/master/testtools/utils.go#L136">MatchString</a>
+				<h3 id="StringStringMatcher.MatchString">func (*StringStringMatcher) <a href="https://github.com/loren-osborn/smartEdge_codeChallenge/blob/master/testtools/utils.go#L137">MatchString</a>
 					<a class="permalink" href="index.html#StringStringMatcher.MatchString">&#xb6;</a>
 				</h3>
 				<pre>func (ssm *<a href="index.html#StringStringMatcher">StringStringMatcher</a>) MatchString(s <a href="https://golang.org/pkg/builtin/#string">string</a>) <a href="https://golang.org/pkg/builtin/#error">error</a></pre>
@@ -917,7 +1005,7 @@ MatchString returns whether the strings are equal
 				
 			
 				
-				<h3 id="StringStringMatcher.String">func (*StringStringMatcher) <a href="https://github.com/loren-osborn/smartEdge_codeChallenge/blob/master/testtools/utils.go#L144">String</a>
+				<h3 id="StringStringMatcher.String">func (*StringStringMatcher) <a href="https://github.com/loren-osborn/smartEdge_codeChallenge/blob/master/testtools/utils.go#L145">String</a>
 					<a class="permalink" href="index.html#StringStringMatcher.String">&#xb6;</a>
 				</h3>
 				<pre>func (ssm *<a href="index.html#StringStringMatcher">StringStringMatcher</a>) String() <a href="https://golang.org/pkg/builtin/#string">string</a></pre>

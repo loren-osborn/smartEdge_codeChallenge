@@ -60,11 +60,11 @@
 				
 				<option value="file2">github.com/smartedge/codechallenge/crypt/buffers.go (100.0%)</option>
 				
-				<option value="file3">github.com/smartedge/codechallenge/crypt/ecdsa.go (0.0%)</option>
+				<option value="file3">github.com/smartedge/codechallenge/crypt/ecdsa.go (52.4%)</option>
 				
-				<option value="file4">github.com/smartedge/codechallenge/crypt/keys.go (0.0%)</option>
+				<option value="file4">github.com/smartedge/codechallenge/crypt/keys.go (67.9%)</option>
 				
-				<option value="file5">github.com/smartedge/codechallenge/crypt/rsa.go (0.0%)</option>
+				<option value="file5">github.com/smartedge/codechallenge/crypt/rsa.go (60.0%)</option>
 				
 				<option value="file6">github.com/smartedge/codechallenge/main.go (72.0%)</option>
 				
@@ -82,7 +82,7 @@
 				
 				<option value="file13">github.com/smartedge/codechallenge/testtools/mocks/os_exit.go (100.0%)</option>
 				
-				<option value="file14">github.com/smartedge/codechallenge/testtools/utils.go (35.1%)</option>
+				<option value="file14">github.com/smartedge/codechallenge/testtools/utils.go (29.9%)</option>
 				
 				</select>
 			</div>
@@ -471,25 +471,25 @@ import (
 type ECDSAPlugin struct{}
 
 // GenKeyPair generates a new ECDSA public and private key pair
-func (p *ECDSAPlugin) GenKeyPair(randReader io.Reader) (pubKey X509Encoded, privKey X509Encoded, err error) <span class="cov0" title="0">{
+func (p *ECDSAPlugin) GenKeyPair(randReader io.Reader) (pubKey X509Encoded, privKey X509Encoded, err error) <span class="cov8" title="1">{
         pubkeyCurve := elliptic.P256()
         privatekey, err := ecdsa.GenerateKey(pubkeyCurve, randReader)
+        if err != nil </span><span class="cov8" title="1">{
+                return nil, nil, err
+        }</span>
+        <span class="cov8" title="1">x509EncodedPriv, err := x509.MarshalECPrivateKey(privatekey)
         if err != nil </span><span class="cov0" title="0">{
                 return nil, nil, err
         }</span>
-        <span class="cov0" title="0">x509EncodedPriv, err := x509.MarshalECPrivateKey(privatekey)
+        <span class="cov8" title="1">x509EncodedPub, err := x509.MarshalPKIXPublicKey(&amp;privatekey.PublicKey)
         if err != nil </span><span class="cov0" title="0">{
                 return nil, nil, err
         }</span>
-        <span class="cov0" title="0">x509EncodedPub, err := x509.MarshalPKIXPublicKey(&amp;privatekey.PublicKey)
-        if err != nil </span><span class="cov0" title="0">{
-                return nil, nil, err
-        }</span>
-        <span class="cov0" title="0">return X509Encoded(x509EncodedPub), X509Encoded(x509EncodedPriv), nil</span>
+        <span class="cov8" title="1">return X509Encoded(x509EncodedPub), X509Encoded(x509EncodedPriv), nil</span>
 }
 
 // InjestPrivateKey loads a ECDSA private key from a X509Encoded buffer,
-func (p *ECDSAPlugin) InjestPrivateKey(privKey X509Encoded) (signer crypto.Signer, err error) <span class="cov0" title="0">{
+func (p *ECDSAPlugin) InjestPrivateKey(privKey X509Encoded) (signer crypto.Signer, err error) <span class="cov8" title="1">{
         return x509.ParseECPrivateKey([]byte(privKey))
 }</span>
 
@@ -511,7 +511,7 @@ func (p *ECDSAPlugin) VerifySignature(sha256Hash DigestHash, binSig BinarySignat
 }
 
 // GetAlgorithmName returns the string "ECDSA"
-func (p *ECDSAPlugin) GetAlgorithmName() string <span class="cov0" title="0">{
+func (p *ECDSAPlugin) GetAlgorithmName() string <span class="cov8" title="1">{
         return "ECDSA"
 }</span>
 </pre>
@@ -522,6 +522,7 @@ import (
         "crypto"
         "crypto/rsa"
         "crypto/x509"
+        "errors"
         "fmt"
         "github.com/smartedge/codechallenge/deps"
         "github.com/smartedge/codechallenge/misc"
@@ -556,50 +557,53 @@ type CryptoTooling struct {
 
 // GetCryptoTooling returns a home where all the keys, signing and
 // verification lives.
-func GetCryptoTooling(d *deps.Dependencies, keySettings *PkiSettings) (*CryptoTooling, error) <span class="cov0" title="0">{
-        result := CryptoTooling{
+func GetCryptoTooling(d *deps.Dependencies, keySettings *PkiSettings) (*CryptoTooling, error) <span class="cov8" title="1">{
+        if keySettings == nil </span><span class="cov8" title="1">{
+                return nil, errors.New("INTERNAL ERROR: No settings provided")
+        }</span>
+        <span class="cov8" title="1">result := CryptoTooling{
                 D:        d,
                 Settings: keySettings,
         }
         switch result.Settings.Algorithm </span>{
-        case x509.ECDSA:<span class="cov0" title="0">
+        case x509.ECDSA:<span class="cov8" title="1">
                 result.AlgPlugin = &amp;ECDSAPlugin{}</span>
-        case x509.RSA:<span class="cov0" title="0">
+        case x509.RSA:<span class="cov8" title="1">
                 result.AlgPlugin = &amp;RSAPlugin{
                         KeyLen: result.Settings.RSAKeyBits,
                 }</span>
-        default:<span class="cov0" title="0">
+        default:<span class="cov8" title="1">
                 return nil, fmt.Errorf("INTERNAL ERROR: Unrecognized algorithm: %#v", result.Settings.Algorithm)</span>
         }
-        <span class="cov0" title="0">return &amp;result, nil</span>
+        <span class="cov8" title="1">return &amp;result, nil</span>
 }
 
-// GetKeys retrieves the private key from the filesystem, generating keypair
-// if necessary.
-func (ct *CryptoTooling) GetKeys() error <span class="cov0" title="0">{
-        if misc.FileExists(ct.D, ct.Settings.PrivateKeyPath) != misc.FileExists(ct.D, ct.Settings.PublicKeyPath) </span><span class="cov0" title="0">{
+// PopulateKeys populates the public and private keypair into ct from the
+// filesystem, generating and storing keypair if missing.
+func (ct *CryptoTooling) PopulateKeys() error <span class="cov8" title="1">{
+        if misc.FileExists(ct.D, ct.Settings.PrivateKeyPath) != misc.FileExists(ct.D, ct.Settings.PublicKeyPath) </span><span class="cov8" title="1">{
                 return fmt.Errorf("Files %s and %s must either both be present or missing", ct.Settings.PrivateKeyPath, ct.Settings.PublicKeyPath)
         }</span>
-        <span class="cov0" title="0">if !misc.FileExists(ct.D, ct.Settings.PrivateKeyPath) </span><span class="cov0" title="0">{
+        <span class="cov8" title="1">if !misc.FileExists(ct.D, ct.Settings.PrivateKeyPath) </span><span class="cov8" title="1">{
                 x509PubKey, x509PrivKey, err := ct.AlgPlugin.GenKeyPair(ct.D.Crypto.Rand.Reader)
-                if err != nil </span><span class="cov0" title="0">{
+                if err != nil </span><span class="cov8" title="1">{
                         return err
                 }</span>
-                <span class="cov0" title="0">ct.PubKey, err = EncodeAndSaveKey(ct.D, x509PubKey, ct.AlgPlugin.GetAlgorithmName(), PublicKey, ct.Settings.PublicKeyPath, 0444)
-                if err != nil </span><span class="cov0" title="0">{
+                <span class="cov8" title="1">ct.PubKey, err = EncodeAndSaveKey(ct.D, x509PubKey, ct.AlgPlugin.GetAlgorithmName(), PublicKey, ct.Settings.PublicKeyPath, 0444)
+                if err != nil </span><span class="cov8" title="1">{
                         return err
                 }</span>
-                <span class="cov0" title="0">ct.PrivKey, err = EncodeAndSaveKey(ct.D, x509PrivKey, ct.AlgPlugin.GetAlgorithmName(), PrivateKey, ct.Settings.PrivateKeyPath, 0400)
-                if err != nil </span><span class="cov0" title="0">{
+                <span class="cov8" title="1">ct.PrivKey, err = EncodeAndSaveKey(ct.D, x509PrivKey, ct.AlgPlugin.GetAlgorithmName(), PrivateKey, ct.Settings.PrivateKeyPath, 0400)
+                if err != nil </span><span class="cov8" title="1">{
                         return err
                 }</span>
         }
-        <span class="cov0" title="0">pemPrivKey, x509PrivKey, err := LoadAndDecodeKey(ct.D, ct.Settings.PrivateKeyPath)
-        if err != nil </span><span class="cov0" title="0">{
+        <span class="cov8" title="1">pemPrivKey, x509PrivKey, err := LoadAndDecodeKey(ct.D, ct.Settings.PrivateKeyPath)
+        if err != nil </span><span class="cov8" title="1">{
                 return err
         }</span>
-        <span class="cov0" title="0">if ct.PrivKey != nil </span><span class="cov0" title="0">{
-                if ct.PrivKey.String() != pemPrivKey.String() </span><span class="cov0" title="0">{
+        <span class="cov8" title="1">if ct.PrivKey != nil </span><span class="cov8" title="1">{
+                if ct.PrivKey.String() != pemPrivKey.String() </span><span class="cov8" title="1">{
                         return fmt.Errorf(
                                 "File %s contents changed between writing and reading: "+
                                         "Was:\n%s\n\nNow:\n%s",
@@ -607,15 +611,15 @@ func (ct *CryptoTooling) GetKeys() error <span class="cov0" title="0">{
                                 ct.PrivKey.String(),
                                 pemPrivKey.String())
                 }</span>
-        } else<span class="cov0" title="0"> {
+        } else<span class="cov8" title="1"> {
                 ct.PrivKey = pemPrivKey
         }</span>
-        <span class="cov0" title="0">pemPubKey, _, err := LoadAndDecodeKey(ct.D, ct.Settings.PublicKeyPath)
-        if err != nil </span><span class="cov0" title="0">{
+        <span class="cov8" title="1">pemPubKey, _, err := LoadAndDecodeKey(ct.D, ct.Settings.PublicKeyPath)
+        if err != nil </span><span class="cov8" title="1">{
                 return err
         }</span>
-        <span class="cov0" title="0">if ct.PubKey != nil </span><span class="cov0" title="0">{
-                if ct.PubKey.String() != pemPubKey.String() </span><span class="cov0" title="0">{
+        <span class="cov8" title="1">if ct.PubKey != nil </span><span class="cov8" title="1">{
+                if ct.PubKey.String() != pemPubKey.String() </span><span class="cov8" title="1">{
                         return fmt.Errorf(
                                 "File %s contents changed between writing and reading: "+
                                         "Was:\n%s\n\nNow:\n%s",
@@ -623,14 +627,14 @@ func (ct *CryptoTooling) GetKeys() error <span class="cov0" title="0">{
                                 ct.PubKey.String(),
                                 pemPubKey.String())
                 }</span>
-        } else<span class="cov0" title="0"> {
+        } else<span class="cov8" title="1"> {
                 ct.PubKey = pemPubKey
         }</span>
-        <span class="cov0" title="0">ct.Signer, err = ct.AlgPlugin.InjestPrivateKey(x509PrivKey)
-        if err != nil </span><span class="cov0" title="0">{
+        <span class="cov8" title="1">ct.Signer, err = ct.AlgPlugin.InjestPrivateKey(x509PrivKey)
+        if err != nil </span><span class="cov8" title="1">{
                 return err
         }</span>
-        <span class="cov0" title="0">return nil</span>
+        <span class="cov8" title="1">return nil</span>
 }
 
 // Sign is a thin wrapper over cryptoSigner.Sign() to ease
@@ -694,21 +698,21 @@ type RSAPlugin struct {
 }
 
 // GenKeyPair generates a new RSA public and private key pair
-func (p *RSAPlugin) GenKeyPair(randReader io.Reader) (pubKey X509Encoded, privKey X509Encoded, err error) <span class="cov0" title="0">{
+func (p *RSAPlugin) GenKeyPair(randReader io.Reader) (pubKey X509Encoded, privKey X509Encoded, err error) <span class="cov8" title="1">{
         privateKey, err := rsa.GenerateKey(randReader, p.KeyLen)
-        if err != nil </span><span class="cov0" title="0">{
+        if err != nil </span><span class="cov8" title="1">{
                 return nil, nil, err
         }</span>
-        <span class="cov0" title="0">x509EncodedPriv := x509.MarshalPKCS1PrivateKey(privateKey)
+        <span class="cov8" title="1">x509EncodedPriv := x509.MarshalPKCS1PrivateKey(privateKey)
         x509EncodedPub, err := x509.MarshalPKIXPublicKey(&amp;privateKey.PublicKey)
         if err != nil </span><span class="cov0" title="0">{
                 return nil, nil, err
         }</span>
-        <span class="cov0" title="0">return X509Encoded(x509EncodedPub), X509Encoded(x509EncodedPriv), nil</span>
+        <span class="cov8" title="1">return X509Encoded(x509EncodedPub), X509Encoded(x509EncodedPriv), nil</span>
 }
 
 // InjestPrivateKey loads a RSA private key from a X509Encoded buffer,
-func (p *RSAPlugin) InjestPrivateKey(privKey X509Encoded) (signer crypto.Signer, err error) <span class="cov0" title="0">{
+func (p *RSAPlugin) InjestPrivateKey(privKey X509Encoded) (signer crypto.Signer, err error) <span class="cov8" title="1">{
         return x509.ParsePKCS1PrivateKey([]byte(privKey))
 }</span>
 
@@ -733,7 +737,7 @@ func (p *RSAPlugin) VerifySignature(sha256Hash DigestHash, binSig BinarySignatur
 }
 
 // GetAlgorithmName returns the string "RSA"
-func (p *RSAPlugin) GetAlgorithmName() string <span class="cov0" title="0">{
+func (p *RSAPlugin) GetAlgorithmName() string <span class="cov8" title="1">{
         return "RSA"
 }</span>
 </pre>
@@ -785,7 +789,7 @@ func RealMain(d *deps.Dependencies) <span class="cov8" title="1">{
         if err != nil </span><span class="cov0" title="0">{
                 HandleError(d, err, 3)
         }</span>
-        <span class="cov8" title="1">err = cryptStuff.GetKeys()
+        <span class="cov8" title="1">err = cryptStuff.PopulateKeys()
         if err != nil </span><span class="cov0" title="0">{
                 HandleError(d, err, 4)
         }</span>
@@ -1322,6 +1326,7 @@ import (
         "flag"
         "fmt"
         "github.com/smartedge/codechallenge/deps"
+        "github.com/smartedge/codechallenge/testtools"
         mathRand "math/rand"
         "os"
         "path/filepath"
@@ -1346,8 +1351,8 @@ type MockDepsBundle struct {
         MapPathIn   func(string) (string, error)
         MapPathOut  func(string) (string, error)
         FakeFSRoot  string
-        hiddenFiles *map[string]*string
-        Files       *map[string]*string
+        hiddenFiles *testtools.FakeFileSystem
+        Files       *testtools.FakeFileSystem
 }
 
 // NewDefaultMockDeps generates a mock environment, along with a
@@ -1355,13 +1360,13 @@ type MockDepsBundle struct {
 // Due to language constraints, it's turned out to be more practical to map
 // filesystem calls into a temporary filesystem directory rather than
 // simulating filesystem activity in memory.
-func NewDefaultMockDeps(stdinContent string, cmdLnArgs []string, homeDir string, files *map[string]*string) *MockDepsBundle <span class="cov8" title="1">{
+func NewDefaultMockDeps(stdinContent string, cmdLnArgs []string, homeDir string, files *testtools.FakeFileSystem) *MockDepsBundle <span class="cov8" title="1">{
         fakeStdout := &amp;bytes.Buffer{}
         fakeStderr := &amp;bytes.Buffer{}
         osExitHarness := NewOsExitMockHarness()
         CopyOfDefaultDeps := *deps.Defaults
         if files == nil || *files == nil </span><span class="cov0" title="0">{
-                localMap := make(map[string]*string, 1)
+                localMap := make(testtools.FakeFileSystem, 1)
                 if files == nil </span><span class="cov0" title="0">{
                         files = &amp;localMap
                 }</span> else<span class="cov0" title="0"> {
@@ -1561,7 +1566,7 @@ func (mdb *MockDepsBundle) setupFakeFilesystem() (func(error) error, error) <spa
         <span class="cov8" title="1">cleanupFunc = func(inErr error) error </span><span class="cov8" title="1">{
                 // Restore nil file map to restore visability
                 mdb.Files = mdb.hiddenFiles
-                *mdb.Files = make(map[string]*string)
+                *mdb.Files = make(testtools.FakeFileSystem)
                 newErr := mdb.NativeDeps.Path.FilePath.Walk(fakeRootPath, func(realPath string, info os.FileInfo, err error) error </span><span class="cov8" title="1">{
                         if err != nil </span><span class="cov0" title="0">{
                                 return err
@@ -1759,6 +1764,7 @@ import (
         "path/filepath"
         "reflect"
         "regexp"
+        "sort"
         "strings"
         "time"
 )
@@ -2082,25 +2088,29 @@ func StringPtr(s string) *string <span class="cov0" title="0">{
         return &amp;s
 }</span>
 
-// AreFakeFileSystemsEqual does a deep comparison of two maps of strings to
-// string pointers (being used as fake filesystems.)
-func AreFakeFileSystemsEqual(a map[string]*string, b map[string]*string) bool <span class="cov0" title="0">{
-        if (a == nil) != (b == nil) </span><span class="cov0" title="0">{
+// FakeFileSystem is a representation of the filesystem:
+//     * all empty leaf directories are represented by a nil
+//     * all files are represented by a pointer to a string of its contents
+type FakeFileSystem map[string]*string
+
+// IsEqualTo does a deep comparison of two FakeFileSystems
+func (ffs FakeFileSystem) IsEqualTo(other FakeFileSystem) bool <span class="cov0" title="0">{
+        if (ffs == nil) != (other == nil) </span><span class="cov0" title="0">{
                 return false
         }</span>
-        <span class="cov0" title="0">for ak, avp := range a </span><span class="cov0" title="0">{
-                bvp, ok := b[ak]
-                if !ok || ((avp == nil) != (bvp == nil)) </span><span class="cov0" title="0">{
+        <span class="cov0" title="0">for ffsKey, ffsValPtr := range ffs </span><span class="cov0" title="0">{
+                otherValPtr, ok := other[ffsKey]
+                if !ok || ((ffsValPtr == nil) != (otherValPtr == nil)) </span><span class="cov0" title="0">{
                         return false
                 }</span>
-                <span class="cov0" title="0">if avp != nil </span><span class="cov0" title="0">{
-                        if *avp != *bvp </span><span class="cov0" title="0">{
+                <span class="cov0" title="0">if ffsValPtr != nil </span><span class="cov0" title="0">{
+                        if *ffsValPtr != *otherValPtr </span><span class="cov0" title="0">{
                                 return false
                         }</span>
                 }
         }
-        <span class="cov0" title="0">for bk := range b </span><span class="cov0" title="0">{
-                _, ok := a[bk]
+        <span class="cov0" title="0">for otherKey := range other </span><span class="cov0" title="0">{
+                _, ok := ffs[otherKey]
                 if !ok </span><span class="cov0" title="0">{
                         return false
                 }</span>
@@ -2108,13 +2118,13 @@ func AreFakeFileSystemsEqual(a map[string]*string, b map[string]*string) bool <s
         <span class="cov0" title="0">return true</span>
 }
 
-// CloneFakeFileSystemsEqual makes a deep clone of the map.
-func CloneFakeFileSystemsEqual(orig map[string]*string) map[string]*string <span class="cov0" title="0">{
-        if orig == nil </span><span class="cov0" title="0">{
+// Clone makes a deep clone of the FakeFileSystem.
+func (ffs FakeFileSystem) Clone() FakeFileSystem <span class="cov0" title="0">{
+        if ffs == nil </span><span class="cov0" title="0">{
                 return nil
         }</span>
-        <span class="cov0" title="0">result := make(map[string]*string, len(orig))
-        for key, val := range orig </span><span class="cov0" title="0">{
+        <span class="cov0" title="0">result := make(FakeFileSystem, len(ffs))
+        for key, val := range ffs </span><span class="cov0" title="0">{
                 if val == nil </span><span class="cov0" title="0">{
                         result[key] = nil
                 }</span> else<span class="cov0" title="0"> {
@@ -2122,6 +2132,53 @@ func CloneFakeFileSystemsEqual(orig map[string]*string) map[string]*string <span
                 }</span>
         }
         <span class="cov0" title="0">return result</span>
+}
+
+// String returns a string representation of the FakeFileSystem.
+func (ffs FakeFileSystem) String() string <span class="cov0" title="0">{
+        indent := "    "
+        if ffs == nil </span><span class="cov0" title="0">{
+                return "&lt;nil&gt;"
+        }</span>
+        <span class="cov0" title="0">encountered := make(map[string]bool, 5*len(ffs))
+        allPaths := make([]string, 0, 5*len(ffs))
+        content := make(map[string]string, 5*len(ffs))
+        for key, val := range ffs </span><span class="cov0" title="0">{
+                pathParts := strings.Split(strings.Trim(key, string(os.PathSeparator)), string(os.PathSeparator))
+                pathSoFar := ""
+                // Should (almost) always be true:
+                if filepath.IsAbs(key) &amp;&amp; (len(pathParts) &gt; 0) </span><span class="cov0" title="0">{
+                        pathParts[0] = fmt.Sprintf("%s%s", string(os.PathSeparator), pathParts[0])
+                }</span>
+                <span class="cov0" title="0">for i, part := range pathParts </span><span class="cov0" title="0">{
+                        if pathSoFar == "" </span><span class="cov0" title="0">{
+                                pathSoFar = part
+                        }</span> else<span class="cov0" title="0"> {
+                                pathSoFar = filepath.Join(pathSoFar, part)
+                        }</span>
+                        <span class="cov0" title="0">_, ok := encountered[pathSoFar]
+                        if !ok </span><span class="cov0" title="0">{
+                                encountered[pathSoFar] = true
+                                allPaths = append(allPaths, pathSoFar)
+                        }</span>
+                        <span class="cov0" title="0">content[pathSoFar] = fmt.Sprintf("%s%s:", strings.Repeat(indent, i), part)</span>
+                }
+                <span class="cov0" title="0">if val == nil </span><span class="cov0" title="0">{
+                        content[pathSoFar] = fmt.Sprintf("%s (leaf)", content[pathSoFar])
+                }</span> else<span class="cov0" title="0"> {
+                        content[pathSoFar] = strings.Replace(
+                                fmt.Sprintf("%s\n%s", content[pathSoFar], *val),
+                                "\n",
+                                fmt.Sprintf("\n%s", strings.Repeat(indent, len(pathParts))),
+                                codechallenge.ReplaceAll)
+                }</span>
+        }
+        <span class="cov0" title="0">sort.Strings(allPaths)
+        resultParts := make([]string, len(allPaths))
+        for i, path := range allPaths </span><span class="cov0" title="0">{
+                resultParts[i] = content[path]
+        }</span>
+        <span class="cov0" title="0">return strings.Join(resultParts, "\n")</span>
 }
 
 // DummyFileInfo a mock for a os.FileInfo interface.
@@ -2160,6 +2217,14 @@ func (dfi *DummyFileInfo) IsDir() bool <span class="cov0" title="0">{
 // Sys underlying data source (can return nil)
 func (dfi *DummyFileInfo) Sys() interface{} <span class="cov0" title="0">{
         return nil
+}</span>
+
+// ReaderFunc is a func that implements the io.Reader interface.
+type ReaderFunc func([]byte) (int, error)
+
+// Read implements Read() for ReaderFunc.
+func (rf ReaderFunc) Read(p []byte) (int, error) <span class="cov0" title="0">{
+        return rf(p)
 }</span>
 </pre>
 		
