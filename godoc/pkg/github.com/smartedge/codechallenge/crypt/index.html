@@ -190,10 +190,10 @@
 				<dd><a href="index.html#PEMEncoded">type PEMEncoded</a></dd>
 				
 					
-					<dd>&nbsp; &nbsp; <a href="index.html#DecodeAndLoadKey">func DecodeAndLoadKey(d *deps.Dependencies, filename string) (PEMEncoded, X509Encoded, error)</a></dd>
+					<dd>&nbsp; &nbsp; <a href="index.html#EncodeAndSaveKey">func EncodeAndSaveKey(d *deps.Dependencies, keyBuf X509Encoded, algorithm string, kt KeyType, filename string, perm os.FileMode) (PEMEncoded, error)</a></dd>
 				
 					
-					<dd>&nbsp; &nbsp; <a href="index.html#EncodeAndSaveKey">func EncodeAndSaveKey(d *deps.Dependencies, keyBuf X509Encoded, algorithm string, kt KeyType, filename string, perm os.FileMode) (PEMEncoded, error)</a></dd>
+					<dd>&nbsp; &nbsp; <a href="index.html#LoadAndDecodeKey">func LoadAndDecodeKey(d *deps.Dependencies, filename string) (PEMEncoded, X509Encoded, error)</a></dd>
 				
 					
 					<dd>&nbsp; &nbsp; <a href="index.html#NewPEMBufferFromString">func NewPEMBufferFromString(src string) PEMEncoded</a></dd>
@@ -670,19 +670,6 @@ PEMEncoded text data buffer
 
 			
 				
-				<h3 id="DecodeAndLoadKey">func <a href="https://github.com/loren-osborn/smartEdge_codeChallenge/blob/master/crypt/buffers.go#L151">DecodeAndLoadKey</a>
-					<a class="permalink" href="index.html#DecodeAndLoadKey">&#xb6;</a>
-				</h3>
-				<pre>func DecodeAndLoadKey(d *<a href="../deps/index.html">deps</a>.<a href="../deps/index.html#Dependencies">Dependencies</a>, filename <a href="https://golang.org/pkg/builtin/#string">string</a>) (<a href="index.html#PEMEncoded">PEMEncoded</a>, <a href="index.html#X509Encoded">X509Encoded</a>, <a href="https://golang.org/pkg/builtin/#error">error</a>)</pre>
-				<p>
-DecodeAndLoadKey loads PEM encoded file and decodes it into a
-x509 encoded key block. Returns PEM encoded data with key block.
-</p>
-
-				
-				
-			
-				
 				<h3 id="EncodeAndSaveKey">func <a href="https://github.com/loren-osborn/smartEdge_codeChallenge/blob/master/crypt/buffers.go#L126">EncodeAndSaveKey</a>
 					<a class="permalink" href="index.html#EncodeAndSaveKey">&#xb6;</a>
 				</h3>
@@ -697,6 +684,19 @@ x509 encoded key block. Returns PEM encoded data with key block.
 				<p>
 EncodeAndSaveKey PEM encodes a x509 encoded key and writes it to
 a file. Returns the PEM encoded string data.
+</p>
+
+				
+				
+			
+				
+				<h3 id="LoadAndDecodeKey">func <a href="https://github.com/loren-osborn/smartEdge_codeChallenge/blob/master/crypt/buffers.go#L151">LoadAndDecodeKey</a>
+					<a class="permalink" href="index.html#LoadAndDecodeKey">&#xb6;</a>
+				</h3>
+				<pre>func LoadAndDecodeKey(d *<a href="../deps/index.html">deps</a>.<a href="../deps/index.html#Dependencies">Dependencies</a>, filename <a href="https://golang.org/pkg/builtin/#string">string</a>) (<a href="index.html#PEMEncoded">PEMEncoded</a>, <a href="index.html#X509Encoded">X509Encoded</a>, <a href="https://golang.org/pkg/builtin/#error">error</a>)</pre>
+				<p>
+LoadAndDecodeKey loads PEM encoded file and decodes it into a
+x509 encoded key block. Returns PEM encoded data with key block.
 </p>
 
 				

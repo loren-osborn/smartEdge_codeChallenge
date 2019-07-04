@@ -58,7 +58,7 @@
 				
 				<option value="file1">github.com/smartedge/codechallenge/cmd/codechallenge/main.go (100.0%)</option>
 				
-				<option value="file2">github.com/smartedge/codechallenge/crypt/buffers.go (58.1%)</option>
+				<option value="file2">github.com/smartedge/codechallenge/crypt/buffers.go (100.0%)</option>
 				
 				<option value="file3">github.com/smartedge/codechallenge/crypt/ecdsa.go (0.0%)</option>
 				
@@ -78,11 +78,11 @@
 				
 				<option value="file11">github.com/smartedge/codechallenge/testtools/errorspec.go (100.0%)</option>
 				
-				<option value="file12">github.com/smartedge/codechallenge/testtools/mocks/deps.go (59.3%)</option>
+				<option value="file12">github.com/smartedge/codechallenge/testtools/mocks/deps.go (59.4%)</option>
 				
 				<option value="file13">github.com/smartedge/codechallenge/testtools/mocks/os_exit.go (100.0%)</option>
 				
-				<option value="file14">github.com/smartedge/codechallenge/testtools/utils.go (36.9%)</option>
+				<option value="file14">github.com/smartedge/codechallenge/testtools/utils.go (35.1%)</option>
 				
 				</select>
 			</div>
@@ -423,35 +423,35 @@ func EncodeAndSaveKey(
         kt KeyType,
         filename string,
         perm os.FileMode,
-) (PEMEncoded, error) <span class="cov0" title="0">{
+) (PEMEncoded, error) <span class="cov8" title="1">{
         pemEncodedKey := keyBuf.EncodeToPEM(algorithm, kt)
         var dirPerm os.FileMode = 0700
-        if (perm &amp; 0070) != 0 </span><span class="cov0" title="0">{
+        if (perm &amp; 0070) != 0 </span><span class="cov8" title="1">{
                 dirPerm += 0050
-                if (perm &amp; 0007) != 0 </span><span class="cov0" title="0">{
+                if (perm &amp; 0007) != 0 </span><span class="cov8" title="1">{
                         dirPerm += 0005
                 }</span>
         }
-        <span class="cov0" title="0">err := misc.WriteDirAndFile(d, filename, []byte(pemEncodedKey.String()), perm, dirPerm)
-        if err != nil </span><span class="cov0" title="0">{
+        <span class="cov8" title="1">err := misc.WriteDirAndFile(d, filename, []byte(pemEncodedKey.String()), perm, dirPerm)
+        if err != nil </span><span class="cov8" title="1">{
                 return nil, err
         }</span>
-        <span class="cov0" title="0">return pemEncodedKey, nil</span>
+        <span class="cov8" title="1">return pemEncodedKey, nil</span>
 }
 
-// DecodeAndLoadKey loads PEM encoded file and decodes it into a
+// LoadAndDecodeKey loads PEM encoded file and decodes it into a
 // x509 encoded key block. Returns PEM encoded data with key block.
-func DecodeAndLoadKey(d *deps.Dependencies, filename string) (PEMEncoded, X509Encoded, error) <span class="cov0" title="0">{
+func LoadAndDecodeKey(d *deps.Dependencies, filename string) (PEMEncoded, X509Encoded, error) <span class="cov8" title="1">{
         pemEncodedKey, err := d.Io.Ioutil.ReadFile(filename)
-        if err != nil </span><span class="cov0" title="0">{
+        if err != nil </span><span class="cov8" title="1">{
                 return nil, nil, err
         }</span>
-        <span class="cov0" title="0">pemKey := PEMEncoded(pemEncodedKey)
+        <span class="cov8" title="1">pemKey := PEMEncoded(pemEncodedKey)
         x509Key, err := pemKey.DecodeToX509()
-        if err != nil </span><span class="cov0" title="0">{
+        if err != nil </span><span class="cov8" title="1">{
                 return nil, nil, err
         }</span>
-        <span class="cov0" title="0">return pemKey, x509Key, err</span>
+        <span class="cov8" title="1">return pemKey, x509Key, err</span>
 }
 </pre>
 		
@@ -594,7 +594,7 @@ func (ct *CryptoTooling) GetKeys() error <span class="cov0" title="0">{
                         return err
                 }</span>
         }
-        <span class="cov0" title="0">pemPrivKey, x509PrivKey, err := DecodeAndLoadKey(ct.D, ct.Settings.PrivateKeyPath)
+        <span class="cov0" title="0">pemPrivKey, x509PrivKey, err := LoadAndDecodeKey(ct.D, ct.Settings.PrivateKeyPath)
         if err != nil </span><span class="cov0" title="0">{
                 return err
         }</span>
@@ -610,7 +610,7 @@ func (ct *CryptoTooling) GetKeys() error <span class="cov0" title="0">{
         } else<span class="cov0" title="0"> {
                 ct.PrivKey = pemPrivKey
         }</span>
-        <span class="cov0" title="0">pemPubKey, _, err := DecodeAndLoadKey(ct.D, ct.Settings.PublicKeyPath)
+        <span class="cov0" title="0">pemPubKey, _, err := LoadAndDecodeKey(ct.D, ct.Settings.PublicKeyPath)
         if err != nil </span><span class="cov0" title="0">{
                 return err
         }</span>
@@ -895,7 +895,10 @@ func WriteDirAndFile(d *deps.Dependencies, filename string, data []byte, filePer
                 <span class="cov0" title="0">userID := ids[0]
                 groupID := ids[1]
                 maxDirDepth := strings.Count(filename, string(os.PathSeparator))
-                filesToChown := make([]string, 1, maxDirDepth)
+                if maxDirDepth &lt; 3 </span><span class="cov0" title="0">{
+                        maxDirDepth = 3
+                }</span>
+                <span class="cov0" title="0">filesToChown := make([]string, 1, maxDirDepth)
                 filesToChown[0] = filename
                 for parent := filepath.Dir(filename); (len(parent) &gt; len(string(os.PathSeparator))) &amp;&amp; !FileExists(d, parent); parent = filepath.Dir(parent) </span><span class="cov0" title="0">{
                         filesToChown = append(filesToChown, parent)
@@ -1472,6 +1475,39 @@ func (mdb *MockDepsBundle) InvokeCallInMockedEnv(wrapped func() error) (outErr e
         <span class="cov8" title="1">return mdb.exitHarness.InvokeCallThatMightExit(wrapped)</span>
 }
 
+// generateMappingFuncs generates funcs to map between real and mocked
+// filesystem paths.
+func (mdb *MockDepsBundle) generateMappingFuncs(fakeRootPath string) (func(string) (string, error), func(string) (string, error)) <span class="cov8" title="1">{
+        mapPathIn := func(path string) (string, error) </span><span class="cov8" title="1">{
+                if path == "" </span><span class="cov0" title="0">{
+                        return "", errors.New("path must not be empty")
+                }</span>
+                <span class="cov8" title="1">if filepath.IsAbs(path) </span><span class="cov8" title="1">{
+                        return filepath.Join(fakeRootPath, path), nil
+                }</span>
+                <span class="cov0" title="0">return path, nil</span>
+        }
+        <span class="cov8" title="1">mapPathOut := func(path string) (string, error) </span><span class="cov8" title="1">{
+                if path == "" </span><span class="cov0" title="0">{
+                        return "", errors.New("path must not be empty")
+                }</span>
+                <span class="cov8" title="1">if !filepath.IsAbs(path) </span><span class="cov0" title="0">{
+                        return path, nil
+                }</span>
+                <span class="cov8" title="1">cleanFakeRoot := filepath.Clean(fakeRootPath)
+                cleanPath := filepath.Clean(path)
+                if cleanFakeRoot == cleanPath </span><span class="cov8" title="1">{
+                        return "/", nil
+                }</span>
+                <span class="cov8" title="1">cleanFakeRoot = fmt.Sprintf("%s/", cleanFakeRoot)
+                if (len(cleanPath) &lt; len(cleanFakeRoot)) || (cleanPath[0:len(cleanFakeRoot)] != cleanFakeRoot) </span><span class="cov0" title="0">{
+                        return "", fmt.Errorf("File %#v not inside fake root %#v when trying to map it outside", cleanPath, cleanFakeRoot)
+                }</span>
+                <span class="cov8" title="1">return cleanPath[len(cleanFakeRoot)-1:], nil</span>
+        }
+        <span class="cov8" title="1">return mapPathIn, mapPathOut</span>
+}
+
 // setupFakeFilesystem sertup creation and teardown of fake filesystem.
 func (mdb *MockDepsBundle) setupFakeFilesystem() (func(error) error, error) <span class="cov8" title="1">{
         // no-op cleanup func
@@ -1479,7 +1515,7 @@ func (mdb *MockDepsBundle) setupFakeFilesystem() (func(error) error, error) <spa
                 return err
         }</span>
         <span class="cov8" title="1">var err error
-        mdb.prevCwd, err = os.Getwd()
+        mdb.prevCwd, err = mdb.NativeDeps.Os.Getwd()
         if err != nil </span><span class="cov0" title="0">{
                 return cleanupFunc, err
         }</span>
@@ -1493,22 +1529,8 @@ func (mdb *MockDepsBundle) setupFakeFilesystem() (func(error) error, error) <spa
         if err != nil </span><span class="cov0" title="0">{
                 return cleanupFunc, err
         }</span>
-        <span class="cov8" title="1">mdb.MapPathIn = func(path string) (string, error) </span><span class="cov8" title="1">{
-                return filepath.Join(fakeRootPath, path), nil
-        }</span>
-        <span class="cov8" title="1">mdb.MapPathOut = func(path string) (string, error) </span><span class="cov8" title="1">{
-                cleanFakeRoot := filepath.Clean(fakeRootPath)
-                cleanPath := filepath.Clean(path)
-                if cleanFakeRoot == cleanPath </span><span class="cov8" title="1">{
-                        return "/", nil
-                }</span>
-                <span class="cov8" title="1">cleanFakeRoot = fmt.Sprintf("%s/", cleanFakeRoot)
-                if (len(cleanPath) &lt; len(cleanFakeRoot)) || (cleanPath[0:len(cleanFakeRoot)] != cleanFakeRoot) </span><span class="cov0" title="0">{
-                        return "", fmt.Errorf("File %#v not inside fake root %#v when trying to map it outside", cleanPath, cleanFakeRoot)
-                }</span>
-                <span class="cov8" title="1">return cleanPath[len(cleanFakeRoot)-1:], nil</span>
-        }
-        <span class="cov8" title="1">mdb.populatePathMappingMocks()
+        <span class="cov8" title="1">mdb.MapPathIn, mdb.MapPathOut = mdb.generateMappingFuncs(fakeRootPath)
+        mdb.populatePathMappingMocks()
         // Populate fake file system
         mdb.hiddenFiles = mdb.Files
         // Not kept in sync with mock environment. Set to nil to prevent access.
@@ -2084,6 +2106,22 @@ func AreFakeFileSystemsEqual(a map[string]*string, b map[string]*string) bool <s
                 }</span>
         }
         <span class="cov0" title="0">return true</span>
+}
+
+// CloneFakeFileSystemsEqual makes a deep clone of the map.
+func CloneFakeFileSystemsEqual(orig map[string]*string) map[string]*string <span class="cov0" title="0">{
+        if orig == nil </span><span class="cov0" title="0">{
+                return nil
+        }</span>
+        <span class="cov0" title="0">result := make(map[string]*string, len(orig))
+        for key, val := range orig </span><span class="cov0" title="0">{
+                if val == nil </span><span class="cov0" title="0">{
+                        result[key] = nil
+                }</span> else<span class="cov0" title="0"> {
+                        result[key] = StringPtr(*val)
+                }</span>
+        }
+        <span class="cov0" title="0">return result</span>
 }
 
 // DummyFileInfo a mock for a os.FileInfo interface.

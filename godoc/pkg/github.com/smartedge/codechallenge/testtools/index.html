@@ -127,6 +127,9 @@
 				<dd><a href="index.html#AreStringSlicesEqual">func AreStringSlicesEqual(a []string, b []string) bool</a></dd>
 			
 				
+				<dd><a href="index.html#CloneFakeFileSystemsEqual">func CloneFakeFileSystemsEqual(orig map[string]*string) map[string]*string</a></dd>
+			
+				
 				<dd><a href="index.html#CloneStringSlice">func CloneStringSlice(inSlice []string) []string</a></dd>
 			
 				
@@ -367,6 +370,20 @@ distinguishes nil-ness, but not capacity
 		
 			
 			
+			<h2 id="CloneFakeFileSystemsEqual">func <a href="https://github.com/loren-osborn/smartEdge_codeChallenge/blob/master/testtools/utils.go#L368">CloneFakeFileSystemsEqual</a>
+				<a class="permalink" href="index.html#CloneFakeFileSystemsEqual">&#xb6;</a>
+			</h2>
+			<pre>func CloneFakeFileSystemsEqual(orig map[<a href="https://golang.org/pkg/builtin/#string">string</a>]*<a href="https://golang.org/pkg/builtin/#string">string</a>) map[<a href="https://golang.org/pkg/builtin/#string">string</a>]*<a href="https://golang.org/pkg/builtin/#string">string</a></pre>
+			<p>
+CloneFakeFileSystemsEqual makes a deep clone of the map.
+</p>
+
+			
+			
+
+		
+			
+			
 			<h2 id="CloneStringSlice">func <a href="https://github.com/loren-osborn/smartEdge_codeChallenge/blob/master/testtools/utils.go#L97">CloneStringSlice</a>
 				<a class="permalink" href="index.html#CloneStringSlice">&#xb6;</a>
 			</h2>
@@ -517,7 +534,7 @@ pointer to a call counter.
 		
 			
 			
-			<h2 id="DummyFileInfo">type <a href="https://github.com/loren-osborn/smartEdge_codeChallenge/blob/master/testtools/utils.go#L368">DummyFileInfo</a>
+			<h2 id="DummyFileInfo">type <a href="https://github.com/loren-osborn/smartEdge_codeChallenge/blob/master/testtools/utils.go#L384">DummyFileInfo</a>
 				<a class="permalink" href="index.html#DummyFileInfo">&#xb6;</a>
 			</h2>
 			<p>
@@ -543,7 +560,7 @@ DummyFileInfo a mock for a os.FileInfo interface.
 
 			
 				
-				<h3 id="DummyFileInfo.IsDir">func (*DummyFileInfo) <a href="https://github.com/loren-osborn/smartEdge_codeChallenge/blob/master/testtools/utils.go#L396">IsDir</a>
+				<h3 id="DummyFileInfo.IsDir">func (*DummyFileInfo) <a href="https://github.com/loren-osborn/smartEdge_codeChallenge/blob/master/testtools/utils.go#L412">IsDir</a>
 					<a class="permalink" href="index.html#DummyFileInfo.IsDir">&#xb6;</a>
 				</h3>
 				<pre>func (dfi *<a href="index.html#DummyFileInfo">DummyFileInfo</a>) IsDir() <a href="https://golang.org/pkg/builtin/#bool">bool</a></pre>
@@ -556,7 +573,7 @@ IsDir abbreviation for Mode().IsDir()
 				
 			
 				
-				<h3 id="DummyFileInfo.ModTime">func (*DummyFileInfo) <a href="https://github.com/loren-osborn/smartEdge_codeChallenge/blob/master/testtools/utils.go#L391">ModTime</a>
+				<h3 id="DummyFileInfo.ModTime">func (*DummyFileInfo) <a href="https://github.com/loren-osborn/smartEdge_codeChallenge/blob/master/testtools/utils.go#L407">ModTime</a>
 					<a class="permalink" href="index.html#DummyFileInfo.ModTime">&#xb6;</a>
 				</h3>
 				<pre>func (dfi *<a href="index.html#DummyFileInfo">DummyFileInfo</a>) ModTime() <a href="https://golang.org/pkg/time/">time</a>.<a href="https://golang.org/pkg/time/#Time">Time</a></pre>
@@ -569,7 +586,7 @@ ModTime modification time
 				
 			
 				
-				<h3 id="DummyFileInfo.Mode">func (*DummyFileInfo) <a href="https://github.com/loren-osborn/smartEdge_codeChallenge/blob/master/testtools/utils.go#L386">Mode</a>
+				<h3 id="DummyFileInfo.Mode">func (*DummyFileInfo) <a href="https://github.com/loren-osborn/smartEdge_codeChallenge/blob/master/testtools/utils.go#L402">Mode</a>
 					<a class="permalink" href="index.html#DummyFileInfo.Mode">&#xb6;</a>
 				</h3>
 				<pre>func (dfi *<a href="index.html#DummyFileInfo">DummyFileInfo</a>) Mode() <a href="https://golang.org/pkg/os/">os</a>.<a href="https://golang.org/pkg/os/#FileMode">FileMode</a></pre>
@@ -582,7 +599,7 @@ Mode file mode bits
 				
 			
 				
-				<h3 id="DummyFileInfo.Name">func (*DummyFileInfo) <a href="https://github.com/loren-osborn/smartEdge_codeChallenge/blob/master/testtools/utils.go#L376">Name</a>
+				<h3 id="DummyFileInfo.Name">func (*DummyFileInfo) <a href="https://github.com/loren-osborn/smartEdge_codeChallenge/blob/master/testtools/utils.go#L392">Name</a>
 					<a class="permalink" href="index.html#DummyFileInfo.Name">&#xb6;</a>
 				</h3>
 				<pre>func (dfi *<a href="index.html#DummyFileInfo">DummyFileInfo</a>) Name() <a href="https://golang.org/pkg/builtin/#string">string</a></pre>
@@ -595,7 +612,7 @@ Name base name of the file
 				
 			
 				
-				<h3 id="DummyFileInfo.Size">func (*DummyFileInfo) <a href="https://github.com/loren-osborn/smartEdge_codeChallenge/blob/master/testtools/utils.go#L381">Size</a>
+				<h3 id="DummyFileInfo.Size">func (*DummyFileInfo) <a href="https://github.com/loren-osborn/smartEdge_codeChallenge/blob/master/testtools/utils.go#L397">Size</a>
 					<a class="permalink" href="index.html#DummyFileInfo.Size">&#xb6;</a>
 				</h3>
 				<pre>func (dfi *<a href="index.html#DummyFileInfo">DummyFileInfo</a>) Size() <a href="https://golang.org/pkg/builtin/#int64">int64</a></pre>
@@ -608,7 +625,7 @@ Size length in bytes for regular files; system-dependent for others
 				
 			
 				
-				<h3 id="DummyFileInfo.Sys">func (*DummyFileInfo) <a href="https://github.com/loren-osborn/smartEdge_codeChallenge/blob/master/testtools/utils.go#L401">Sys</a>
+				<h3 id="DummyFileInfo.Sys">func (*DummyFileInfo) <a href="https://github.com/loren-osborn/smartEdge_codeChallenge/blob/master/testtools/utils.go#L417">Sys</a>
 					<a class="permalink" href="index.html#DummyFileInfo.Sys">&#xb6;</a>
 				</h3>
 				<pre>func (dfi *<a href="index.html#DummyFileInfo">DummyFileInfo</a>) Sys() interface{}</pre>
