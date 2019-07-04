@@ -15,6 +15,7 @@ import (
 	"path/filepath"
 	"reflect"
 	"regexp"
+	"sort"
 	"strings"
 	"time"
 )
@@ -338,25 +339,29 @@ func StringPtr(s string) *string {
 	return &s
 }
 
-// AreFakeFileSystemsEqual does a deep comparison of two maps of strings to
-// string pointers (being used as fake filesystems.)
-func AreFakeFileSystemsEqual(a map[string]*string, b map[string]*string) bool {
-	if (a == nil) != (b == nil) {
+// FakeFileSystem is a representation of the filesystem:
+//     * all empty leaf directories are represented by a nil
+//     * all files are represented by a pointer to a string of its contents
+type FakeFileSystem map[string]*string
+
+// IsEqualTo does a deep comparison of two FakeFileSystems
+func (ffs FakeFileSystem) IsEqualTo(other FakeFileSystem) bool {
+	if (ffs == nil) != (other == nil) {
 		return false
 	}
-	for ak, avp := range a {
-		bvp, ok := b[ak]
-		if !ok || ((avp == nil) != (bvp == nil)) {
+	for ffsKey, ffsValPtr := range ffs {
+		otherValPtr, ok := other[ffsKey]
+		if !ok || ((ffsValPtr == nil) != (otherValPtr == nil)) {
 			return false
 		}
-		if avp != nil {
-			if *avp != *bvp {
+		if ffsValPtr != nil {
+			if *ffsValPtr != *otherValPtr {
 				return false
 			}
 		}
 	}
-	for bk := range b {
-		_, ok := a[bk]
+	for otherKey := range other {
+		_, ok := ffs[otherKey]
 		if !ok {
 			return false
 		}
@@ -364,13 +369,13 @@ func AreFakeFileSystemsEqual(a map[string]*string, b map[string]*string) bool {
 	return true
 }
 
-// CloneFakeFileSystemsEqual makes a deep clone of the map.
-func CloneFakeFileSystemsEqual(orig map[string]*string) map[string]*string {
-	if orig == nil {
+// Clone makes a deep clone of the FakeFileSystem.
+func (ffs FakeFileSystem) Clone() FakeFileSystem {
+	if ffs == nil {
 		return nil
 	}
-	result := make(map[string]*string, len(orig))
-	for key, val := range orig {
+	result := make(FakeFileSystem, len(ffs))
+	for key, val := range ffs {
 		if val == nil {
 			result[key] = nil
 		} else {
@@ -378,6 +383,53 @@ func CloneFakeFileSystemsEqual(orig map[string]*string) map[string]*string {
 		}
 	}
 	return result
+}
+
+// String returns a string representation of the FakeFileSystem.
+func (ffs FakeFileSystem) String() string {
+	indent := "    "
+	if ffs == nil {
+		return "<nil>"
+	}
+	encountered := make(map[string]bool, 5*len(ffs))
+	allPaths := make([]string, 0, 5*len(ffs))
+	content := make(map[string]string, 5*len(ffs))
+	for key, val := range ffs {
+		pathParts := strings.Split(strings.Trim(key, string(os.PathSeparator)), string(os.PathSeparator))
+		pathSoFar := ""
+		// Should (almost) always be true:
+		if filepath.IsAbs(key) && (len(pathParts) > 0) {
+			pathParts[0] = fmt.Sprintf("%s%s", string(os.PathSeparator), pathParts[0])
+		}
+		for i, part := range pathParts {
+			if pathSoFar == "" {
+				pathSoFar = part
+			} else {
+				pathSoFar = filepath.Join(pathSoFar, part)
+			}
+			_, ok := encountered[pathSoFar]
+			if !ok {
+				encountered[pathSoFar] = true
+				allPaths = append(allPaths, pathSoFar)
+			}
+			content[pathSoFar] = fmt.Sprintf("%s%s:", strings.Repeat(indent, i), part)
+		}
+		if val == nil {
+			content[pathSoFar] = fmt.Sprintf("%s (leaf)", content[pathSoFar])
+		} else {
+			content[pathSoFar] = strings.Replace(
+				fmt.Sprintf("%s\n%s", content[pathSoFar], *val),
+				"\n",
+				fmt.Sprintf("\n%s", strings.Repeat(indent, len(pathParts))),
+				codechallenge.ReplaceAll)
+		}
+	}
+	sort.Strings(allPaths)
+	resultParts := make([]string, len(allPaths))
+	for i, path := range allPaths {
+		resultParts[i] = content[path]
+	}
+	return strings.Join(resultParts, "\n")
 }
 
 // DummyFileInfo a mock for a os.FileInfo interface.
@@ -416,4 +468,12 @@ func (dfi *DummyFileInfo) IsDir() bool {
 // Sys underlying data source (can return nil)
 func (dfi *DummyFileInfo) Sys() interface{} {
 	return nil
+}
+
+// ReaderFunc is a func that implements the io.Reader interface.
+type ReaderFunc func([]byte) (int, error)
+
+// Read implements Read() for ReaderFunc.
+func (rf ReaderFunc) Read(p []byte) (int, error) {
+	return rf(p)
 }

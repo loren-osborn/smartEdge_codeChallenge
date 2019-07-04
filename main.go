@@ -45,7 +45,7 @@ func RealMain(d *deps.Dependencies) {
 	if err != nil {
 		HandleError(d, err, 3)
 	}
-	err = cryptStuff.GetKeys()
+	err = cryptStuff.PopulateKeys()
 	if err != nil {
 		HandleError(d, err, 4)
 	}

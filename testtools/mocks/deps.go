@@ -6,6 +6,7 @@ import (
 	"flag"
 	"fmt"
 	"github.com/smartedge/codechallenge/deps"
+	"github.com/smartedge/codechallenge/testtools"
 	mathRand "math/rand"
 	"os"
 	"path/filepath"
@@ -30,8 +31,8 @@ type MockDepsBundle struct {
 	MapPathIn   func(string) (string, error)
 	MapPathOut  func(string) (string, error)
 	FakeFSRoot  string
-	hiddenFiles *map[string]*string
-	Files       *map[string]*string
+	hiddenFiles *testtools.FakeFileSystem
+	Files       *testtools.FakeFileSystem
 }
 
 // NewDefaultMockDeps generates a mock environment, along with a
@@ -39,13 +40,13 @@ type MockDepsBundle struct {
 // Due to language constraints, it's turned out to be more practical to map
 // filesystem calls into a temporary filesystem directory rather than
 // simulating filesystem activity in memory.
-func NewDefaultMockDeps(stdinContent string, cmdLnArgs []string, homeDir string, files *map[string]*string) *MockDepsBundle {
+func NewDefaultMockDeps(stdinContent string, cmdLnArgs []string, homeDir string, files *testtools.FakeFileSystem) *MockDepsBundle {
 	fakeStdout := &bytes.Buffer{}
 	fakeStderr := &bytes.Buffer{}
 	osExitHarness := NewOsExitMockHarness()
 	CopyOfDefaultDeps := *deps.Defaults
 	if files == nil || *files == nil {
-		localMap := make(map[string]*string, 1)
+		localMap := make(testtools.FakeFileSystem, 1)
 		if files == nil {
 			files = &localMap
 		} else {
@@ -245,7 +246,7 @@ func (mdb *MockDepsBundle) setupFakeFilesystem() (func(error) error, error) {
 	cleanupFunc = func(inErr error) error {
 		// Restore nil file map to restore visability
 		mdb.Files = mdb.hiddenFiles
-		*mdb.Files = make(map[string]*string)
+		*mdb.Files = make(testtools.FakeFileSystem)
 		newErr := mdb.NativeDeps.Path.FilePath.Walk(fakeRootPath, func(realPath string, info os.FileInfo, err error) error {
 			if err != nil {
 				return err

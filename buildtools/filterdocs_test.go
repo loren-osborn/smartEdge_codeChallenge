@@ -50,16 +50,16 @@ func GetRepetitions(from, to string) map[string]TranslationStringPair {
 func TestWalker(t *testing.T) {
 	for desc, tc := range map[string]struct {
 		homeDir   string
-		beforeFs  map[string]*string
+		beforeFs  testtools.FakeFileSystem
 		setup     func(mdb *mocks.MockDepsBundle) error
 		status    int
 		stdOutput testtools.StringMatcher
 		stdErr    testtools.StringMatcher
-		afterFs   map[string]*string
+		afterFs   testtools.FakeFileSystem
 	}{
 		"Simplest test case": {
 			homeDir: "/home/foobar",
-			beforeFs: map[string]*string{
+			beforeFs: testtools.FakeFileSystem{
 				"/home/foobar/godoc/fred":   testtools.StringPtr("abc 123"),
 				"/home/foobar/godoc/george": testtools.StringPtr(CSSOrigWithLibPath),
 			},
@@ -69,14 +69,14 @@ func TestWalker(t *testing.T) {
 			status:    0,
 			stdOutput: testtools.NewStringStringMatcher("modified file: \"/home/foobar/godoc/george\"\n"),
 			stdErr:    testtools.NewStringStringMatcher(""),
-			afterFs: map[string]*string{
+			afterFs: testtools.FakeFileSystem{
 				"/home/foobar/godoc/fred":   testtools.StringPtr("abc 123"),
 				"/home/foobar/godoc/george": testtools.StringPtr(CSSTranslatedWithLibPath),
 			},
 		},
 		"Bad Getwd()": {
 			homeDir:  "/home/foobar",
-			beforeFs: map[string]*string{},
+			beforeFs: testtools.FakeFileSystem{},
 			setup: func(mdb *mocks.MockDepsBundle) error {
 				mdb.Deps.Os.Getwd = func() (string, error) {
 					return "", errors.New("this is a test")
@@ -86,13 +86,13 @@ func TestWalker(t *testing.T) {
 			status:    1,
 			stdOutput: testtools.NewStringStringMatcher(""),
 			stdErr:    testtools.NewStringStringMatcher("error fetching CWD: this is a test\n"),
-			afterFs: map[string]*string{
+			afterFs: testtools.FakeFileSystem{
 				"/home/foobar": nil,
 			},
 		},
 		"Bad Walk()": {
 			homeDir:  "/home/foobar",
-			beforeFs: map[string]*string{},
+			beforeFs: testtools.FakeFileSystem{},
 			setup: func(mdb *mocks.MockDepsBundle) error {
 				mdb.Deps.Path.FilePath.Walk = func(root string, walkFn filepath.WalkFunc) error {
 					err1 := walkFn(filepath.Join(root, "foo"), nil, errors.New("this is another test"))
@@ -107,13 +107,13 @@ func TestWalker(t *testing.T) {
 				"Error reading file \"/home/foobar/godoc/bar\": open {{FakeFSRoot}}/home/foobar/godoc/bar: no such file or directory\n" +
 				"error walking the path \"/home/foobar/godoc\": err1: \"this is another test\"\n" +
 				"err2: \"open {{FakeFSRoot}}/home/foobar/godoc/bar: no such file or directory\"\n"),
-			afterFs: map[string]*string{
+			afterFs: testtools.FakeFileSystem{
 				"/home/foobar": nil,
 			},
 		},
 		"Bad Write": {
 			homeDir: "/home/foobar",
-			beforeFs: map[string]*string{
+			beforeFs: testtools.FakeFileSystem{
 				"/home/foobar/godoc/fred":   testtools.StringPtr("abc 123"),
 				"/home/foobar/godoc/george": testtools.StringPtr(CSSOrigWithLibPath),
 			},
@@ -126,7 +126,7 @@ func TestWalker(t *testing.T) {
 			status:    2,
 			stdOutput: testtools.NewStringStringMatcher(""),
 			stdErr:    testtools.NewStringStringMatcher("Error writing file \"/home/foobar/godoc/george\": this is a test\nerror walking the path \"/home/foobar/godoc\": this is a test\n"),
-			afterFs: map[string]*string{
+			afterFs: testtools.FakeFileSystem{
 				"/home/foobar/godoc/fred":   testtools.StringPtr("abc 123"),
 				"/home/foobar/godoc/george": testtools.StringPtr(CSSOrigWithLibPath),
 			},
@@ -157,8 +157,8 @@ func TestWalker(t *testing.T) {
 			}
 			if mockDepsBundle.Files == nil {
 				tt.Error("mockDepsBundle.Files is unexpectedly nil")
-			} else if !testtools.AreFakeFileSystemsEqual(tc.afterFs, *mockDepsBundle.Files) {
-				tt.Errorf("Filesystem doesn't look as expected: we expected:\n%#v\nbut we got:\n%#v", tc.afterFs, mockDepsBundle.Files)
+			} else if !tc.afterFs.IsEqualTo(*mockDepsBundle.Files) {
+				tt.Errorf("Filesystem doesn't look as expected: we expected:\n%s\nbut we got:\n%s", tc.afterFs.String(), mockDepsBundle.Files.String())
 			}
 		})
 	}

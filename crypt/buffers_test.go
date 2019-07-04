@@ -322,7 +322,7 @@ func TestEncodeAndSaveKey(t *testing.T) {
 		fileMode                os.FileMode
 		expectedPEMKey          string
 		expectedError           *testtools.ErrorSpec
-		expectedFileSystemState map[string]*string
+		expectedFileSystemState testtools.FakeFileSystem
 	}{
 		{
 			desc:          "Basic example",
@@ -335,7 +335,7 @@ func TestEncodeAndSaveKey(t *testing.T) {
 				"MTIzNDU2Nzg5MGFiY2RlZmdoaWprbG1ub3BxcnN0dXZ3eHl6\n" +
 				"-----END CHARSET PRIVATE KEY-----\n",
 			expectedError: nil,
-			expectedFileSystemState: map[string]*string{
+			expectedFileSystemState: testtools.FakeFileSystem{
 				"/home/user/charset_priv.key": testtools.StringPtr("-----BEGIN CHARSET PRIVATE KEY-----\n" +
 					"MTIzNDU2Nzg5MGFiY2RlZmdoaWprbG1ub3BxcnN0dXZ3eHl6\n" +
 					"-----END CHARSET PRIVATE KEY-----\n"),
@@ -353,7 +353,7 @@ func TestEncodeAndSaveKey(t *testing.T) {
 				Type:    "*errors.errorString",
 				Message: "path must not be empty",
 			},
-			expectedFileSystemState: map[string]*string{
+			expectedFileSystemState: testtools.FakeFileSystem{
 				"/home/user": nil,
 			},
 		},
@@ -387,8 +387,8 @@ func TestEncodeAndSaveKey(t *testing.T) {
 			if err := tc.expectedError.EnsureMatches(actualErr); err != nil {
 				tt.Error(err.Error())
 			}
-			if !testtools.AreFakeFileSystemsEqual(tc.expectedFileSystemState, *mockDepsBundle.Files) {
-				tt.Errorf("Unexpected final filesystem state. Expected:\n%#v\nActual:\n%#v", tc.expectedFileSystemState, *mockDepsBundle.Files)
+			if !tc.expectedFileSystemState.IsEqualTo(*mockDepsBundle.Files) {
+				tt.Errorf("Unexpected final filesystem state. Expected:\n%s\nActual:\n%s", tc.expectedFileSystemState.String(), mockDepsBundle.Files.String())
 			}
 		})
 	}
@@ -398,7 +398,7 @@ func TestEncodeAndSaveKey(t *testing.T) {
 func TestLoadAndDecodeKey(t *testing.T) {
 	for _, tc := range []struct {
 		desc             string
-		fileSystemState  map[string]*string
+		fileSystemState  testtools.FakeFileSystem
 		filename         string
 		expectedPEMKey   string
 		expectedX509Data string
@@ -406,7 +406,7 @@ func TestLoadAndDecodeKey(t *testing.T) {
 	}{
 		{
 			desc: "Basic example",
-			fileSystemState: map[string]*string{
+			fileSystemState: testtools.FakeFileSystem{
 				"/home/user/charset_priv.key": testtools.StringPtr("-----BEGIN CHARSET PRIVATE KEY-----\n" +
 					"MTIzNDU2Nzg5MGFiY2RlZmdoaWprbG1ub3BxcnN0dXZ3eHl6\n" +
 					"-----END CHARSET PRIVATE KEY-----\n"),
@@ -420,7 +420,7 @@ func TestLoadAndDecodeKey(t *testing.T) {
 		},
 		{
 			desc: "Missing file",
-			fileSystemState: map[string]*string{
+			fileSystemState: testtools.FakeFileSystem{
 				"/home/user": nil,
 			},
 			filename:         "charset_priv.key",
@@ -433,7 +433,7 @@ func TestLoadAndDecodeKey(t *testing.T) {
 		},
 		{
 			desc: "no PEM data",
-			fileSystemState: map[string]*string{
+			fileSystemState: testtools.FakeFileSystem{
 				"/home/user/charset_priv.key": testtools.StringPtr("fred flintstone\n"),
 			},
 			filename:         "charset_priv.key",
@@ -446,7 +446,7 @@ func TestLoadAndDecodeKey(t *testing.T) {
 		},
 	} {
 		t.Run(fmt.Sprintf("Subtest: %s", tc.desc), func(tt *testing.T) {
-			curFileSysState := testtools.CloneFakeFileSystemsEqual(tc.fileSystemState)
+			curFileSysState := tc.fileSystemState.Clone()
 			mockDepsBundle := mocks.NewDefaultMockDeps("", []string{"progname"}, "/home/user", &curFileSysState)
 			returnedNormally := false
 			actualPEMBuf, actualX509Buf, actualErr := crypt.PEMEncoded(nil), crypt.X509Encoded(nil), error(nil)
@@ -474,8 +474,8 @@ func TestLoadAndDecodeKey(t *testing.T) {
 			if err := tc.expectedError.EnsureMatches(actualErr); err != nil {
 				tt.Error(err.Error())
 			}
-			if !testtools.AreFakeFileSystemsEqual(tc.fileSystemState, *mockDepsBundle.Files) {
-				tt.Errorf("Unexpected change in filesystem state. Expected:\n%#v\nActual:\n%#v", tc.fileSystemState, *mockDepsBundle.Files)
+			if !tc.fileSystemState.IsEqualTo(*mockDepsBundle.Files) {
+				tt.Errorf("Unexpected change in filesystem state. Expected:\n%s\nActual:\n%s", tc.fileSystemState.String(), mockDepsBundle.Files.String())
 			}
 		})
 	}

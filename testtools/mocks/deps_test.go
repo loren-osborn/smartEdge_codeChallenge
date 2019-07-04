@@ -22,7 +22,7 @@ type mockEnvTestCaseInfo struct {
 	fakeErrContent string
 	fakeArgList    []string
 	homeDirPath    string
-	fakeFileSystem *map[string]*string
+	fakeFileSystem *testtools.FakeFileSystem
 	fakeExitStatus int
 }
 
@@ -33,7 +33,7 @@ var mockEnvTestCases []mockEnvTestCaseInfo = []mockEnvTestCaseInfo{
 		fakeErrContent: "sample error",
 		fakeArgList:    []string{"progName"},
 		homeDirPath:    "/home/me",
-		fakeFileSystem: &map[string]*string{},
+		fakeFileSystem: &testtools.FakeFileSystem{},
 		fakeExitStatus: 7,
 	},
 	{
@@ -42,7 +42,7 @@ var mockEnvTestCases []mockEnvTestCaseInfo = []mockEnvTestCaseInfo{
 		fakeErrContent: "but I stubbed my toe",
 		fakeArgList:    []string{"codechallenge", "-rsa"},
 		homeDirPath:    "/not_root/",
-		fakeFileSystem: &map[string]*string{},
+		fakeFileSystem: &testtools.FakeFileSystem{},
 		fakeExitStatus: 3,
 	},
 }
@@ -285,7 +285,7 @@ func TestNewDefaultMockDepsFileSystem(t *testing.T) {
 // TestNewDefaultMockDepsRogueHomeDir tests rare cases where home directory
 // contains illegal \0 characters.
 func TestNewDefaultMockDepsRogueHomeDir(t *testing.T) {
-	mockDepsBundle := mocks.NewDefaultMockDeps("data", []string{"progname"}, "illegal\x00name", &map[string]*string{})
+	mockDepsBundle := mocks.NewDefaultMockDeps("data", []string{"progname"}, "illegal\x00name", &testtools.FakeFileSystem{})
 	realHomeDir := os.Getenv("HOME")
 	argCodeRan := false
 	err := mockDepsBundle.InvokeCallInMockedEnv(func() error {
@@ -305,7 +305,7 @@ func TestNewDefaultMockDepsRogueHomeDir(t *testing.T) {
 	if argCodeRan {
 		t.Error("closure code should not have run")
 	}
-	mockDepsBundle = mocks.NewDefaultMockDeps("data", []string{"progname"}, "/some/path", &map[string]*string{})
+	mockDepsBundle = mocks.NewDefaultMockDeps("data", []string{"progname"}, "/some/path", &testtools.FakeFileSystem{})
 	dummySetenvError := errors.New("Dummy Setenv() error message")
 	setenvCallLog := make([][2]string, 0, 5)
 	mockDepsBundle.NativeDeps.Os.Setenv = func(name, val string) error {
@@ -345,7 +345,7 @@ func TestNewDefaultMockDepsRogueHomeDir(t *testing.T) {
 // TestNewDefaultMockDepsRogueHomeDir tests rare cases where home directory
 // contains illegal \0 characters.
 func TestNewDefaultMockDepsRogueFileIO(t *testing.T) {
-	mockDepsBundle := mocks.NewDefaultMockDeps("data", []string{"progname"}, "/home/someone", &map[string]*string{})
+	mockDepsBundle := mocks.NewDefaultMockDeps("data", []string{"progname"}, "/home/someone", &testtools.FakeFileSystem{})
 	realHomeDir := os.Getenv("HOME")
 	argCodeRan := false
 	dummyMkdirAllError := errors.New("Dummy MkdirAll() error message")

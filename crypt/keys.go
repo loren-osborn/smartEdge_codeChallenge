@@ -4,6 +4,7 @@ import (
 	"crypto"
 	"crypto/rsa"
 	"crypto/x509"
+	"errors"
 	"fmt"
 	"github.com/smartedge/codechallenge/deps"
 	"github.com/smartedge/codechallenge/misc"
@@ -39,6 +40,9 @@ type CryptoTooling struct {
 // GetCryptoTooling returns a home where all the keys, signing and
 // verification lives.
 func GetCryptoTooling(d *deps.Dependencies, keySettings *PkiSettings) (*CryptoTooling, error) {
+	if keySettings == nil {
+		return nil, errors.New("INTERNAL ERROR: No settings provided")
+	}
 	result := CryptoTooling{
 		D:        d,
 		Settings: keySettings,
@@ -56,9 +60,9 @@ func GetCryptoTooling(d *deps.Dependencies, keySettings *PkiSettings) (*CryptoTo
 	return &result, nil
 }
 
-// GetKeys retrieves the private key from the filesystem, generating keypair
-// if necessary.
-func (ct *CryptoTooling) GetKeys() error {
+// PopulateKeys populates the public and private keypair into ct from the
+// filesystem, generating and storing keypair if missing.
+func (ct *CryptoTooling) PopulateKeys() error {
 	if misc.FileExists(ct.D, ct.Settings.PrivateKeyPath) != misc.FileExists(ct.D, ct.Settings.PublicKeyPath) {
 		return fmt.Errorf("Files %s and %s must either both be present or missing", ct.Settings.PrivateKeyPath, ct.Settings.PublicKeyPath)
 	}
