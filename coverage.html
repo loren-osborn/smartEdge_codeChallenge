@@ -60,11 +60,11 @@
 				
 				<option value="file2">github.com/smartedge/codechallenge/crypt/buffers.go (100.0%)</option>
 				
-				<option value="file3">github.com/smartedge/codechallenge/crypt/ecdsa.go (52.4%)</option>
+				<option value="file3">github.com/smartedge/codechallenge/crypt/ecdsa.go (90.5%)</option>
 				
-				<option value="file4">github.com/smartedge/codechallenge/crypt/keys.go (67.9%)</option>
+				<option value="file4">github.com/smartedge/codechallenge/crypt/keys.go (100.0%)</option>
 				
-				<option value="file5">github.com/smartedge/codechallenge/crypt/rsa.go (60.0%)</option>
+				<option value="file5">github.com/smartedge/codechallenge/crypt/rsa.go (93.3%)</option>
 				
 				<option value="file6">github.com/smartedge/codechallenge/main.go (72.0%)</option>
 				
@@ -494,20 +494,20 @@ func (p *ECDSAPlugin) InjestPrivateKey(privKey X509Encoded) (signer crypto.Signe
 }</span>
 
 // VerifySignature verifies a ECDSA signature for a message digest,
-func (p *ECDSAPlugin) VerifySignature(sha256Hash DigestHash, binSig BinarySignature, publicKey crypto.PublicKey) (bool, error) <span class="cov0" title="0">{
+func (p *ECDSAPlugin) VerifySignature(sha256Hash DigestHash, binSig BinarySignature, publicKey crypto.PublicKey) (bool, error) <span class="cov8" title="1">{
         // Decode the signature to get R and S
         sigStruct := ecdsaSignature{}
         _, err := asn1.Unmarshal([]byte(binSig), &amp;sigStruct)
-        if err != nil </span><span class="cov0" title="0">{
+        if err != nil </span><span class="cov8" title="1">{
                 return false, err
         }</span>
-        <span class="cov0" title="0">ecdsaPublicKey, ok := publicKey.(*ecdsa.PublicKey)
-        if !ok </span><span class="cov0" title="0">{
+        <span class="cov8" title="1">ecdsaPublicKey, ok := publicKey.(*ecdsa.PublicKey)
+        if !ok </span><span class="cov8" title="1">{
                 return false, fmt.Errorf("Expecting a *ecdsa.PublicKey, but encountered a %T instead", publicKey)
         }</span>
 
         // Verify signature
-        <span class="cov0" title="0">return ecdsa.Verify(ecdsaPublicKey, []byte(sha256Hash), sigStruct.R, sigStruct.S), nil</span>
+        <span class="cov8" title="1">return ecdsa.Verify(ecdsaPublicKey, []byte(sha256Hash), sigStruct.R, sigStruct.S), nil</span>
 }
 
 // GetAlgorithmName returns the string "ECDSA"
@@ -639,7 +639,7 @@ func (ct *CryptoTooling) PopulateKeys() error <span class="cov8" title="1">{
 
 // Sign is a thin wrapper over cryptoSigner.Sign() to ease
 // type conversions and dependencies.
-func (ct *CryptoTooling) Sign(digest DigestHash) (BinarySignature, error) <span class="cov0" title="0">{
+func (ct *CryptoTooling) Sign(digest DigestHash) (BinarySignature, error) <span class="cov8" title="1">{
         signature, err := ct.Signer.Sign(
                 ct.D.Crypto.Rand.Reader,
                 []byte(digest),
@@ -647,38 +647,38 @@ func (ct *CryptoTooling) Sign(digest DigestHash) (BinarySignature, error) <span 
                         SaltLength: rsa.PSSSaltLengthAuto,
                         Hash:       crypto.SHA256,
                 })
-        if err != nil </span><span class="cov0" title="0">{
+        if err != nil </span><span class="cov8" title="1">{
                 return nil, err
         }</span>
-        <span class="cov0" title="0">return BinarySignature(signature), nil</span>
+        <span class="cov8" title="1">return BinarySignature(signature), nil</span>
 }
 
 // SignMessage simply sighs a hash of the message. It was added for
 // consistancy with VerifySignedMessage.
-func (ct *CryptoTooling) SignMessage(msg string) (BinarySignature, error) <span class="cov0" title="0">{
+func (ct *CryptoTooling) SignMessage(msg string) (BinarySignature, error) <span class="cov8" title="1">{
         return ct.Sign(NewSHA256DigestHash(msg))
 }</span>
 
 // VerifySignedMessage simply sighs a hash of the message. It was added for
 // consistancy with VerifySignedMessage.
-func (ct *CryptoTooling) VerifySignedMessage(msg string, base64Sig string, pemPubKey string) (bool, error) <span class="cov0" title="0">{
+func (ct *CryptoTooling) VerifySignedMessage(msg string, base64Sig string, pemPubKey string) (bool, error) <span class="cov8" title="1">{
         sig, err := NewBinarySignatureFromBase64(base64Sig)
-        if err != nil </span><span class="cov0" title="0">{
+        if err != nil </span><span class="cov8" title="1">{
                 return false, err
         }</span>
-        <span class="cov0" title="0">x509PubKey, err := NewPEMBufferFromString(pemPubKey).DecodeToX509()
-        if err != nil </span><span class="cov0" title="0">{
+        <span class="cov8" title="1">x509PubKey, err := NewPEMBufferFromString(pemPubKey).DecodeToX509()
+        if err != nil </span><span class="cov8" title="1">{
                 return false, err
         }</span>
-        <span class="cov0" title="0">genericPubKey, err := x509PubKey.AsGenericPublicKey()
-        if err != nil </span><span class="cov0" title="0">{
+        <span class="cov8" title="1">genericPubKey, err := x509PubKey.AsGenericPublicKey()
+        if err != nil </span><span class="cov8" title="1">{
                 return false, err
         }</span>
-        <span class="cov0" title="0">valid, err := ct.AlgPlugin.VerifySignature(NewSHA256DigestHash(msg), sig, genericPubKey)
-        if err != nil </span><span class="cov0" title="0">{
+        <span class="cov8" title="1">valid, err := ct.AlgPlugin.VerifySignature(NewSHA256DigestHash(msg), sig, genericPubKey)
+        if err != nil </span><span class="cov8" title="1">{
                 return false, err
         }</span>
-        <span class="cov0" title="0">return valid, nil</span>
+        <span class="cov8" title="1">return valid, nil</span>
 }
 </pre>
 		
@@ -717,14 +717,14 @@ func (p *RSAPlugin) InjestPrivateKey(privKey X509Encoded) (signer crypto.Signer,
 }</span>
 
 // VerifySignature verifies a RSA signature for a message digest,
-func (p *RSAPlugin) VerifySignature(sha256Hash DigestHash, binSig BinarySignature, publicKey crypto.PublicKey) (bool, error) <span class="cov0" title="0">{
+func (p *RSAPlugin) VerifySignature(sha256Hash DigestHash, binSig BinarySignature, publicKey crypto.PublicKey) (bool, error) <span class="cov8" title="1">{
         rsaPublicKey, ok := publicKey.(*rsa.PublicKey)
-        if !ok </span><span class="cov0" title="0">{
+        if !ok </span><span class="cov8" title="1">{
                 return false, fmt.Errorf("Expecting a *rsa.PublicKey, but encountered a %T instead", publicKey)
         }</span>
 
         // Verify signature
-        <span class="cov0" title="0">err := rsa.VerifyPSS(
+        <span class="cov8" title="1">err := rsa.VerifyPSS(
                 rsaPublicKey,
                 crypto.SHA256,
                 []byte(sha256Hash),
